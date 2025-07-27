@@ -11,6 +11,7 @@ import {
   Home,
   LogOut,
   User,
+  Layers,
 } from "lucide-react"
 import { logout } from "@/app/(auth)/login/actions"
 import {
@@ -73,18 +74,23 @@ export function AppSidebar() {
     fetchUserProfile()
   }, [])
 
-  const menuItems = [
-    {
+    const menuItems = [
+        {
       title: "Dashboard",
       href: "/admin",
       icon: Home,
-    },
-    {
+        },
+        {
       title: "Buildings",
       href: "/admin/buildings",
       icon: Building2,
-    },
-    {
+        },
+        {
+      title: "Floors",
+      href: "/admin/floors",
+      icon: Layers,
+        },
+        {
       title: "Resources",
       href: "/admin/resources",
       icon: Settings,
