@@ -28,6 +28,7 @@ import {
 import { useEffect, useState } from "react"
 import { createClient } from "@/utils/supabase/client"
 import Image from "next/image"
+import { useGlobalLoadingBar } from "@/components/providers/LoadingBarProvider"
 
 type UserProfile = {
   id: string
@@ -42,6 +43,7 @@ export function AppSidebar() {
   const pathname = usePathname()
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const { start } = useGlobalLoadingBar()
 
   useEffect(() => {
     async function fetchUserProfile() {
@@ -100,6 +102,7 @@ export function AppSidebar() {
   ]
 
   const handleLogout = async () => {
+    start()
     await logout()
   }
 
@@ -135,7 +138,7 @@ export function AppSidebar() {
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton asChild isActive={pathname === item.href}>
-                      <Link href={item.href}>
+                      <Link href={item.href} onClick={() => start()}>
                         <Icon className="h-4 w-4" />
                         <span>{item.title}</span>
                       </Link>
