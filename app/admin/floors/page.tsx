@@ -37,7 +37,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { 
@@ -63,7 +62,7 @@ type Floor = {
   buildings?: {
     name: string
     code: string
-  }[]
+  }
 }
 
 type Building = {
@@ -91,7 +90,7 @@ export default function FloorsPage() {
   })
   const [formData, setFormData] = useState({
     building_id: '',
-    floor_number: '',
+    floor_number: 0,
     name: '',
     is_active: true
   })
@@ -184,7 +183,7 @@ export default function FloorsPage() {
 
       // Refresh the floors list
       await fetchFloors()
-      setFormData({ building_id: '', floor_number: '', name: '', is_active: true })
+      setFormData({ building_id: '', floor_number: 0, name: '', is_active: true })
       setFormErrors({ building_id: '', floor_number: '', name: '' })
       setIsAddDialogOpen(false)
     } catch (error) {
@@ -219,7 +218,7 @@ export default function FloorsPage() {
       // Refresh the floors list
       await fetchFloors()
       setEditingFloor(null)
-      setFormData({ building_id: '', floor_number: '', name: '', is_active: true })
+      setFormData({ building_id: '', floor_number: 0, name: '', is_active: true })
       setFormErrors({ building_id: '', floor_number: '', name: '' })
       setIsEditDialogOpen(false)
     } catch (error) {
@@ -257,20 +256,6 @@ export default function FloorsPage() {
       is_active: floor.is_active
     })
     setIsEditDialogOpen(true)
-  }
-
-  const getStatusBadge = (isActive: boolean) => {
-    return isActive ? (
-      <Badge variant="default" className="flex items-center gap-1">
-        <CheckCircle className="h-3 w-3" />
-        Active
-      </Badge>
-    ) : (
-      <Badge variant="secondary" className="flex items-center gap-1">
-        <XCircle className="h-3 w-3" />
-        Inactive
-      </Badge>
-    )
   }
 
   return (
@@ -312,7 +297,7 @@ export default function FloorsPage() {
               <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
                 setIsAddDialogOpen(open)
                 if (!open) {
-                  setFormData({ building_id: '', floor_number: '', name: '', is_active: true })
+                  setFormData({ building_id: '', floor_number: 0, name: '', is_active: true })
                   setFormErrors({ building_id: '', floor_number: '', name: '' })
                 }
               }}>
@@ -612,7 +597,7 @@ export default function FloorsPage() {
         setIsEditDialogOpen(open)
         if (!open) {
           setEditingFloor(null)
-          setFormData({ building_id: '', floor_number: '', name: '', is_active: true })
+          setFormData({ building_id: '', floor_number: 0, name: '', is_active: true })
           setFormErrors({ building_id: '', floor_number: '', name: '' })
         }
       }}>

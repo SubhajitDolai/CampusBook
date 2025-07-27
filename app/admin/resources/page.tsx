@@ -47,7 +47,6 @@ import {
   Edit,
   Trash2,
   CheckCircle,
-  XCircle,
   Loader2
 } from "lucide-react"
 import { useState, useEffect } from "react"
@@ -67,11 +66,11 @@ type Resource = {
   buildings?: {
     name: string
     code: string
-  }[]
+  }
   floors?: {
     floor_number: number
     name: string | null
-  }[]
+  }
 }
 
 type Building = {
