@@ -288,7 +288,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
               </AlertDialogTitle>
               
               <AlertDialogDescription className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
-                We&apos;ve sent a verification link to your inbox. Click the link in your email to activate your Courtside account.
+                We&apos;ve sent a verification link to your inbox. Click the link in your email to activate your CampusBook account.
               </AlertDialogDescription>
             </motion.div>
 
