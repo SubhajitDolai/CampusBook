@@ -136,4 +136,31 @@ export async function getSystemOverview() {
       pendingApprovals: 0,
     }
   }
+}
+
+export async function getUsers() {
+  const supabase = await createClient()
+
+  try {
+    const { data: users } = await supabase
+      .from('profiles')
+      .select(`
+        id,
+        name,
+        email,
+        university_id,
+        phone,
+        gender,
+        designation,
+        department,
+        role,
+        created_at
+      `)
+      .order('created_at', { ascending: false })
+
+    return users || []
+  } catch (error) {
+    console.error('Error fetching users:', error)
+    return []
+  }
 } 
