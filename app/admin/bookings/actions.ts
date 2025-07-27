@@ -24,7 +24,7 @@ export async function getBookings() {
             name
           )
         ),
-        profiles (
+        profiles!bookings_user_id_fkey (
           id,
           name,
           email,
