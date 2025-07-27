@@ -163,4 +163,114 @@ export async function getUsers() {
     console.error('Error fetching users:', error)
     return []
   }
+}
+
+export async function promoteUserToAdmin(userId: string) {
+  const supabase = await createClient();
+  try {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { error: 'User not authenticated' };
+    }
+
+    // Get current user's role
+    const { data: currentUserProfile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (!currentUserProfile || currentUserProfile.role !== 'super_admin') {
+      return { error: 'Only super admins can promote users to admin' };
+    }
+
+    // Check if target user exists and is not already admin/super_admin
+    const { data: targetUser } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
+
+    if (!targetUser) {
+      return { error: 'User not found' };
+    }
+
+    if (targetUser.role === 'admin' || targetUser.role === 'super_admin') {
+      return { error: 'User is already an admin or super admin' };
+    }
+
+    // Promote user to admin
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role: 'admin' })
+      .eq('id', userId);
+    
+    if (error) {
+      console.error('Error promoting user:', error);
+      return { error: error.message };
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error promoting user:', error);
+    return { error: 'Failed to promote user' };
+  }
+}
+
+export async function demoteUserToFaculty(userId: string) {
+  const supabase = await createClient();
+  try {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { error: 'User not authenticated' };
+    }
+
+    // Get current user's role
+    const { data: currentUserProfile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (!currentUserProfile || currentUserProfile.role !== 'super_admin') {
+      return { error: 'Only super admins can demote users' };
+    }
+
+    // Check if target user exists and is an admin (not super_admin)
+    const { data: targetUser } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
+
+    if (!targetUser) {
+      return { error: 'User not found' };
+    }
+
+    if (targetUser.role === 'super_admin') {
+      return { error: 'Cannot demote super admin' };
+    }
+
+    if (targetUser.role === 'faculty') {
+      return { error: 'User is already a faculty member' };
+    }
+
+    // Demote user to faculty
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role: 'faculty' })
+      .eq('id', userId);
+    
+    if (error) {
+      console.error('Error demoting user:', error);
+      return { error: error.message };
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error demoting user:', error);
+    return { error: 'Failed to demote user' };
+  }
 } 

@@ -27,19 +27,19 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table"
-import { 
-  Building2, 
-  Users, 
-
-  Settings, 
-
+import {
+  Building2,
+  Users,
+  Settings,
   Search,
   Mail,
   Phone,
   GraduationCap
 } from "lucide-react"
-import { getUsers } from "../actions"
+import { getUsers, promoteUserToAdmin, demoteUserToFaculty } from "../actions"
 import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { createClient } from "@/utils/supabase/client"
 
 type User = {
   id: string
@@ -54,10 +54,47 @@ type User = {
   created_at: string
 }
 
+// Get current user role from profiles table
+function useCurrentUserRole() {
+  const [role, setRole] = useState<'super_admin' | 'admin' | 'faculty' | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchCurrentUserRole() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+          setRole(profile?.role || null);
+        }
+      } catch (error) {
+        console.error('Error fetching current user role:', error);
+        setRole(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCurrentUserRole();
+  }, []);
+
+  return { role, loading };
+}
+
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
   const [searchTerm, setSearchTerm] = useState("")
+  const { role: currentUserRole, loading: roleLoading } = useCurrentUserRole();
+  const [promotingId, setPromotingId] = useState<string | null>(null);
+  const [demotingId, setDemotingId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchUsers() {
@@ -69,7 +106,7 @@ export default function UsersPage() {
   }, [])
 
   useEffect(() => {
-    const filtered = users.filter(user => 
+    const filtered = users.filter(user =>
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.department?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -77,6 +114,32 @@ export default function UsersPage() {
     )
     setFilteredUsers(filtered)
   }, [searchTerm, users])
+
+  // Handler to promote a user to admin (real backend)
+  const handlePromoteToAdmin = async (userId: string) => {
+    setPromotingId(userId);
+    const result = await promoteUserToAdmin(userId);
+    if (result && result.success) {
+      setUsers((prev) => prev.map(u => u.id === userId ? { ...u, role: 'admin' } : u));
+      setFilteredUsers((prev) => prev.map(u => u.id === userId ? { ...u, role: 'admin' } : u));
+    } else {
+      alert(result?.error || 'Failed to promote user');
+    }
+    setPromotingId(null);
+  };
+
+  // Handler to demote a user to faculty (real backend)
+  const handleDemoteToFaculty = async (userId: string) => {
+    setDemotingId(userId);
+    const result = await demoteUserToFaculty(userId);
+    if (result && result.success) {
+      setUsers((prev) => prev.map(u => u.id === userId ? { ...u, role: 'faculty' } : u));
+      setFilteredUsers((prev) => prev.map(u => u.id === userId ? { ...u, role: 'faculty' } : u));
+    } else {
+      alert(result?.error || 'Failed to demote user');
+    }
+    setDemotingId(null);
+  };
 
   const getRoleBadge = (role: string) => {
     switch (role) {
@@ -233,6 +296,7 @@ export default function UsersPage() {
                       <TableHead>Contact</TableHead>
                       <TableHead>Gender</TableHead>
                       <TableHead>Role</TableHead>
+                      {!roleLoading && currentUserRole === 'super_admin' && <TableHead>Action</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -280,6 +344,33 @@ export default function UsersPage() {
                         <TableCell>
                           {getRoleBadge(user.role)}
                         </TableCell>
+                        {!roleLoading && currentUserRole === 'super_admin' && (
+                          <TableCell>
+                            {user.role === 'faculty' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={promotingId === user.id}
+                                onClick={() => handlePromoteToAdmin(user.id)}
+                              >
+                                {promotingId === user.id ? 'Promoting...' : 'Make Admin'}
+                              </Button>
+                            )}
+                            {user.role === 'admin' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={demotingId === user.id}
+                                onClick={() => handleDemoteToFaculty(user.id)}
+                              >
+                                {demotingId === user.id ? 'Demoting...' : 'Demote to Faculty'}
+                              </Button>
+                            )}
+                            {user.role === 'super_admin' && (
+                              <span className="text-xs text-muted-foreground">Super Admin</span>
+                            )}
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
