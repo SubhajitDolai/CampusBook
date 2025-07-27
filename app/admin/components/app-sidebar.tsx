@@ -30,6 +30,8 @@ import { useEffect, useState } from "react"
 import { createClient } from "@/utils/supabase/client"
 import Image from "next/image"
 import { useGlobalLoadingBar } from "@/components/providers/LoadingBarProvider"
+import { useTheme } from "next-themes"
+import { Moon, Sun, Monitor, Smartphone, Laptop } from "lucide-react"
 
 type UserProfile = {
   id: string
@@ -141,17 +143,30 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => {
                 const Icon = item.icon
+                const isActive = pathname === item.href
                 return (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={pathname === item.href}>
-                      <Link href={item.href} onClick={() => start()}>
-                        <Icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      {isActive ? (
+                        <span>
+                          <Icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </span>
+                      ) : (
+                        <Link href={item.href} onClick={() => start()}>
+                          <Icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 )
               })}
+              {/* Theme toggle menu item */}
+              <SidebarGroupLabel>Appearance</SidebarGroupLabel>
+              <SidebarMenuItem>
+                <ThemeToggleSidebarMenuItem />
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -196,4 +211,65 @@ export function AppSidebar() {
       </SidebarFooter>
     </Sidebar>
   )
+}
+
+function ThemeToggleSidebarMenuItem() {
+  const { setTheme, theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+
+  useEffect(() => {
+    setMounted(true);
+    const detectDevice = () => {
+      const width = window.innerWidth;
+      if (width < 768) setDeviceType('mobile');
+      else if (width < 1024) setDeviceType('tablet');
+      else setDeviceType('desktop');
+    };
+    detectDevice();
+    window.addEventListener('resize', detectDevice);
+    return () => window.removeEventListener('resize', detectDevice);
+  }, []);
+
+  const cycleTheme = () => {
+    if (!mounted) return;
+    if (theme === 'light') setTheme('dark');
+    else if (theme === 'dark') setTheme('system');
+    else setTheme('light');
+  };
+
+  let icon = <Sun className="h-4 w-4" />;
+  let label = 'Light Mode';
+  if (mounted) {
+    if (theme === 'light') {
+      icon = <Sun className="h-4 w-4" />;
+      label = 'Light Mode';
+    } else if (theme === 'dark') {
+      icon = <Moon className="h-4 w-4" />;
+      label = 'Dark Mode';
+    } else {
+      if (deviceType === 'mobile') {
+        icon = <Smartphone className="h-4 w-4" />;
+      } else if (deviceType === 'tablet') {
+        icon = <Monitor className="h-4 w-4" />;
+      } else {
+        icon = <Laptop className="h-4 w-4" />;
+      }
+      label = 'System Theme';
+    }
+  }
+
+  return (
+    <SidebarMenuButton asChild isActive={false}>
+      <button
+        type="button"
+        className="flex items-center gap-2 w-full px-2 py-2 text-sm rounded hover:bg-muted transition-colors cursor-pointer"
+        onClick={cycleTheme}
+        aria-label={`Current theme: ${label}. Click to cycle themes.`}
+      >
+        {icon}
+        <span>{label}</span>
+      </button>
+    </SidebarMenuButton>
+  );
 }
