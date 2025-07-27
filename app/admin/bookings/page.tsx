@@ -34,7 +34,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { 
   Calendar, 
@@ -43,11 +42,9 @@ import {
   XCircle,
   Clock,
   User,
-  Building2,
   Settings,
   Trash2,
   Loader2,
-  AlertTriangle,
   Ban,
   Check,
   X
@@ -142,7 +139,7 @@ export default function BookingsPage() {
   }
 
   useEffect(() => {
-    let filtered = bookings.filter(booking => {
+    const filtered = bookings.filter(booking => {
       const matchesSearch = 
         booking.reason?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         booking.profiles?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -158,9 +155,9 @@ export default function BookingsPage() {
     })
     
     // Sort by created date (newest first)
-    filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    const sorted = filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     
-    setFilteredBookings(filtered)
+    setFilteredBookings(sorted)
   }, [searchTerm, statusFilter, bookings])
 
   const handleApproveBooking = async (bookingId: string) => {
@@ -253,12 +250,7 @@ export default function BookingsPage() {
     return new Date(dateString).toLocaleDateString()
   }
 
-  const formatTime = (timeString: string) => {
-    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    })
-  }
+
 
   const formatDateTime = (dateString: string, timeString: string) => {
     const date = new Date(dateString)
