@@ -24,12 +24,17 @@ export async function login(formData: FormData) {
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, university_id')
       .eq('id', user.id)
       .single()
 
+    // Check if profile is complete (has university_id)
+    if (!profile || !profile.university_id) {
+      redirect('/onboarding')
+    }
+
     // Role-based redirect
-    if (profile?.role === 'admin') {
+    if (profile?.role === 'admin' || profile?.role === 'super_admin') {
       redirect('/admin')
     } else {
       redirect('/')
