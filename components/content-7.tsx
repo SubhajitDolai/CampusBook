@@ -5,11 +5,11 @@ export default function ContentSection() {
     return (
         <section id="how-it-works" className="py-16 md:py-32">
             <div className="mx-auto max-w-5xl space-y-8 px-6 md:space-y-16">
-                <h2 className="relative z-10 max-w-xl text-4xl font-medium lg:text-5xl">How CampusGrid Works</h2>
+                <h2 className="relative z-10 max-w-xl text-4xl font-medium lg:text-5xl">How CampusBook Works</h2>
                 <div className="grid gap-6 sm:grid-cols-2 md:gap-12 lg:gap-24">
                     <div className="relative space-y-4">
                         <p className="text-muted-foreground">
-                            CampusGrid makes booking university resources simple for faculty. Just follow these easy steps:
+                            CampusBook makes booking university resources simple for faculty. Just follow these easy steps:
                         </p>
                         <p className="text-muted-foreground">Choose your resource, pick a time, and book instantly. Stay organized and save time every day.</p>
 

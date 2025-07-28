@@ -101,7 +101,7 @@ export default function IntegrationsSection() {
                     </div>
                     <div className="mx-auto mt-12 max-w-lg space-y-6 text-center">
                         <h2 className="text-balance text-3xl font-semibold md:text-4xl">Book Any University Resource</h2>
-                        <p className="text-muted-foreground">From lecture halls to labs, CampusGrid covers all your university resource needs.</p>
+                        <p className="text-muted-foreground">From lecture halls to labs, CampusBook covers all your university resource needs.</p>
 
                         <Button
                             variant="outline"

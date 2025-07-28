@@ -7,7 +7,7 @@ export default function CallToAction() {
             <div className="mx-auto max-w-5xl rounded-3xl border px-6 py-12 md:py-20 lg:py-32">
                 <div className="text-center">
                     <h2 className="text-balance text-4xl font-semibold lg:text-5xl">Ready to Book Smarter?</h2>
-                    <p className="mt-4">Join faculty across universities using CampusGrid to simplify resource booking.</p>
+                    <p className="mt-4">Join faculty across universities using CampusBook to simplify resource booking.</p>
 
                     <div className="mt-12 flex flex-wrap justify-center gap-4">
                         <Button

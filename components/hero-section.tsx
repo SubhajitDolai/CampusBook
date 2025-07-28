@@ -152,7 +152,7 @@ export default function HeroSection() {
                                     href="/"
                                     className="rounded-(--radius) mx-auto flex w-fit items-center gap-2 border p-1 pr-3">
                                     <span className="bg-muted rounded-[calc(var(--radius)-0.25rem)] px-2 py-1 text-xs">New</span>
-                                    <span className="text-sm">Introducing CampusGrid</span>
+                                    <span className="text-sm">Introducing CampusBook</span>
                                     <span className="bg-(--color-border) block h-4 w-px"></span>
 
                                     <ArrowRight className="size-4" />
@@ -161,8 +161,8 @@ export default function HeroSection() {
                                 <h1 className="mt-8 text-4xl font-semibold md:text-5xl xl:text-5xl xl:[line-height:1.125]">
                                     Book University Resources<br /> With Ease and Simplicity
                                 </h1>
-                                <p className="mx-auto mt-8 hidden max-w-2xl text-wrap text-lg sm:block">CampusGrid lets university faculty quickly and reliably reserve rooms, labs, and campus resources. Simple, fast, and intuitive for your daily needs.</p>
-                                <p className="mx-auto mt-6 max-w-2xl text-wrap sm:hidden">Reserve campus spaces in seconds. CampusGrid is built for faculty to save time and stay organized.</p>
+                                <p className="mx-auto mt-8 hidden max-w-2xl text-wrap text-lg sm:block">CampusBook lets university faculty quickly and reliably reserve rooms, labs, and campus resources. Simple, fast, and intuitive for your daily needs.</p>
+                                <p className="mx-auto mt-6 max-w-2xl text-wrap sm:hidden">Reserve campus spaces in seconds. CampusBook is built for faculty to save time and stay organized.</p>
 
                                 <div className="mt-8">
                                     <Button

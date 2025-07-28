@@ -5,8 +5,8 @@ export default function Features() {
         <section id="features" className="py-12 md:py-20">
             <div className="mx-auto max-w-5xl space-y-8 px-6 md:space-y-16">
                 <div className="relative z-10 mx-auto max-w-xl space-y-6 text-center md:space-y-12">
-                    <h2 className="text-balance text-4xl font-medium lg:text-5xl">Why CampusGrid?</h2>
-                    <p>CampusGrid gives university faculty the tools to book, manage, and organize campus resources with speed and simplicity.</p>
+                    <h2 className="text-balance text-4xl font-medium lg:text-5xl">Why CampusBook?</h2>
+                    <p>CampusBook gives university faculty the tools to book, manage, and organize campus resources with speed and simplicity.</p>
                 </div>
 
                 <div className="relative mx-auto grid max-w-4xl divide-x divide-y border *:p-12 sm:grid-cols-2 lg:grid-cols-3">
