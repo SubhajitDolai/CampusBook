@@ -2,10 +2,18 @@ import { Gemini, Replit, MagicUI, VSCodium, MediaWiki, GooglePaLM } from '@/comp
 import { LogoIcon2 } from '@/components/logo'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 import { InfiniteSlider } from '@/components/infinite-slider'
 
 export default function IntegrationsSection() {
+    const router = useRouter();
+    const { start } = useGlobalLoadingBar();
+    const handleClick = () => {
+        start();
+        router.push('/dashboard');
+    };
+
     return (
         <section id="integrations">
             <div className="py-24 md:py-32">
@@ -106,8 +114,9 @@ export default function IntegrationsSection() {
                         <Button
                             variant="outline"
                             size="sm"
-                            asChild>
-                            <Link href="#">Get Started</Link>
+                            onClick={handleClick}
+                        >
+                            Get Started
                         </Button>
                     </div>
                 </div>
