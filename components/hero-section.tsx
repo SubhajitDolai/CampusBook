@@ -13,6 +13,7 @@ import { ArrowRight, Menu, Rocket, X, CalendarCheck, Clock, Bell, Smartphone, Su
 import { Button } from '@/components/ui/button'
 import { logout } from '@/app/(auth)/login/actions';
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider';
+import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 
 const menuItems = [
@@ -29,6 +30,7 @@ const menuItems = [
 export default function HeroSection() {
     const [menuState, setMenuState] = React.useState(false)
     const { start } = useGlobalLoadingBar();
+    const router = useRouter();
     const { setTheme, theme } = useTheme();
     const [mounted, setMounted] = React.useState(false);
     const [deviceType, setDeviceType] = React.useState<'mobile' | 'tablet' | 'desktop'>('desktop');
@@ -148,15 +150,16 @@ export default function HeroSection() {
                     <div className="relative py-24 lg:py-28">
                         <div className="mx-auto max-w-7xl px-6 md:px-12">
                             <div className="text-center sm:mx-auto sm:w-10/12 lg:mr-auto lg:mt-0 lg:w-4/5">
-                                <Link
-                                    href="/"
-                                    className="rounded-(--radius) mx-auto flex w-fit items-center gap-2 border p-1 pr-3">
+                                <button
+                                    type="button"
+                                    onClick={() => { start(); router.push('/dashboard'); }}
+                                    className="rounded-(--radius) mx-auto flex w-fit items-center gap-2 border p-1 pr-3"
+                                >
                                     <span className="bg-muted rounded-[calc(var(--radius)-0.25rem)] px-2 py-1 text-xs">New</span>
                                     <span className="text-sm">Introducing CampusBook</span>
                                     <span className="bg-(--color-border) block h-4 w-px"></span>
-
                                     <ArrowRight className="size-4" />
-                                </Link>
+                                </button>
 
                                 <h1 className="mt-8 text-4xl font-semibold md:text-5xl xl:text-5xl xl:[line-height:1.125]">
                                     Book University Resources<br /> With Ease and Simplicity
@@ -167,11 +170,10 @@ export default function HeroSection() {
                                 <div className="mt-8">
                                     <Button
                                         size="lg"
-                                        asChild>
-                                        <Link href="#">
-                                            <Rocket className="relative size-4" />
-                                            <span className="text-nowrap">Get Started</span>
-                                        </Link>
+                                        onClick={() => { start(); router.push('/dashboard'); }}
+                                    >
+                                        <Rocket className="relative size-4" />
+                                        <span className="text-nowrap">Get Started</span>
                                     </Button>
                                 </div>
                             </div>
