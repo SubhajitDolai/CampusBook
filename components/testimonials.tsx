@@ -99,8 +99,8 @@ export default function WallOfLoveSection() {
             <div className="py-16 md:py-32">
                 <div className="mx-auto max-w-6xl px-6">
                     <div className="text-center">
-                        <h2 className="text-title text-3xl font-semibold">Faculty Love CampusGrid</h2>
-                        <p className="text-body mt-6">See what university faculty are saying about booking with CampusGrid.</p>
+                        <h2 className="text-title text-3xl font-semibold">Faculty Love CampusBook</h2>
+                        <p className="text-body mt-6">See what university faculty are saying about booking with CampusBook.</p>
                     </div>
                     <div className="mt-8 grid gap-3 sm:grid-cols-2 md:mt-12 lg:grid-cols-3">
                         {testimonialChunks.map((chunk, chunkIndex) => (

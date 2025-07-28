@@ -16,7 +16,7 @@ export const Logo = ({ className }: { className?: string }) => {
     return (
         <Image
             src={src}
-            alt="CampusGrid Logo"
+            alt="CampusBook Logo"
             width={120}
             height={32}
             className={className}
@@ -39,7 +39,7 @@ export const LogoIcon = ({ className }: { className?: string }) => {
     return (
         <Image
             src={src}
-            alt="CampusGrid Logo Icon"
+            alt="CampusBook Logo Icon"
             width={40}
             height={40}
             className={className}
@@ -79,7 +79,7 @@ export const LogoIcon2 = ({ className }: { className?: string }) => {
     return (
         <Image
             src={src}
-            alt="CampusGrid Logo Icon"
+            alt="CampusBook Logo Icon"
             width={40}
             height={40}
             className={className}

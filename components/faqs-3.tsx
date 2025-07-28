@@ -28,14 +28,14 @@ export default function FAQsThree() {
         {
             id: 'item-3',
             icon: 'users',
-            question: 'Who can use CampusGrid?',
-            answer: 'CampusGrid is designed for university faculty to book and manage campus resources. Access is typically provided by your university administration.',
+            question: 'Who can use CampusBook?',
+            answer: 'CampusBook is designed for university faculty to book and manage campus resources. Access is typically provided by your university administration.',
         },
         {
             id: 'item-4',
             icon: 'bell',
             question: 'Will I get reminders for my bookings?',
-            answer: 'Yes, CampusGrid sends automated reminders before your booking starts so you never miss a reservation.',
+            answer: 'Yes, CampusBook sends automated reminders before your booking starts so you never miss a reservation.',
         },
         {
             id: 'item-5',
