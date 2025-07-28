@@ -3,15 +3,16 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { 
-  Building2, 
-  Users, 
-  Calendar, 
-  Settings, 
+import {
+  Building2,
+  Users,
+  Calendar,
   Home,
   LogOut,
   User,
   Layers,
+  LayoutDashboard,
+  Boxes,
 } from "lucide-react"
 import { logout } from "@/app/(auth)/login/actions"
 import {
@@ -52,10 +53,10 @@ export function AppSidebar() {
     async function fetchUserProfile() {
       try {
         const supabase = createClient()
-        
+
         // Get current user
         const { data: { user } } = await supabase.auth.getUser()
-        
+
         if (user) {
           // Get user profile
           const { data: profile } = await supabase
@@ -63,7 +64,7 @@ export function AppSidebar() {
             .select('id, name, email, university_id, department, role')
             .eq('id', user.id)
             .single()
-          
+
           setUserProfile(profile)
         }
       } catch (error) {
@@ -76,26 +77,26 @@ export function AppSidebar() {
     fetchUserProfile()
   }, [])
 
-    const menuItems = [
-        {
+  const menuItems = [
+    {
       title: "Dashboard",
       href: "/admin",
-      icon: Home,
-        },
-        {
+      icon: LayoutDashboard,
+    },
+    {
       title: "Buildings",
       href: "/admin/buildings",
       icon: Building2,
-        },
-        {
+    },
+    {
       title: "Floors",
       href: "/admin/floors",
       icon: Layers,
-        },
-        {
+    },
+    {
       title: "Resources",
       href: "/admin/resources",
-      icon: Settings,
+      icon: Boxes,
     },
     {
       title: "Bookings",
@@ -106,6 +107,11 @@ export function AppSidebar() {
       title: "Users",
       href: "/admin/users",
       icon: Users,
+    },
+    {
+      title: "Home",
+      href: "/",
+      icon: Home,
     },
   ]
 
@@ -118,17 +124,17 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader>
         <div className="flex h-16 items-center justify-center border-b px-6">
-          <Image 
-            src="/logo-dark.webp" 
-            alt="CampusBook" 
+          <Image
+            src="/logo-dark.webp"
+            alt="CampusBook"
             width={128}
             height={128}
             className="h-8 w-auto dark:hidden"
             priority
           />
-          <Image 
-            src="/logo-light.webp" 
-            alt="CampusBook" 
+          <Image
+            src="/logo-light.webp"
+            alt="CampusBook"
             width={128}
             height={128}
             className="h-8 w-auto hidden dark:block"
