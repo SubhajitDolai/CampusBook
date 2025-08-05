@@ -38,7 +38,7 @@ export async function addFloor(formData: FormData) {
     const name = formData.get('name') as string
     const is_active = formData.get('is_active') === 'true'
 
-    if (!building_id || !floor_number) {
+    if (!building_id || floor_number === undefined || floor_number === null) {
       return { error: 'Building and floor number are required' }
     }
 
@@ -59,7 +59,7 @@ export async function addFloor(formData: FormData) {
       .insert({
         building_id,
         floor_number,
-        name: name || null,
+        name: name || `Floor ${floor_number}`,
         is_active
       })
       .select()
@@ -86,7 +86,7 @@ export async function updateFloor(id: string, formData: FormData) {
     const name = formData.get('name') as string
     const is_active = formData.get('is_active') === 'true'
 
-    if (!building_id || !floor_number) {
+    if (!building_id || floor_number === undefined || floor_number === null) {
       return { error: 'Building and floor number are required' }
     }
 
@@ -108,7 +108,7 @@ export async function updateFloor(id: string, formData: FormData) {
       .update({
         building_id,
         floor_number,
-        name: name || null,
+        name: name || `Floor ${floor_number}`,
         is_active
       })
       .eq('id', id)

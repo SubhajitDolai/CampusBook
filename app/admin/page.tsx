@@ -27,7 +27,6 @@ type Booking = {
   end_time: string
   reason: string
   status: string
-  recurring: boolean
   created_at: string
   resources?: {
     id: string

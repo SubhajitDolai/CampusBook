@@ -68,7 +68,6 @@ export async function getRecentBookings() {
         end_time,
         reason,
         status,
-        recurring,
         created_at,
         resources (
           id,

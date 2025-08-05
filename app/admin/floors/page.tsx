@@ -153,8 +153,8 @@ export default function FloorsPage() {
       errors.building_id = 'Building is required'
     }
     
-    if (!formData.floor_number || formData.floor_number <= 0) {
-      errors.floor_number = 'Floor number is required and must be greater than 0'
+    if (formData.floor_number === undefined || formData.floor_number === null) {
+      errors.floor_number = 'Floor number is required'
     }
     
     setFormErrors(errors)
@@ -348,12 +348,13 @@ export default function FloorsPage() {
                         type="number"
                         value={formData.floor_number}
                         onChange={(e) => {
-                          setFormData({ ...formData, floor_number: parseInt(e.target.value) || 0 })
+                          const value = e.target.value === '' ? 0 : parseInt(e.target.value)
+                          setFormData({ ...formData, floor_number: value })
                           if (formErrors.floor_number) {
                             setFormErrors({ ...formErrors, floor_number: '' })
                           }
                         }}
-                        placeholder="Enter floor number"
+                        placeholder="Enter floor number (e.g., -2, -1, 0, 1, 2)"
                         className={formErrors.floor_number ? "border-red-500" : ""}
                       />
                       {formErrors.floor_number && (
@@ -366,7 +367,7 @@ export default function FloorsPage() {
                         id="name"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="Enter floor name (optional)"
+                        placeholder="Enter floor name (optional) - will default to 'Floor X'"
                       />
                     </div>
                     <div className="flex items-center space-x-2">
@@ -637,31 +638,32 @@ export default function FloorsPage() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="edit-floor_number">Floor Number *</Label>
-              <Input
-                id="edit-floor_number"
-                type="number"
-                value={formData.floor_number}
-                onChange={(e) => {
-                  setFormData({ ...formData, floor_number: parseInt(e.target.value) || 0 })
-                  if (formErrors.floor_number) {
-                    setFormErrors({ ...formErrors, floor_number: '' })
-                  }
-                }}
-                placeholder="Enter floor number"
-                className={formErrors.floor_number ? "border-red-500" : ""}
-              />
+                                    <Input
+                        id="edit-floor_number"
+                        type="number"
+                        value={formData.floor_number}
+                        onChange={(e) => {
+                          const value = e.target.value === '' ? 0 : parseInt(e.target.value)
+                          setFormData({ ...formData, floor_number: value })
+                          if (formErrors.floor_number) {
+                            setFormErrors({ ...formErrors, floor_number: '' })
+                          }
+                        }}
+                        placeholder="Enter floor number (e.g., -2, -1, 0, 1, 2)"
+                        className={formErrors.floor_number ? "border-red-500" : ""}
+                      />
               {formErrors.floor_number && (
                 <p className="text-sm text-red-500">{formErrors.floor_number}</p>
               )}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="edit-name">Floor Name</Label>
-              <Input
-                id="edit-name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Enter floor name (optional)"
-              />
+                      <Input
+                        id="edit-name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="Enter floor name (optional) - will default to 'Floor X'"
+                      />
             </div>
             <div className="flex items-center space-x-2">
               <Switch

@@ -61,7 +61,6 @@ type Booking = {
   start_time: string
   end_time: string
   reason: string
-  recurring: boolean
   status: 'pending' | 'approved' | 'rejected' | 'cancelled'
   approved_by: string | null
   approved_at: string | null
@@ -457,9 +456,7 @@ export default function BookingsPage() {
                               </div>
                               <div>
                                 <p className="font-medium line-clamp-2">{booking.reason}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  {booking.recurring ? 'Recurring booking' : 'One-time booking'}
-                                </p>
+
                                 <p className="text-xs text-muted-foreground">
                                   Created {formatDate(booking.created_at)}
                                 </p>

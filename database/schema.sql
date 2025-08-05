@@ -69,7 +69,6 @@ CREATE TABLE bookings (
   start_time TIME NOT NULL,
   end_time TIME NOT NULL,
   reason TEXT NOT NULL,
-  recurring BOOLEAN DEFAULT false,
   status booking_status NOT NULL DEFAULT 'pending',
   approved_by UUID REFERENCES profiles(id),
   approved_at TIMESTAMP WITH TIME ZONE,
