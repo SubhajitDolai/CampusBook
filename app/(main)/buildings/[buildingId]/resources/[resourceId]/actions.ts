@@ -1,0 +1,317 @@
+'use server'
+
+import { createClient } from '@/utils/supabase/server'
+
+export async function getBuildingDetails(buildingId: string) {
+  const supabase = await createClient()
+
+  try {
+    const { data: building, error } = await supabase
+      .from('buildings')
+      .select(`
+        id,
+        name,
+        code,
+        description,
+        is_active
+      `)
+      .eq('id', buildingId)
+      .eq('is_active', true)
+      .single()
+
+    if (error) {
+      console.error('Error fetching building:', error)
+      return null
+    }
+
+    return building
+  } catch (error) {
+    console.error('Error in getBuildingDetails:', error)
+    return null
+  }
+}
+
+export async function getResourceDetails(resourceId: string) {
+  const supabase = await createClient()
+
+  try {
+    const { data: resource, error } = await supabase
+      .from('resources')
+      .select(`
+        id,
+        building_id,
+        floor_id,
+        name,
+        type,
+        capacity,
+        description,
+        equipment,
+        is_active,
+        created_at
+      `)
+      .eq('id', resourceId)
+      .eq('is_active', true)
+      .single()
+
+    if (error) {
+      console.error('Error fetching resource:', error)
+      return null
+    }
+
+    return resource
+  } catch (error) {
+    console.error('Error in getResourceDetails:', error)
+    return null
+  }
+}
+
+export async function getResourceWithDetails(resourceId: string) {
+  const supabase = await createClient()
+
+  try {
+    const { data: resource, error: resourceError } = await supabase
+      .from('resources')
+      .select(`
+        id,
+        building_id,
+        floor_id,
+        name,
+        type,
+        capacity,
+        description,
+        equipment,
+        is_active,
+        created_at
+      `)
+      .eq('id', resourceId)
+      .eq('is_active', true)
+      .single()
+
+    if (resourceError) {
+      console.error('Error fetching resource:', resourceError)
+      return null
+    }
+
+    // Get floor details for location info
+    const { data: floor, error: floorError } = await supabase
+      .from('floors')
+      .select(`
+        id,
+        floor_number,
+        name
+      `)
+      .eq('id', resource.floor_id)
+      .eq('is_active', true)
+      .single()
+
+    if (floorError) {
+      console.error('Error fetching floor:', floorError)
+    }
+
+    // Get building details
+    const { data: building, error: buildingError } = await supabase
+      .from('buildings')
+      .select(`
+        id,
+        name,
+        code
+      `)
+      .eq('id', resource.building_id)
+      .eq('is_active', true)
+      .single()
+
+    if (buildingError) {
+      console.error('Error fetching building:', buildingError)
+    }
+
+    // Check for active bookings to determine status
+    const { data: activeBookings, error: bookingError } = await supabase
+      .from('bookings')
+      .select('id')
+      .eq('resource_id', resourceId)
+      .in('status', ['pending', 'approved'])
+      .gte('end_date', new Date().toISOString().split('T')[0])
+
+    if (bookingError) {
+      console.error('Error checking active bookings:', bookingError)
+    }
+
+    // Enhance resource with additional details
+    const enhancedResource = {
+      ...resource,
+      location: `${building?.name || 'Unknown Building'} - ${floor?.name || `Floor ${floor?.floor_number}`}`,
+      floor: floor?.name || `Floor ${floor?.floor_number}`,
+      status: activeBookings && activeBookings.length > 0 ? 'Booked' : 'Available',
+      equipmentList: resource.equipment ? resource.equipment.split(',').map((item: string) => item.trim()) : []
+    }
+
+    return enhancedResource
+  } catch (error) {
+    console.error('Error in getResourceWithDetails:', error)
+    return null
+  }
+}
+
+export async function createBooking(formData: FormData) {
+  const supabase = await createClient()
+
+  try {
+    const resourceId = formData.get('resourceId') as string
+    const startDate = formData.get('startDate') as string
+    const endDate = formData.get('endDate') as string
+    const startTime = formData.get('startTime') as string
+    const endTime = formData.get('endTime') as string
+    const reason = formData.get('reason') as string
+    if (!resourceId || !startDate || !endDate || !startTime || !endTime || !reason) {
+      return { error: 'All fields are required' }
+    }
+
+    // Get current user ID from authentication
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError || !user) {
+      console.error('Error getting user:', userError)
+      return { error: 'User not authenticated' }
+    }
+
+    // Verify that the resource exists and is active
+    const { data: resource, error: resourceError } = await supabase
+      .from('resources')
+      .select('id, name, is_active')
+      .eq('id', resourceId)
+      .eq('is_active', true)
+      .single()
+
+    if (resourceError || !resource) {
+      console.error('Error verifying resource:', resourceError)
+      return { error: 'Resource not found or inactive' }
+    }
+
+    // Log the booking data for debugging
+    console.log('Creating booking with data:', {
+      resource_id: resourceId,
+      user_id: user.id,
+      start_date: startDate,
+      end_date: endDate,
+      start_time: startTime,
+      end_time: endTime,
+      reason: reason,
+      status: 'pending'
+    })
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .insert({
+        resource_id: resourceId,
+        user_id: user.id,
+        start_date: startDate,
+        end_date: endDate,
+        start_time: startTime,
+        end_time: endTime,
+        reason: reason,
+        status: 'pending'
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error creating booking:', error)
+      return { error: `Failed to create booking: ${error.message}` }
+    }
+
+    return { data }
+  } catch (error) {
+    console.error('Error in createBooking:', error)
+    return { error: 'Failed to create booking' }
+  }
+} 
+
+export async function getResourceBookings(resourceId: string) {
+  const supabase = await createClient()
+
+  console.log('Fetching bookings for resource:', resourceId)
+  console.log('Resource ID type:', typeof resourceId)
+  console.log('Resource ID value:', resourceId)
+
+  try {
+    // First, get the bookings
+    const { data: bookings, error: bookingsError } = await supabase
+      .from('bookings')
+      .select(`
+        id,
+        start_date,
+        end_date,
+        start_time,
+        end_time,
+        reason,
+        status,
+        created_at,
+        user_id
+      `)
+      .eq('resource_id', resourceId)
+      .gte('end_date', new Date().toISOString().split('T')[0]) // Only show current and future bookings
+      .order('start_date', { ascending: true })
+      .order('start_time', { ascending: true })
+
+    if (bookingsError) {
+      console.error('Error fetching resource bookings:', bookingsError)
+      console.error('Error details:', JSON.stringify(bookingsError, null, 2))
+      return []
+    }
+
+    console.log('Found bookings:', bookings?.length || 0)
+
+    if (!bookings || bookings.length === 0) {
+      console.log('No bookings found for resource:', resourceId)
+      return []
+    }
+
+    // Get user IDs from bookings
+    const userIds = bookings.map(booking => booking.user_id)
+    console.log('User IDs from bookings:', userIds)
+
+    // Fetch user profiles
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, name, email, department')
+      .in('id', userIds)
+
+    if (profilesError) {
+      console.error('Error fetching profiles:', profilesError)
+      console.error('Profile error details:', JSON.stringify(profilesError, null, 2))
+      // Return bookings with fallback profile data
+      return bookings.map(booking => ({
+        ...booking,
+        profiles: {
+          id: booking.user_id,
+          name: 'Unknown User',
+          email: 'unknown@example.com',
+          department: 'Unknown Department'
+        }
+      }))
+    }
+
+    console.log('Found profiles:', profiles?.length || 0)
+
+    // Create a map of user profiles
+    const profilesMap = new Map(profiles?.map(profile => [profile.id, profile]) || [])
+
+    // Combine bookings with profile data
+    const bookingsWithProfiles = bookings.map(booking => ({
+      ...booking,
+      profiles: profilesMap.get(booking.user_id) || {
+        id: booking.user_id,
+        name: 'Unknown User',
+        email: 'unknown@example.com',
+        department: 'Unknown Department'
+      }
+    }))
+
+    console.log('Returning bookings with profiles:', bookingsWithProfiles.length)
+    return bookingsWithProfiles
+  } catch (error) {
+    console.error('Error in getResourceBookings:', error)
+    console.error('Full error details:', JSON.stringify(error, null, 2))
+    return []
+  }
+} 

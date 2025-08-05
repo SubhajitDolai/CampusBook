@@ -111,11 +111,21 @@ export default function HeroSection() {
                                     <ul className="space-y-6 text-base lg:flex lg:gap-8 lg:space-y-0 lg:text-sm">
                                         {menuItems.map((item, index) => (
                                             <li key={index}>
-                                                <Link
-                                                    href={item.href}
-                                                    className="text-muted-foreground hover:text-accent-foreground block duration-150">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        const element = document.querySelector(item.href);
+                                                        if (element) {
+                                                            element.scrollIntoView({
+                                                                behavior: 'smooth',
+                                                                block: 'start'
+                                                            });
+                                                        }
+                                                        setMenuState(false);
+                                                    }}
+                                                    className="text-muted-foreground hover:text-accent-foreground block duration-150 w-full text-left">
                                                     <span>{item.name}</span>
-                                                </Link>
+                                                </button>
                                             </li>
                                         ))}
                                     </ul>

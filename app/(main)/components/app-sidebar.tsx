@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import Image from "next/image"
-import { LayoutDashboard, Building2, User, Home, BookOpen, LogOut, Moon, Sun, Monitor, Smartphone, Laptop } from "lucide-react"
+import { LayoutDashboard, Building2, User, Home, BookOpen, LogOut, Moon, Sun, Monitor, Smartphone, Laptop, GraduationCap } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -124,6 +124,11 @@ export function AppSidebar() {
       title: "Buildings",
       href: "/buildings",
       icon: Building2,
+    },
+    {
+      title: "Resources",
+      href: "/resources",
+      icon: GraduationCap,
     },
     {
       title: "Bookings",
