@@ -21,6 +21,13 @@ CREATE TABLE profiles (
   designation VARCHAR(100),
   department VARCHAR(100) NOT NULL,
   role user_role NOT NULL DEFAULT 'faculty',
+  seating_location VARCHAR(255),
+  building_name VARCHAR(255),
+  floor_number INTEGER,
+  room_number INTEGER,
+  cabin VARCHAR(50),
+  cubicle VARCHAR(50),
+  workstation VARCHAR(50),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

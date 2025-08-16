@@ -273,7 +273,7 @@ export async function getResourceBookings(resourceId: string) {
     // Fetch user profiles
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('id, name, email, department')
+      .select('id, name, email, department, seating_location, building_name, floor_number, room_number, cabin, cubicle, workstation')
       .in('id', userIds)
 
     if (profilesError) {
@@ -286,7 +286,14 @@ export async function getResourceBookings(resourceId: string) {
           id: booking.user_id,
           name: 'Unknown User',
           email: 'unknown@example.com',
-          department: 'Unknown Department'
+          department: 'Unknown Department',
+          seating_location: null,
+          building_name: null,
+          floor_number: null,
+          room_number: null,
+          cabin: null,
+          cubicle: null,
+          workstation: null
         }
       }))
     }
@@ -303,7 +310,14 @@ export async function getResourceBookings(resourceId: string) {
         id: booking.user_id,
         name: 'Unknown User',
         email: 'unknown@example.com',
-        department: 'Unknown Department'
+        department: 'Unknown Department',
+        seating_location: null,
+        building_name: null,
+        floor_number: null,
+        room_number: null,
+        cabin: null,
+        cubicle: null,
+        workstation: null
       }
     }))
 

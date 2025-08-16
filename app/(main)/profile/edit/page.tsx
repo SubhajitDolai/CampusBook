@@ -38,7 +38,14 @@ const formSchema = z.object({
   phone: z.string().min(10, "Phone number is required"),
   gender: z.enum(["male", "female", "other"]),
   designation: z.string().min(1, "Designation is required"),
-  department: z.string().min(1, "Department is required")
+  department: z.string().min(1, "Department is required"),
+  seating_location: z.string().optional(),
+  building_name: z.string().optional(),
+  floor_number: z.string().optional(),
+  room_number: z.string().optional(),
+  cabin: z.string().optional(),
+  cubicle: z.string().optional(),
+  workstation: z.string().optional()
 })
 
 type Profile = {
@@ -50,6 +57,13 @@ type Profile = {
   designation: string;
   department: string;
   role: string;
+  seating_location?: string | null;
+  building_name?: string | null;
+  floor_number?: number | null;
+  room_number?: number | null;
+  cabin?: string | null;
+  cubicle?: string | null;
+  workstation?: string | null;
 };
 
 type FormData = z.infer<typeof formSchema>
@@ -70,7 +84,14 @@ export default function ProfileEditPage() {
       phone: "",
       gender: "male",
       designation: "",
-      department: ""
+      department: "",
+      seating_location: "",
+      building_name: "",
+      floor_number: "",
+      room_number: "",
+      cabin: "",
+      cubicle: "",
+      workstation: ""
     }
   })
 
@@ -88,7 +109,7 @@ export default function ProfileEditPage() {
         }
         const { data, error } = await supabase
           .from("profiles")
-          .select("name, email, university_id, phone, gender, designation, department, role")
+          .select("name, email, university_id, phone, gender, designation, department, role, seating_location, building_name, floor_number, room_number, cabin, cubicle, workstation")
           .eq("id", user.id)
           .single()
         if (error || !data) {
@@ -101,7 +122,14 @@ export default function ProfileEditPage() {
             phone: data.phone || "",
             gender: data.gender,
             designation: data.designation,
-            department: data.department
+            department: data.department,
+            seating_location: data.seating_location || "",
+            building_name: data.building_name || "",
+            floor_number: data.floor_number ? data.floor_number.toString() : "",
+            room_number: data.room_number ? data.room_number.toString() : "",
+            cabin: data.cabin || "",
+            cubicle: data.cubicle || "",
+            workstation: data.workstation || ""
           })
         }
       } catch (e) {
@@ -154,7 +182,14 @@ export default function ProfileEditPage() {
           phone: data.phone || null,
           gender: data.gender,
           designation: data.designation,
-          department: data.department
+          department: data.department,
+          seating_location: data.seating_location || null,
+          building_name: data.building_name || null,
+          floor_number: data.floor_number ? parseInt(data.floor_number, 10) : null,
+          room_number: data.room_number ? parseInt(data.room_number, 10) : null,
+          cabin: data.cabin || null,
+          cubicle: data.cubicle || null,
+          workstation: data.workstation || null
         })
         .eq("id", user.id)
 
@@ -435,6 +470,134 @@ export default function ProfileEditPage() {
                             </FormItem>
                           )}
                         />
+                      </div>
+                    </CardContent>
+                    
+                    {/* Seating Location Section */}
+                    <CardContent className="px-8 pb-8">
+                      <div className="border-t pt-8">
+                        <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                          <Building2 className="h-5 w-5" />
+                          Seating Location Information
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-4">
+                            <FormField
+                              control={form.control}
+                              name="building_name"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Building Name</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="e.g. Main Building, Block A" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="floor_number"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Floor Number</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      type="number" 
+                                      placeholder="e.g. 2" 
+                                      min="0"
+                                      {...field} 
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="room_number"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Room Number</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      type="number" 
+                                      placeholder="e.g. 201" 
+                                      min="0"
+                                      {...field} 
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <div className="space-y-4">
+                            <FormField
+                              control={form.control}
+                              name="seating_location"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Seating Location Type</FormLabel>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select seating type" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="cabin">Cabin</SelectItem>
+                                      <SelectItem value="cubicle">Cubicle</SelectItem>
+                                      <SelectItem value="workstation">Workstation</SelectItem>
+                                      <SelectItem value="office">Office</SelectItem>
+                                      <SelectItem value="other">Other</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="cabin"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Cabin</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="e.g. Cabin 3" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="cubicle"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Cubicle</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="e.g. Cubicle A5" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="workstation"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Workstation</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="e.g. Workstation 12" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                     <CardFooter className="flex justify-between gap-2 px-8 pb-8">

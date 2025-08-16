@@ -79,7 +79,14 @@ export async function getRecentBookings() {
           id,
           name,
           university_id,
-          department
+          department,
+          seating_location,
+          building_name,
+          floor_number,
+          room_number,
+          cabin,
+          cubicle,
+          workstation
         )
       `)
       .order('created_at', { ascending: false })
@@ -153,7 +160,14 @@ export async function getUsers() {
         designation,
         department,
         role,
-        created_at
+        created_at,
+        seating_location,
+        building_name,
+        floor_number,
+        room_number,
+        cabin,
+        cubicle,
+        workstation
       `)
       .order('created_at', { ascending: false })
 

@@ -30,7 +30,14 @@ export async function getBookings() {
           email,
           university_id,
           department,
-          role
+          role,
+          seating_location,
+          building_name,
+          floor_number,
+          room_number,
+          cabin,
+          cubicle,
+          workstation
         ),
         approved_by_profile:profiles!bookings_approved_by_fkey (
           id,

@@ -52,6 +52,13 @@ type User = {
   department: string
   role: string
   created_at: string
+  seating_location?: string | null
+  building_name?: string | null
+  floor_number?: number | null
+  room_number?: number | null
+  cabin?: string | null
+  cubicle?: string | null
+  workstation?: string | null
 }
 
 // Get current user role from profiles table
@@ -295,6 +302,7 @@ export default function UsersPage() {
                       <TableHead>Department</TableHead>
                       <TableHead>Contact</TableHead>
                       <TableHead>Gender</TableHead>
+                      <TableHead>Seating Location</TableHead>
                       <TableHead>Role</TableHead>
                       {!roleLoading && currentUserRole === 'super_admin' && <TableHead>Action</TableHead>}
                     </TableRow>
@@ -340,6 +348,28 @@ export default function UsersPage() {
                         </TableCell>
                         <TableCell>
                           <div className="text-sm font-medium">{user.gender || 'Not specified'}</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-1">
+                            {user.building_name && (
+                              <div className="text-xs">
+                                <span className="text-muted-foreground">Building:</span> {user.building_name}
+                              </div>
+                            )}
+                            {user.floor_number && user.room_number && (
+                              <div className="text-xs">
+                                <span className="text-muted-foreground">Room:</span> F{user.floor_number}-{user.room_number}
+                              </div>
+                            )}
+                            {(user.cabin || user.cubicle || user.workstation) && (
+                              <div className="text-xs">
+                                <span className="text-muted-foreground">Location:</span> {user.cabin || user.cubicle || user.workstation}
+                              </div>
+                            )}
+                            {!user.building_name && !user.floor_number && !user.room_number && !user.cabin && !user.cubicle && !user.workstation && (
+                              <div className="text-xs text-muted-foreground">Not specified</div>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>
                           {getRoleBadge(user.role)}

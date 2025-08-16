@@ -19,6 +19,13 @@ export async function completeOnboarding(formData: FormData) {
   const gender = formData.get('gender') as string
   const department = formData.get('department') as string
   const designation = formData.get('designation') as string
+  
+  // Get new seating location fields
+  const seating_location = formData.get('seating_location') as string
+  const building_name = formData.get('building_name') as string
+  const floor_number = formData.get('floor_number') as string
+  const room_number = formData.get('room_number') as string
+  const specific_location = formData.get('specific_location') as string
 
   // Validate required fields
   if (!name || !university_id || !phone || !gender || !department || !designation) {
@@ -44,19 +51,29 @@ export async function completeOnboarding(formData: FormData) {
     .eq('id', user.id)
     .single()
 
+  // Prepare profile data with new fields
+  const profileData = {
+    name,
+    email: user.email || '',
+    university_id,
+    phone,
+    gender,
+    department,
+    designation,
+    seating_location: seating_location || null,
+    building_name: building_name || null,
+    floor_number: floor_number ? parseInt(floor_number) : null,
+    room_number: room_number ? parseInt(room_number) : null,
+    cabin: seating_location === 'cabin' ? specific_location : null,
+    cubicle: seating_location === 'cubicle' ? specific_location : null,
+    workstation: seating_location === 'workstation' ? specific_location : null
+  }
+
   if (existingProfile) {
     // Update existing profile
     const { error } = await supabase
       .from('profiles')
-      .update({
-        name,
-        email: user.email || '',
-        university_id,
-        phone,
-        gender,
-        department,
-        designation
-      })
+      .update(profileData)
       .eq('id', user.id)
 
     if (error) {
@@ -68,14 +85,8 @@ export async function completeOnboarding(formData: FormData) {
     const { error } = await supabase
       .from('profiles')
       .insert({
+        ...profileData,
         id: user.id,
-        name,
-        email: user.email || '',
-        university_id,
-        phone,
-        gender,
-        department,
-        designation,
         role: 'faculty' // default role
       })
 

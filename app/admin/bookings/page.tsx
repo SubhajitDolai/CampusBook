@@ -86,6 +86,13 @@ type Booking = {
     university_id: string
     department: string
     role: string
+    seating_location?: string | null
+    building_name?: string | null
+    floor_number?: number | null
+    room_number?: number | null
+    cabin?: string | null
+    cubicle?: string | null
+    workstation?: string | null
   }
   approved_by_profile?: {
     id: string

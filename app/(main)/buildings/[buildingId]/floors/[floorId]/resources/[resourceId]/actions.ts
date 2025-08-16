@@ -303,9 +303,10 @@ export async function getResourceBookings(resourceId: string) {
     let profilesError = null
 
     try {
+      // Fetch user profiles
       const profilesResult = await supabase
         .from('profiles')
-        .select('id, name, email, department')
+        .select('id, name, email, department, seating_location, building_name, floor_number, room_number, cabin, cubicle, workstation')
         .in('id', userIds)
       
       profiles = profilesResult.data
@@ -325,7 +326,14 @@ export async function getResourceBookings(resourceId: string) {
           id: booking.user_id,
           name: 'Unknown User',
           email: 'unknown@example.com',
-          department: 'Unknown Department'
+          department: 'Unknown Department',
+          seating_location: null,
+          building_name: null,
+          floor_number: null,
+          room_number: null,
+          cabin: null,
+          cubicle: null,
+          workstation: null
         }
       }))
     }
@@ -342,7 +350,14 @@ export async function getResourceBookings(resourceId: string) {
         id: booking.user_id,
         name: 'Unknown User',
         email: 'unknown@example.com',
-        department: 'Unknown Department'
+        department: 'Unknown Department',
+        seating_location: null,
+        building_name: null,
+        floor_number: null,
+        room_number: null,
+        cabin: null,
+        cubicle: null,
+        workstation: null
       }
     }))
 
