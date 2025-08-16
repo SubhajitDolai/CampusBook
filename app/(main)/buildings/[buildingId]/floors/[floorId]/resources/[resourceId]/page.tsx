@@ -67,6 +67,13 @@ interface Booking {
     name: string
     email: string
     department: string
+    seating_location?: string | null
+    building_name?: string | null
+    floor_number?: number | null
+    room_number?: number | null
+    cabin?: string | null
+    cubicle?: string | null
+    workstation?: string | null
   } | null
 }
 

@@ -69,6 +69,13 @@ type Profile = {
   designation: string
   department: string
   role: string
+  seating_location?: string | null
+  building_name?: string | null
+  floor_number?: number | null
+  room_number?: number | null
+  cabin?: string | null
+  cubicle?: string | null
+  workstation?: string | null
 }
 
 export default function ProfilePage() {
@@ -90,7 +97,7 @@ export default function ProfilePage() {
         }
         const { data, error } = await supabase
           .from("profiles")
-          .select("name, email, university_id, phone, gender, designation, department, role")
+          .select("name, email, university_id, phone, gender, designation, department, role, seating_location, building_name, floor_number, room_number, cabin, cubicle, workstation")
           .eq("id", user.id)
           .single()
         if (error || !data) {
@@ -261,6 +268,87 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 </CardContent>
+                
+                {/* Seating Location Information */}
+                {(profile.building_name || profile.floor_number || profile.room_number || profile.seating_location || profile.cabin || profile.cubicle || profile.workstation) && (
+                  <CardContent className="px-8 pb-8">
+                    <div className="border-t pt-8">
+                      <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                        <Building2 className="h-5 w-5" />
+                        Seating Location
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                          {profile.building_name && (
+                            <div className="flex items-center gap-3">
+                              <Building2 className="text-muted-foreground size-5" />
+                              <div>
+                                <span className="text-sm text-muted-foreground">Building</span>
+                                <div className="font-medium">{profile.building_name}</div>
+                              </div>
+                            </div>
+                          )}
+                          {profile.floor_number && (
+                            <div className="flex items-center gap-3">
+                              <Building2 className="text-muted-foreground size-5" />
+                              <div>
+                                <span className="text-sm text-muted-foreground">Floor</span>
+                                <div className="font-medium">{profile.floor_number}</div>
+                              </div>
+                            </div>
+                          )}
+                          {profile.room_number && (
+                            <div className="flex items-center gap-3">
+                              <Building2 className="text-muted-foreground size-5" />
+                              <div>
+                                <span className="text-sm text-muted-foreground">Room</span>
+                                <div className="font-medium">{profile.room_number}</div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="space-y-4">
+                          {profile.seating_location && (
+                            <div className="flex items-center gap-3">
+                              <Building2 className="text-muted-foreground size-5" />
+                              <div>
+                                <span className="text-sm text-muted-foreground">Location Type</span>
+                                <div className="font-medium capitalize">{profile.seating_location}</div>
+                              </div>
+                            </div>
+                          )}
+                          {profile.cabin && (
+                            <div className="flex items-center gap-3">
+                              <Building2 className="text-muted-foreground size-5" />
+                              <div>
+                                <span className="text-sm text-muted-foreground">Cabin</span>
+                                <div className="font-medium">{profile.cabin}</div>
+                              </div>
+                            </div>
+                          )}
+                          {profile.cubicle && (
+                            <div className="flex items-center gap-3">
+                              <Building2 className="text-muted-foreground size-5" />
+                              <div>
+                                <span className="text-sm text-muted-foreground">Cubicle</span>
+                                <div className="font-medium">{profile.cubicle}</div>
+                              </div>
+                            </div>
+                          )}
+                          {profile.workstation && (
+                            <div className="flex items-center gap-3">
+                              <Building2 className="text-muted-foreground size-5" />
+                              <div>
+                                <span className="text-sm text-muted-foreground">Workstation</span>
+                                <div className="font-medium">{profile.workstation}</div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                )}
               </Card>
             </>
           )}

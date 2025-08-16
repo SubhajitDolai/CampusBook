@@ -56,7 +56,7 @@ export async function getUserBookings(): Promise<BookingWithDetails[]> {
     // First, get the user's profile
     const { data: userProfile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, name, email, university_id, department, role')
+      .select('id, name, email, university_id, department, role, seating_location, building_name, floor_number, room_number, cabin, cubicle, workstation')
       .eq('id', user.id)
       .single()
 

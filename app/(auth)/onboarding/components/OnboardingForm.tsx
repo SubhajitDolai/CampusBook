@@ -118,6 +118,72 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
           />
         </div>
 
+        {/* Seating Location Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Seating Location</h3>
+          
+          {/* Building Name */}
+          <div className="grid gap-2">
+            <Label htmlFor="building_name">Building Name</Label>
+            <Input
+              id="building_name"
+              name="building_name"
+              placeholder="e.g. Main Building, Block A"
+            />
+          </div>
+
+          {/* Floor Number */}
+          <div className="grid gap-2">
+            <Label htmlFor="floor_number">Floor Number</Label>
+            <Input
+              id="floor_number"
+              name="floor_number"
+              type="number"
+              placeholder="e.g. 2"
+              min="0"
+            />
+          </div>
+
+          {/* Room Number */}
+          <div className="grid gap-2">
+            <Label htmlFor="room_number">Room Number</Label>
+            <Input
+              id="room_number"
+              name="room_number"
+              type="number"
+              placeholder="e.g. 201"
+              min="0"
+            />
+          </div>
+
+          {/* Seating Location Type */}
+          <div className="grid gap-2">
+            <Label htmlFor="seating_location">Seating Location Type</Label>
+            <Select name="seating_location">
+              <SelectTrigger>
+                <SelectValue placeholder="Select seating type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cabin">Cabin</SelectItem>
+                <SelectItem value="cubicle">Cubicle</SelectItem>
+                <SelectItem value="workstation">Workstation</SelectItem>
+                <SelectItem value="office">Office</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Specific Location */}
+          <div className="grid gap-2">
+            <Label htmlFor="specific_location">Specific Location</Label>
+            <Input
+              id="specific_location"
+              name="specific_location"
+              placeholder="e.g. Cabin 3, Cubicle A5, Workstation 12"
+            />
+          </div>
+        </div>
+
         {/* Submit */}
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
