@@ -50,6 +50,7 @@ import {
   X
 } from "lucide-react"
 import { useState, useEffect } from "react"
+import { toast } from "sonner"
 import { getBookings, approveBooking, rejectBooking, deleteBooking, getBookingStats } from "./actions"
 
 type Booking = {
@@ -173,12 +174,13 @@ export default function BookingsPage() {
       if (result.success) {
         await fetchBookings()
         await fetchStats()
+        toast.success('Booking approved successfully')
       } else {
-        alert(result.error || 'Failed to approve booking')
+        toast.error(result.error || 'Failed to approve booking')
       }
     } catch (error) {
       console.error('Error approving booking:', error)
-      alert('Failed to approve booking')
+      toast.error('Failed to approve booking')
     } finally {
       setApprovingId(null)
     }
@@ -191,12 +193,13 @@ export default function BookingsPage() {
       if (result.success) {
         await fetchBookings()
         await fetchStats()
+        toast.success('Booking rejected successfully')
       } else {
-        alert(result.error || 'Failed to reject booking')
+        toast.error(result.error || 'Failed to reject booking')
       }
     } catch (error) {
       console.error('Error rejecting booking:', error)
-      alert('Failed to reject booking')
+      toast.error('Failed to reject booking')
     } finally {
       setRejectingId(null)
     }
@@ -212,12 +215,13 @@ export default function BookingsPage() {
         await fetchStats()
         setIsDeleteDialogOpen(false)
         setDeletingBooking(null)
+        toast.success('Booking deleted successfully')
       } else {
-        alert(result.error || 'Failed to delete booking')
+        toast.error(result.error || 'Failed to delete booking')
       }
     } catch (error) {
       console.error('Error deleting booking:', error)
-      alert('Failed to delete booking')
+      toast.error('Failed to delete booking')
     }
   }
 

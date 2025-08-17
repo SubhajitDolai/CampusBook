@@ -38,6 +38,7 @@ import {
 } from "lucide-react"
 import { getUsers, promoteUserToAdmin, demoteUserToFaculty } from "../actions"
 import { useState, useEffect } from "react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/utils/supabase/client"
 
@@ -129,8 +130,9 @@ export default function UsersPage() {
     if (result && result.success) {
       setUsers((prev) => prev.map(u => u.id === userId ? { ...u, role: 'admin' } : u));
       setFilteredUsers((prev) => prev.map(u => u.id === userId ? { ...u, role: 'admin' } : u));
+      toast.success('User promoted to admin successfully');
     } else {
-      alert(result?.error || 'Failed to promote user');
+      toast.error(result?.error || 'Failed to promote user');
     }
     setPromotingId(null);
   };
@@ -142,8 +144,9 @@ export default function UsersPage() {
     if (result && result.success) {
       setUsers((prev) => prev.map(u => u.id === userId ? { ...u, role: 'faculty' } : u));
       setFilteredUsers((prev) => prev.map(u => u.id === userId ? { ...u, role: 'faculty' } : u));
+      toast.success('User demoted to faculty successfully');
     } else {
-      alert(result?.error || 'Failed to demote user');
+      toast.error(result?.error || 'Failed to demote user');
     }
     setDemotingId(null);
   };

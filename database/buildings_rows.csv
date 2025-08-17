@@ -1,0 +1,49 @@
+id,name,code,description,is_active,created_at
+07aaf60d-c6f5-4d0d-98f4-cefed8e99515,CHANAKYA,CK,"Ramcharan School of Leadership,
+School of Business",true,2025-08-12 04:30:57.330348+00
+0af6bc0f-7e31-49d8-88a9-2ff414018fe5,VISHWAMITRA,VR,School of Engineering and Technology,true,2025-08-12 04:53:32.963656+00
+0f4a93e5-0553-465e-89cc-2c09ec552b3a,DHRUV - A,DR,"School of Engineering and Technology,
+School od Health Science and Technology",true,2025-08-12 04:32:38.636337+00
+143b2629-557e-4b99-9027-8d3c3dbafd45,JAMADAGNI,JN,School of Engineering and Technology,true,2025-08-12 04:41:57.98833+00
+1543960e-98d6-403a-ad56-f46a6a2caeb2,AIR MONITORING STATION,C,Air Monitoring Station,true,2025-08-12 04:24:47.547925+00
+1ec1f415-0a6f-4c35-a342-f7856c2e4341,VIVEKANANDA,VK,School of Engineering and Technology,true,2025-08-12 04:54:09.260142+00
+23e05a9b-668e-41a8-8a92-d093da273bed,GAUTAM,GM,School of Engineering and Technology,true,2025-08-12 04:40:25.815422+00
+252b0f45-fdcd-4a12-963d-7ca482a16e4a,KABIR,KR,School of Engineering and Technology,true,2025-08-12 04:42:40.900822+00
+306d2996-3a61-4b76-9392-aff2c2c58715,MAITREYI,MY,"School of Science and Environmental Studies,
+Department of Research and Development",true,2025-08-12 04:46:44.543462+00
+3713d3a7-49c4-466b-9b5d-2820a77ed123,AGASTYA,AT,Central Library,true,2025-08-12 04:23:09.680226+00
+3b67aa87-e11f-4b53-b006-25a022d3770f,DHRUV - PHARMACY,DR-P,"School of Health Science and Technology,
+School of Consciousness",true,2025-08-12 04:34:50.207872+00
+43b02b9f-9167-41c1-9d27-006b60fcdb76,SHRIRAJ,SJ,Main Canteen,true,2025-08-12 04:51:04.597544+00
+497ee87e-246b-43ad-8f52-4b2d73d6d563,VISHWAKARMA,VM,School of Design,true,2025-08-12 04:52:55.320122+00
+50361f54-40e7-4754-90ef-b8990a395484,MAHAVEER,MR,School of Engineering and Technology,true,2025-08-12 04:47:23.784575+00
+63b8917d-ddd1-49a6-8b91-493a39c72990,PRAYAG,PG,School of Engineering and Technology,true,2025-08-12 04:48:19.612033+00
+6cff2fd8-bb31-47ab-8498-de5fc474249f,KASHYAP,KS,"School of Engineering and Technology,
+School of Science and Environment Studies,
+Ramcharan School of Business,
+School of Business,
+TBI Innovation",true,2025-08-12 04:45:00.560949+00
+6d12ade9-3a84-42d3-bca6-4ac8c03af07c,ABRAHAM,AM,Girls Hostel,true,2025-08-12 04:22:21.40236+00
+8169b223-2d9b-4d0d-9f20-fb1f0ff54925,DNYANESHWAR,DW,"School of Government,
+School of Science and Environment Studies",true,2025-08-12 04:37:01.970778+00
+8c606b87-4104-49bb-b20d-468c3eb17923,VYAS,VY,"School of Computer Science and Engineering,
+School of Liberal Arts,
+School of Business",true,2025-08-12 04:56:11.032826+00
+9a3a4999-9b0f-4519-a38d-3f87ab5e3fc4,NANAK,NK,Guest House,true,2025-08-12 04:47:50.716116+00
+9df2f6de-5404-4974-9331-8a5d79ec93af,ATRI,AR,School of Engineering and Technology,true,2025-08-12 04:26:49.512979+00
+a452dea8-ac64-44ea-8780-e486682cc24b,GARGI,GG,"School of Engineering and Technology,
+School of Liberal Arts",true,2025-08-12 04:39:28.259228+00
+af623ded-eade-4d00-a927-9d23e1da1c4f,SECURITY VIGILANCE,B,Security,true,2025-08-12 04:50:26.723803+00
+c2cd0170-9b2e-4354-984a-01309b084b55,AVANTI,AI,School of Economics and Commerce,true,2025-08-12 04:27:43.064528+00
+c786553d-fe99-4c42-b42d-fcef939476d3,AKHADA,AK,Akhada,true,2025-08-12 04:57:58.340317+00
+c9d8ab2a-d543-4e56-b83a-d667da55b399,ARYABHAT,AB,"School of Engineering and Technology,
+School of Liberal Arts",true,2025-08-12 04:26:00.966983+00
+db25c05d-9ec3-460c-812a-5970d855a023,SARASWATI,ST,"School of Law,
+School of Design,
+School of Liberal Arts",true,2025-08-12 04:49:32.584803+00
+e33ca139-eda0-4710-9fcc-72178f32e188,GANGA,GN,"School of Liberal Art,
+School of Business",true,2025-08-12 04:38:14.260439+00
+eb2405c3-f57b-4f84-a588-314e895d8166,BHARDWAJ,BJ,"Department of Research and Development,
+School of Engineering and Technology,
+Student Council,",true,2025-08-12 04:29:24.844597+00
+fa1893b7-b130-4a8d-a85c-9ec9a3d53f6d,VASHISHTA,VT,School of Engineering and Technology,true,2025-08-12 04:51:43.079857+00

@@ -9,11 +9,26 @@ const members = [
         linkedin: 'https://www.linkedin.com/in/ganesh-pokale-b67b487/',
     },
     {
+        name: 'Mr. Nilesh Dhokane',
+        role: 'Deputy Registrar',
+        avatar: '/team/nilesh.webp',
+        linkedin: 'https://www.linkedin.com/in/nilesh-dhokane/',
+    },
+    {
         name: 'Mr. Kunal Marathe',
         role: 'Asst. Registrar',
         avatar: '/team/kunal.webp',
         linkedin: 'https://www.linkedin.com/in/kunal-marathe-97aba15b/',
     },
+    {
+        name: 'Mr. Ranjeet Shinde',
+        role: 'Sr. Executive',
+        avatar: '/team/ranjeet.webp',
+        linkedin: 'https://www.linkedin.com/in/ranjeet-shinde/',
+    },
+]
+
+const leaders = [
     {
         name: 'Subhajit Dolai',
         role: 'Creator & Developer',
@@ -22,34 +37,11 @@ const members = [
     },
     {
         name: 'Swaraj Patil',
-        role: 'Software Tester',
+        role: 'Frontend & QAT',
         avatar: '/team/swaraj.webp',
         linkedin: 'https://www.linkedin.com/in/swaraj-patil-393934248/',
     },
 ]
-
-// const leaders = [
-//     {
-//         name: 'Subhajit Dolai',
-//         role: 'Full Stack developer',
-//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-//     },
-//     {
-//         name: 'Subhajit Dolai',
-//         role: 'System Design',
-//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-//     },
-//     {
-//         name: 'Subhajit Dolai',
-//         role: 'Devops',
-//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-//     },
-//     {
-//         name: 'Subhajit Dolai',
-//         role: 'Cyber security',
-//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-//     },
-// ]
 
 // const workers = [
 //     {
@@ -77,7 +69,7 @@ const members = [
 export default function TeamSection() {
     // Track loading state for each image
     const [loadedImages, setLoadedImages] = useState(Array(members.length).fill(false))
-    // const [loadedLeaders, setLoadedLeaders] = useState(Array(leaders.length).fill(false))
+    const [loadedLeaders, setLoadedLeaders] = useState(Array(leaders.length).fill(false))
     // const [loadedWorkers, setLoadedWorkers] = useState(Array(workers.length).fill(false))
 
     const handleImageLoad = (index: number) => {
@@ -87,13 +79,13 @@ export default function TeamSection() {
             return updated
         })
     }
-    // const handleLeaderImageLoad = (index: number) => {
-    //     setLoadedLeaders((prev) => {
-    //         const updated = [...prev]
-    //         updated[index] = true
-    //         return updated
-    //     })
-    // }
+    const handleLeaderImageLoad = (index: number) => {
+        setLoadedLeaders((prev) => {
+            const updated = [...prev]
+            updated[index] = true
+            return updated
+        })
+    }
     // const handleWorkerImageLoad = (index: number) => {
     //     setLoadedWorkers((prev) => {
     //         const updated = [...prev]
@@ -139,11 +131,17 @@ export default function TeamSection() {
                     </div>
                 </div>
 
-                {/* <div className="mt-6">
-                    <h3 className="mb-6 text-lg font-medium">Engineering</h3>
+                <div className="mt-6">
+                    <h3 className="mb-6 text-lg font-medium">Development Team</h3>
                     <div data-rounded="full" className="grid grid-cols-2 gap-4 border-t py-6 md:grid-cols-4">
                         {leaders.map((member, index) => (
-                            <div key={index}>
+                            <a
+                                key={index}
+                                href={member.linkedin}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:opacity-90 transition-opacity"
+                            >
                                 <div className="bg-background size-20 rounded-full border p-0.5 shadow shadow-zinc-950/5 relative">
 
                                     {!loadedLeaders[index] && (
@@ -159,10 +157,10 @@ export default function TeamSection() {
                                 </div>
                                 <span className="mt-2 block text-sm">{member.name}</span>
                                 <span className="text-muted-foreground block text-xs">{member.role}</span>
-                            </div>
+                            </a>
                         ))}
                     </div>
-                </div> */}
+                </div>
 
                 {/* <div className="mt-6">
                     <h3 className="mb-6 text-lg font-medium">Administration</h3>

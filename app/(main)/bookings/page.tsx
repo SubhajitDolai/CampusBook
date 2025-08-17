@@ -22,6 +22,7 @@ import { isUpcomingBooking, isPastBooking } from './utils'
 import { BookingCard } from './components/BookingCard'
 import { LoadingSpinner } from './components/LoadingSpinner'
 import { ErrorDisplay } from './components/ErrorDisplay'
+import { toast } from 'sonner'
 
 
 
@@ -58,12 +59,13 @@ export default function BookingsPage() {
         // Refresh bookings after successful cancellation
         const updatedBookings = await getUserBookings()
         setBookings(updatedBookings)
+        toast.success('Booking cancelled successfully')
       } else {
-        alert(`Failed to cancel booking: ${result.error}`)
+        toast.error(`Failed to cancel booking: ${result.error}`)
       }
     } catch (error) {
       console.error('Error cancelling booking:', error)
-      alert('An error occurred while cancelling the booking')
+      toast.error('An error occurred while cancelling the booking')
     }
   }
 

@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { createBooking } from '../actions'
 import React from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 interface BookingFormProps {
   resourceId: string
@@ -28,19 +29,19 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
     e.preventDefault()
     
     if (!startDate || !endDate || !startTime || !endTime || !reason) {
-      alert('Please fill in all fields')
+      toast.error('Please fill in all fields')
       return
     }
 
     // Validate that end date is not before start date
     if (endDate < startDate) {
-      alert('End date cannot be before start date')
+      toast.error('End date cannot be before start date')
       return
     }
 
     // Validate that end time is not before start time for same day bookings
     if (startDate.getTime() === endDate.getTime() && endTime <= startTime) {
-      alert('End time must be after start time')
+      toast.error('End time must be after start time')
       return
     }
 
@@ -60,15 +61,15 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
       const result = await createBooking(formData)
 
       if (result.error) {
-        alert(`Booking failed: ${result.error}`)
+        toast.error(`Booking failed: ${result.error}`)
       } else {
-        alert('Booking created successfully!')
+        toast.success('Booking created successfully!')
         // Redirect to bookings page or show success message
         router.push('/bookings')
       }
     } catch (error) {
       console.error('Booking error:', error)
-      alert('An error occurred while creating the booking')
+      toast.error('An error occurred while creating the booking')
     } finally {
       setIsSubmitting(false)
     }
