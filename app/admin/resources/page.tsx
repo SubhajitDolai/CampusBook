@@ -47,7 +47,8 @@ import {
   Edit,
   Trash2,
   CheckCircle,
-  Loader2
+  Loader2,
+  X
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { getResources, addResource, updateResource, deleteResource, getBuildings, getFloors } from "./actions"
@@ -92,6 +93,8 @@ export default function ResourcesPage() {
   const [buildings, setBuildings] = useState<Building[]>([])
   const [floors, setFloors] = useState<Floor[]>([])
   const [searchTerm, setSearchTerm] = useState("")
+  const [selectedBuilding, setSelectedBuilding] = useState<string>("all")
+  const [selectedFloor, setSelectedFloor] = useState<string>("all")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editingResource, setEditingResource] = useState<Resource | null>(null)
@@ -152,13 +155,23 @@ export default function ResourcesPage() {
   }
 
   useEffect(() => {
-    const filtered = resources.filter(resource => 
+    let filtered = resources.filter(resource => 
       resource.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       resource.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       resource.buildings?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       resource.buildings?.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       resource.floors?.floor_number?.toString().includes(searchTerm)
     )
+    
+    // Apply building filter if selected
+    if (selectedBuilding && selectedBuilding !== "all") {
+      filtered = filtered.filter(resource => resource.building_id === selectedBuilding)
+    }
+    
+    // Apply floor filter if selected
+    if (selectedFloor && selectedFloor !== "all") {
+      filtered = filtered.filter(resource => resource.floor_id === selectedFloor)
+    }
     
     // Sort by building name first, then by floor number, then by resource name
     const sorted = filtered.sort((a, b) => {
@@ -180,7 +193,7 @@ export default function ResourcesPage() {
     })
     
     setFilteredResources(sorted)
-  }, [searchTerm, resources])
+  }, [searchTerm, selectedBuilding, selectedFloor, resources])
 
   const validateForm = () => {
     const errors = {
@@ -342,6 +355,12 @@ export default function ResourcesPage() {
 
   const getFloorsForBuilding = (buildingId: string) => {
     return floors.filter(floor => floor.building_id === buildingId)
+  }
+
+  const clearFilters = () => {
+    setSearchTerm("")
+    setSelectedBuilding("all")
+    setSelectedFloor("all")
   }
 
   return (
@@ -641,15 +660,62 @@ export default function ResourcesPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="mb-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search resources by name, type, building, or floor..."
-                    className="pl-10"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
+              <div className="mb-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:gap-4 items-stretch sm:items-center">
+                  <div className="relative flex-1 min-w-0">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search resources by name, type, building, or floor..."
+                      className="pl-10 h-10"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <div className="w-full sm:w-48">
+                    <Select value={selectedBuilding} onValueChange={(value) => {
+                      setSelectedBuilding(value)
+                      setSelectedFloor("all") // Reset floor when building changes
+                    }}>
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Filter by building" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Buildings</SelectItem>
+                        {buildings.map((building) => (
+                          <SelectItem key={building.id} value={building.id}>
+                            {building.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="w-full sm:w-48">
+                    <Select value={selectedFloor} onValueChange={setSelectedFloor} disabled={selectedBuilding === "all"}>
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Filter by floor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Floors</SelectItem>
+                        {selectedBuilding !== "all" && getFloorsForBuilding(selectedBuilding).map((floor) => (
+                          <SelectItem key={floor.id} value={floor.id}>
+                            Floor {floor.floor_number} {floor.name ? `(${floor.name})` : ''}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {(searchTerm || selectedBuilding !== "all" || selectedFloor !== "all") && (
+                    <div>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={clearFilters}
+                        className="h-10 w-10"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
 

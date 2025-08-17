@@ -47,7 +47,8 @@ import {
   Trash2,
   CheckCircle,
   XCircle,
-  Loader2
+  Loader2,
+  X
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { getFloors, addFloor, updateFloor, deleteFloor, getBuildings } from "./actions"
@@ -76,6 +77,7 @@ export default function FloorsPage() {
   const [filteredFloors, setFilteredFloors] = useState<Floor[]>([])
   const [buildings, setBuildings] = useState<Building[]>([])
   const [searchTerm, setSearchTerm] = useState("")
+  const [selectedBuilding, setSelectedBuilding] = useState<string>("all")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editingFloor, setEditingFloor] = useState<Floor | null>(null)
@@ -120,12 +122,17 @@ export default function FloorsPage() {
   }
 
   useEffect(() => {
-    const filtered = floors.filter(floor => 
+    let filtered = floors.filter(floor => 
       floor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       floor.floor_number.toString().includes(searchTerm) ||
       floor.buildings?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       floor.buildings?.code?.toLowerCase().includes(searchTerm.toLowerCase())
     )
+    
+    // Apply building filter if selected
+    if (selectedBuilding && selectedBuilding !== "all") {
+      filtered = filtered.filter(floor => floor.building_id === selectedBuilding)
+    }
     
     // Sort by building name first, then by floor number
     const sorted = filtered.sort((a, b) => {
@@ -140,7 +147,7 @@ export default function FloorsPage() {
     })
     
     setFilteredFloors(sorted)
-  }, [searchTerm, floors])
+  }, [searchTerm, selectedBuilding, floors])
 
   const validateForm = () => {
     const errors = {
@@ -191,6 +198,11 @@ export default function FloorsPage() {
     } finally {
       setIsAddingFloor(false)
     }
+  }
+
+  const clearFilters = () => {
+    setSearchTerm("")
+    setSelectedBuilding("all")
   }
 
   const handleEditFloor = async () => {
@@ -452,15 +464,44 @@ export default function FloorsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="mb-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search floors by name, number, or building..."
-                    className="pl-10"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
+              <div className="mb-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:gap-4 items-stretch sm:items-center">
+                  <div className="relative flex-1 min-w-0">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search floors by name, number, or building..."
+                      className="pl-10 h-10"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <div className="w-full sm:w-48">
+                    <Select value={selectedBuilding} onValueChange={setSelectedBuilding}>
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Filter by building" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Buildings</SelectItem>
+                        {buildings.map((building) => (
+                          <SelectItem key={building.id} value={building.id}>
+                            {building.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="w-10">
+                    {(searchTerm || selectedBuilding !== "all") && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={clearFilters}
+                        className="h-10 w-10"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
 
