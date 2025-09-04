@@ -16,16 +16,15 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { MapPin, Users, Clock } from 'lucide-react'
-import Link from 'next/link'
 
 
 import { getBuildingDetails, getBuildingResources, getResourceTypes, getFloorsByBuilding } from './actions'
 import { notFound } from 'next/navigation'
 import ResourceFilters from './components/ResourceFilters'
 import React from 'react'
+import { LoadingBarButton } from '../../LoadingBarButton'
 
 interface Building {
   id: string
@@ -208,11 +207,9 @@ export default function BuildingResourcesPage({ params }: { params: Promise<{ bu
                       <Clock className="h-4 w-4" />
                       <span>{resource.type}</span>
                     </div>
-                    <Link href={`/buildings/${resolvedParams.buildingId}/resources/${resource.id}`}>
-                      <Button className="w-full">
-                        {resource.status === 'Available' ? 'Book Now' : 'View Details'}
-                      </Button>
-                    </Link>
+                    <LoadingBarButton href={`/buildings/${resolvedParams.buildingId}/resources/${resource.id}`} className="w-full">
+                      {resource.status === 'Available' ? 'Book Now' : 'View Details'}
+                    </LoadingBarButton>
                   </div>
                 </CardContent>
               </Card>

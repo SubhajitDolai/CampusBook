@@ -11,14 +11,11 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search, Filter, MapPin, Users, Clock, Building2 } from 'lucide-react'
-import Link from 'next/link'
+import { Search, Filter, Building2 } from 'lucide-react'
 import { getAllResources, getResourceTypes, getBuildings } from './actions'
+import { ResourceCard } from './components/ResourceCard'
 
 export default async function ResourcesPageServer() {
   // Fetch data server-side
@@ -99,46 +96,7 @@ export default async function ResourcesPageServer() {
           {/* Resources Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {resources.map((resource) => (
-              <Card key={resource.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{resource.name}</CardTitle>
-                      <CardDescription>{resource.description}</CardDescription>
-                    </div>
-                    <Badge 
-                      variant={resource.status === 'Available' ? 'default' : 'secondary'}
-                    >
-                      {resource.status}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Building2 className="h-4 w-4" />
-                      <span>{resource.building.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      <span>{resource.floor.name || `Floor ${resource.floor.floor_number}`}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Users className="h-4 w-4" />
-                      <span>Capacity: {resource.capacity || 'N/A'}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4" />
-                      <span>{resource.type}</span>
-                    </div>
-                    <Link href={`/buildings/${resource.building.id}/resources/${resource.id}`}>
-                      <Button className="w-full">
-                        {resource.status === 'Available' ? 'Book Now' : 'View Details'}
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
+              <ResourceCard key={resource.id} resource={resource} />
             ))}
           </div>
 

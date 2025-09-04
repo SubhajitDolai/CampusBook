@@ -2,7 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Calendar, Clock, MapPin, ArrowRight } from 'lucide-react'
-import Link from 'next/link'
+import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
+import { useRouter } from 'next/navigation'
 import { RecentBooking } from '../actions'
 
 interface RecentBookingsCardProps {
@@ -10,6 +11,14 @@ interface RecentBookingsCardProps {
 }
 
 export function RecentBookingsCard({ bookings }: RecentBookingsCardProps) {
+  const { start } = useGlobalLoadingBar()
+  const router = useRouter()
+
+  const handleNavigation = (href: string) => {
+    start()
+    router.push(href)
+  }
+
   // Sort bookings by most recent first (by created_at time)
   const sortedBookings = [...bookings].sort((a, b) => {
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -57,12 +66,14 @@ export function RecentBookingsCard({ bookings }: RecentBookingsCardProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Recent Bookings</CardTitle>
-          <Link href="/bookings">
-            <Button variant="ghost" size="sm">
-              View All
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => handleNavigation('/bookings')}
+          >
+            View All
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -70,11 +81,13 @@ export function RecentBookingsCard({ bookings }: RecentBookingsCardProps) {
           {bookings.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No recent bookings</p>
-              <Link href="/resources">
-                <Button className="mt-2" size="sm">
-                  Browse Resources
-                </Button>
-              </Link>
+              <Button 
+                className="mt-2" 
+                size="sm"
+                onClick={() => handleNavigation('/resources')}
+              >
+                Browse Resources
+              </Button>
             </div>
           ) : (
             sortedBookings.map((booking) => (

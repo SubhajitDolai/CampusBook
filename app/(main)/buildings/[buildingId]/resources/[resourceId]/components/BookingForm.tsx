@@ -10,6 +10,7 @@ import { createBooking } from '../actions'
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 interface BookingFormProps {
   resourceId: string
@@ -17,6 +18,7 @@ interface BookingFormProps {
 
 export default function BookingForm({ resourceId }: BookingFormProps) {
   const router = useRouter()
+  const { start } = useGlobalLoadingBar()
   const [startDate, setStartDate] = React.useState<Date>()
   const [endDate, setEndDate] = React.useState<Date>()
   const [startTime, setStartTime] = React.useState('')
@@ -64,7 +66,8 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
         toast.error(`Booking failed: ${result.error}`)
       } else {
         toast.success('Booking created successfully!')
-        // Redirect to bookings page or show success message
+        // Start loading bar and redirect to bookings page
+        start()
         router.push('/bookings')
       }
     } catch (error) {

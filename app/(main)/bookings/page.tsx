@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import Link from 'next/link'
 import React from 'react'
 import { getUserBookings, cancelBooking, BookingWithDetails } from './actions'
 import { isUpcomingBooking, isPastBooking } from './utils'
@@ -23,6 +22,8 @@ import { BookingCard } from './components/BookingCard'
 import { LoadingSpinner } from './components/LoadingSpinner'
 import { ErrorDisplay } from './components/ErrorDisplay'
 import { toast } from 'sonner'
+import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
+import { useRouter } from 'next/navigation'
 
 
 
@@ -30,6 +31,14 @@ export default function BookingsPage() {
   const [bookings, setBookings] = React.useState<BookingWithDetails[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
+
+  const { start } = useGlobalLoadingBar()
+  const router = useRouter()
+
+  const handleNavigation = (href: string) => {
+    start()
+    router.push(href)
+  }
 
   // Fetch bookings on component mount
   React.useEffect(() => {
@@ -118,9 +127,12 @@ export default function BookingsPage() {
                 {upcomingBookings.length === 0 ? (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">No upcoming bookings found.</p>
-                    <Link href="/resources">
-                      <Button className="mt-4">Browse Resources</Button>
-                    </Link>
+                    <Button 
+                      className="mt-4"
+                      onClick={() => handleNavigation('/resources')}
+                    >
+                      Browse Resources
+                    </Button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
