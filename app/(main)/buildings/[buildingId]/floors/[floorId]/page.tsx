@@ -14,13 +14,12 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Layers, MapPin, Users, Building2 } from 'lucide-react'
-import Link from 'next/link'
 import React from 'react'
 import { getBuildingDetails, getFloorWithStats, getResourcesWithStatus } from './actions'
 import { notFound } from 'next/navigation'
+import { LoadingBarButton } from '../../../LoadingBarButton'
 
 interface Building {
   id: string
@@ -167,11 +166,9 @@ export default async function FloorDetailsPage({ params }: { params: Promise<{ b
                       <Users className="h-4 w-4" />
                       <span>Capacity: {resource.capacity}</span>
                     </div>
-                    <Link href={`/buildings/${buildingId}/floors/${floorId}/resources/${resource.id}`}>
-                      <Button className="w-full">
-                        {resource.status === 'Available' ? 'Book Now' : 'View Details'}
-                      </Button>
-                    </Link>
+                    <LoadingBarButton href={`/buildings/${buildingId}/floors/${floorId}/resources/${resource.id}`} className="w-full">
+                      {resource.status === 'Available' ? 'Book Now' : 'View Details'}
+                    </LoadingBarButton>
                   </div>
                 </CardContent>
               </Card>

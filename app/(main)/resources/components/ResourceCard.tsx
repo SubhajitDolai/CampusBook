@@ -4,14 +4,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { MapPin, Users, Clock, Building2 } from 'lucide-react'
-import Link from 'next/link'
 import { ResourceWithDetails } from '../actions'
+import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
+import { useRouter } from 'next/navigation'
 
 interface ResourceCardProps {
   resource: ResourceWithDetails
 }
 
 export function ResourceCard({ resource }: ResourceCardProps) {
+  const { start } = useGlobalLoadingBar()
+  const router = useRouter()
+
+  const handleNavigation = (href: string) => {
+    start()
+    router.push(href)
+  }
+
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader>
@@ -45,11 +54,12 @@ export function ResourceCard({ resource }: ResourceCardProps) {
             <Clock className="h-4 w-4" />
             <span>{resource.type}</span>
           </div>
-          <Link href={`/buildings/${resource.building.id}/resources/${resource.id}`}>
-            <Button className="w-full">
-              {resource.status === 'Available' ? 'Book Now' : 'View Details'}
-            </Button>
-          </Link>
+          <Button 
+            className="w-full"
+            onClick={() => handleNavigation(`/buildings/${resource.building.id}/resources/${resource.id}`)}
+          >
+            {resource.status === 'Available' ? 'Book Now' : 'View Details'}
+          </Button>
         </div>
       </CardContent>
     </Card>

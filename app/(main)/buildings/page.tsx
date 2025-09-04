@@ -12,10 +12,9 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Building2, MapPin, Users } from 'lucide-react'
-import Link from 'next/link'
 import { getBuildingsWithStats } from './actions'
+import { LoadingBarButton } from './LoadingBarButton'
 
 export default async function BuildingsPage() {
   // Fetch real data from database
@@ -74,11 +73,9 @@ export default async function BuildingsPage() {
                       <Users className="h-4 w-4" />
                       <span>{building.totalResources} resources available</span>
                     </div>
-                    <Link href={`/buildings/${building.id}`}>
-                      <Button className="w-full mt-4">
-                        View Building
-                      </Button>
-                    </Link>
+                    <LoadingBarButton href={`/buildings/${building.id}`} className="w-full mt-4">
+                      View Building
+                    </LoadingBarButton>
                   </div>
                 </CardContent>
               </Card>

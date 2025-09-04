@@ -14,13 +14,12 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { MapPin, Users, Layers } from 'lucide-react'
-import Link from 'next/link'
 import React from 'react'
 import { getBuildingWithStats, getFloorsWithStats } from '../actions'
 import { notFound } from 'next/navigation'
+import { LoadingBarButton } from '../LoadingBarButton'
 
 interface Building {
   id: string
@@ -142,11 +141,9 @@ export default async function BuildingDetailsPage({ params }: { params: Promise<
                       <span>Floor {floor.floor_number}</span>
                     </div>
                     <div className="flex gap-2">
-                      <Link href={`/buildings/${buildingId}/floors/${floor.id}`} className="flex-1">
-                        <Button className="w-full">
-                          View Floor
-                        </Button>
-                      </Link>
+                      <LoadingBarButton href={`/buildings/${buildingId}/floors/${floor.id}`} className="w-full">
+                        View Floor
+                      </LoadingBarButton>
                     </div>
                   </div>
                 </CardContent>
@@ -155,11 +152,9 @@ export default async function BuildingDetailsPage({ params }: { params: Promise<
           </div>
 
           <div className="mt-8">
-            <Link href={`/buildings/${buildingId}/resources`}>
-              <Button variant="outline" className="w-full md:w-auto">
-                View All Resources in Building
-              </Button>
-            </Link>
+            <LoadingBarButton href={`/buildings/${buildingId}/resources`} className="w-full md:w-auto" variant="outline">
+              View All Resources in Building
+            </LoadingBarButton>
           </div>
         </div>
       </SidebarInset>
