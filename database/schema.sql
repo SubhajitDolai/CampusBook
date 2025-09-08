@@ -10,6 +10,9 @@ CREATE TYPE resource_type AS ENUM ('classroom', 'lab', 'hall', 'auditorium', 'ot
 CREATE TYPE booking_status AS ENUM ('pending', 'approved', 'rejected', 'cancelled');
 CREATE TYPE gender AS ENUM ('male', 'female', 'other');
 
+-- Resource status enum
+CREATE TYPE resource_status AS ENUM ('Available', 'In Use', 'Maintenance', 'Unavailable');
+
 -- Users table (extends auth.users)
 CREATE TABLE profiles (
   id UUID REFERENCES auth.users(id) PRIMARY KEY,
@@ -63,7 +66,8 @@ CREATE TABLE resources (
   description TEXT,
   equipment TEXT,
   is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  status resource_status NOT NULL DEFAULT 'Available'
 );
 
 -- Bookings table

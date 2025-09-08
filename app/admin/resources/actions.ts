@@ -44,6 +44,7 @@ export async function addResource(formData: FormData) {
     const capacity = formData.get('capacity') as string
     const description = formData.get('description') as string
     const equipment = formData.get('equipment') as string
+    const status = formData.get('status') as string
     const is_active = formData.get('is_active') === 'true'
 
     if (!building_id || !floor_id || !name || !type) {
@@ -72,6 +73,7 @@ export async function addResource(formData: FormData) {
         capacity: capacity ? parseInt(capacity) : null,
         description: description.trim() || null,
         equipment: equipment.trim() || null,
+        status: status || 'Available',
         is_active
       })
       .select()
@@ -100,6 +102,7 @@ export async function updateResource(id: string, formData: FormData) {
     const capacity = formData.get('capacity') as string
     const description = formData.get('description') as string
     const equipment = formData.get('equipment') as string
+    const status = formData.get('status') as string
     const is_active = formData.get('is_active') === 'true'
 
     if (!building_id || !floor_id || !name || !type) {
@@ -129,6 +132,7 @@ export async function updateResource(id: string, formData: FormData) {
         capacity: capacity ? parseInt(capacity) : null,
         description: description.trim() || null,
         equipment: equipment.trim() || null,
+        status: status || 'Available',
         is_active
       })
       .eq('id', id)

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { calculateDynamicStatus, type Booking } from '@/lib/dynamic-status'
 
 export async function getBuildingDetails(buildingId: string) {
   const supabase = await createClient()
@@ -48,6 +49,7 @@ export async function getBuildingResources(buildingId: string) {
         equipment,
         is_active,
         created_at,
+        status,
         floors (
           id,
           floor_number,
@@ -63,13 +65,48 @@ export async function getBuildingResources(buildingId: string) {
       return []
     }
 
-    // Enhance resources with floor information and status
+    if (!resources) {
+      return []
+    }
+
+    // Get all resource IDs to fetch their bookings
+    const resourceIds = resources.map(r => r.id)
+    
+    // Fetch active bookings for all resources (only approved bookings)
+    const { data: bookings, error: bookingsError } = await supabase
+      .from('bookings')
+      .select('resource_id, start_date, end_date, start_time, end_time, status')
+      .in('resource_id', resourceIds)
+      .eq('status', 'approved')  // Only approved bookings affect resource status
+      .gte('end_date', new Date().toISOString().split('T')[0])
+
+    if (bookingsError) {
+      console.error('Error fetching bookings:', bookingsError)
+    }
+
+    // Group bookings by resource_id
+    const bookingsByResource = new Map<string, Booking[]>()
+    bookings?.forEach(booking => {
+      if (!bookingsByResource.has(booking.resource_id)) {
+        bookingsByResource.set(booking.resource_id, [])
+      }
+      bookingsByResource.get(booking.resource_id)?.push(booking)
+    })
+
+    // Enhance resources with floor information and dynamic status
     const enhancedResources = resources?.map(resource => {
       const floor = Array.isArray(resource.floors) ? resource.floors[0] : resource.floors
+      
+      // Get bookings for this resource
+      const resourceBookings = bookingsByResource.get(resource.id) || []
+      
+      // Calculate dynamic status
+      const dynamicStatus = calculateDynamicStatus(resource.status, resourceBookings)
+      
       return {
         ...resource,
         floor: floor?.name || `Floor ${floor?.floor_number}`,
-        status: 'Available', // Default status - will be enhanced with booking logic later
+        status: dynamicStatus,
         equipmentList: resource.equipment ? resource.equipment.split(',').map((item: string) => item.trim()) : []
       }
     }) || []
@@ -151,6 +188,7 @@ export async function searchBuildingResources(buildingId: string, searchTerm?: s
         equipment,
         is_active,
         created_at,
+        status,
         floors (
           id,
           floor_number,
@@ -177,13 +215,48 @@ export async function searchBuildingResources(buildingId: string, searchTerm?: s
       return []
     }
 
-    // Enhance resources with floor information and status
+    if (!resources) {
+      return []
+    }
+
+    // Get all resource IDs to fetch their bookings
+    const resourceIds = resources.map(r => r.id)
+    
+    // Fetch active bookings for all resources (only approved bookings)
+    const { data: bookings, error: bookingsError } = await supabase
+      .from('bookings')
+      .select('resource_id, start_date, end_date, start_time, end_time, status')
+      .in('resource_id', resourceIds)
+      .eq('status', 'approved')  // Only approved bookings affect resource status
+      .gte('end_date', new Date().toISOString().split('T')[0])
+
+    if (bookingsError) {
+      console.error('Error fetching bookings:', bookingsError)
+    }
+
+    // Group bookings by resource_id
+    const bookingsByResource = new Map<string, Booking[]>()
+    bookings?.forEach(booking => {
+      if (!bookingsByResource.has(booking.resource_id)) {
+        bookingsByResource.set(booking.resource_id, [])
+      }
+      bookingsByResource.get(booking.resource_id)?.push(booking)
+    })
+
+    // Enhance resources with floor information and dynamic status
     let enhancedResources = resources?.map(resource => {
       const floor = Array.isArray(resource.floors) ? resource.floors[0] : resource.floors
+      
+      // Get bookings for this resource
+      const resourceBookings = bookingsByResource.get(resource.id) || []
+      
+      // Calculate dynamic status
+      const dynamicStatus = calculateDynamicStatus(resource.status, resourceBookings)
+      
       return {
         ...resource,
         floor: floor?.name || `Floor ${floor?.floor_number}`,
-        status: 'Available', // Default status - will be enhanced with booking logic later
+        status: dynamicStatus,
         equipmentList: resource.equipment ? resource.equipment.split(',').map((item: string) => item.trim()) : []
       }
     }) || []

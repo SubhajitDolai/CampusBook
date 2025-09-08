@@ -94,7 +94,11 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
                 selected={startDate}
                 onSelect={setStartDate}
                 className="rounded-md border"
-                disabled={(date) => date < new Date()}
+                disabled={(date) => {
+                  const today = new Date()
+                  today.setHours(0, 0, 0, 0) // Set to start of today
+                  return date < today
+                }}
               />
             </div>
 
@@ -105,7 +109,11 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
                 selected={endDate}
                 onSelect={setEndDate}
                 className="rounded-md border"
-                disabled={(date) => date < new Date()}
+                disabled={(date) => {
+                  const today = new Date()
+                  today.setHours(0, 0, 0, 0) // Set to start of today
+                  return date < today
+                }}
               />
             </div>
           </div>
