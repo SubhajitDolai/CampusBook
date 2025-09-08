@@ -15,6 +15,9 @@ interface Booking {
   status: 'pending' | 'approved' | 'rejected' | 'cancelled'
   created_at: string
   weekdays?: number[]
+  faculty_name?: string
+  subject?: string
+  class_name?: string
   profiles: {
     id: string
     name: string
@@ -169,6 +172,30 @@ export default function ExistingBookings({ bookings }: ExistingBookingsProps) {
                   <span className="text-muted-foreground">
                     Days: {formatWeekdays(booking.weekdays)}
                   </span>
+                </div>
+              )}
+
+              {/* Academic Information */}
+              {(booking.subject || booking.class_name || booking.faculty_name) && (
+                <div className="bg-muted/50 p-3 rounded-md space-y-2">
+                  {booking.subject && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Subject:</span>
+                      <span className="text-foreground">{booking.subject}</span>
+                    </div>
+                  )}
+                  {booking.class_name && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Class:</span>
+                      <span className="text-foreground">{booking.class_name}</span>
+                    </div>
+                  )}
+                  {booking.faculty_name && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Faculty:</span>
+                      <span className="text-foreground">{booking.faculty_name}</span>
+                    </div>
+                  )}
                 </div>
               )}
 

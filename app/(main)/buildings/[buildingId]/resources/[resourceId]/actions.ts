@@ -200,8 +200,11 @@ export async function createBooking(formData: FormData) {
     const endTime = formData.get('endTime') as string
     const reason = formData.get('reason') as string
     const weekdaysJson = formData.get('weekdays') as string
+    const facultyName = formData.get('facultyName') as string
+    const subject = formData.get('subject') as string
+    const className = formData.get('className') as string
     
-    if (!resourceId || !startDate || !endDate || !startTime || !endTime || !reason || !weekdaysJson) {
+    if (!resourceId || !startDate || !endDate || !startTime || !endTime || !reason || !weekdaysJson || !subject || !className) {
       return { error: 'All fields are required' }
     }
 
@@ -247,6 +250,9 @@ export async function createBooking(formData: FormData) {
       end_time: endTime,
       reason: reason,
       weekdays: weekdays,
+      faculty_name: facultyName,
+      subject: subject,
+      class_name: className,
       status: 'pending'
     })
 
@@ -261,6 +267,9 @@ export async function createBooking(formData: FormData) {
         end_time: endTime,
         reason: reason,
         weekdays: weekdays,
+        faculty_name: facultyName,
+        subject: subject,
+        class_name: className,
         status: 'pending'
       })
       .select()
@@ -299,7 +308,10 @@ export async function getResourceBookings(resourceId: string) {
         status,
         created_at,
         user_id,
-        weekdays
+        weekdays,
+        faculty_name,
+        subject,
+        class_name
       `)
       .eq('resource_id', resourceId)
       .gte('end_date', new Date().toISOString().split('T')[0]) // Only show current and future bookings

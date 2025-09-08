@@ -87,6 +87,26 @@ export function BookingCard({ booking, onCancel, showCancelButton = false }: Boo
           <div>
             <CardTitle className="text-lg">{booking.resources.name}</CardTitle>
             <CardDescription>{booking.reason}</CardDescription>
+            {/* Academic Information */}
+            {(booking.subject || booking.faculty_name || booking.class_name) && (
+              <div className="flex items-center gap-2 mt-2">
+                {booking.subject && (
+                  <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs">
+                    {booking.subject}
+                  </span>
+                )}
+                {booking.faculty_name && (
+                  <span className="text-xs text-muted-foreground">
+                    Faculty: {booking.faculty_name}
+                  </span>
+                )}
+                {booking.class_name && (
+                  <span className="text-xs text-muted-foreground">
+                    Class: {booking.class_name}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           {getStatusIcon(booking.status)}
         </div>

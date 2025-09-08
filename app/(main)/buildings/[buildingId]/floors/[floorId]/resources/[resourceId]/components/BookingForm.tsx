@@ -26,6 +26,9 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
   const [endTime, setEndTime] = React.useState('')
   const [reason, setReason] = React.useState('')
   const [selectedWeekdays, setSelectedWeekdays] = React.useState<number[]>([1, 2, 3, 4, 5, 6, 7]) // All days by default
+  const [facultyName, setFacultyName] = React.useState('')
+  const [subject, setSubject] = React.useState('')
+  const [className, setClassName] = React.useState('')
 
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
@@ -63,8 +66,8 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!startDate || !endDate || !startTime || !endTime || !reason) {
-      toast.error('Please fill in all fields')
+    if (!startDate || !endDate || !startTime || !endTime || !reason || !subject || !className) {
+      toast.error('Please fill in all required fields')
       return
     }
 
@@ -97,6 +100,9 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
       formData.append('endTime', endTime)
       formData.append('reason', reason)
       formData.append('weekdays', JSON.stringify(selectedWeekdays))
+      formData.append('facultyName', facultyName)
+      formData.append('subject', subject)
+      formData.append('className', className)
 
       const result = await createBooking(formData)
 
@@ -187,6 +193,47 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
             />
           </div>
 
+          {/* Academic Information */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="facultyName">Faculty Name (Optional)</Label>
+              <input
+                id="facultyName"
+                type="text"
+                placeholder="Faculty conducting the class"
+                value={facultyName}
+                onChange={(e) => setFacultyName(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="subject">Subject *</Label>
+              <input
+                id="subject"
+                type="text"
+                placeholder="e.g., Data Structures, Machine Learning"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="className">Class *</Label>
+              <input
+                id="className"
+                type="text"
+                placeholder="e.g., SY DSBDA, FY BTech, TE Computer"
+                value={className}
+                onChange={(e) => setClassName(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                required
+              />
+            </div>
+          </div>
+
           {/* Weekday Selection */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -256,7 +303,7 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={!startDate || !endDate || !startTime || !endTime || !reason || selectedWeekdays.length === 0 || isSubmitting}
+            disabled={!startDate || !endDate || !startTime || !endTime || !reason || !subject || !className || selectedWeekdays.length === 0 || isSubmitting}
           >
             {isSubmitting ? 'Creating Booking...' : 'Book Resource'}
           </Button>
