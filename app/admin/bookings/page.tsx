@@ -66,6 +66,9 @@ type Booking = {
   approved_by: string | null
   approved_at: string | null
   created_at: string
+  faculty_name?: string
+  subject?: string
+  class_name?: string
   resources?: {
     id: string
     name: string
@@ -467,7 +470,26 @@ export default function BookingsPage() {
                               </div>
                               <div>
                                 <p className="font-medium line-clamp-2">{booking.reason}</p>
-
+                                {/* Academic Information */}
+                                {(booking.subject || booking.faculty_name || booking.class_name) && (
+                                  <div className="flex items-center gap-2 mt-1">
+                                    {booking.subject && (
+                                      <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs">
+                                        {booking.subject}
+                                      </span>
+                                    )}
+                                    {booking.faculty_name && (
+                                      <span className="text-xs text-muted-foreground">
+                                        Faculty: {booking.faculty_name}
+                                      </span>
+                                    )}
+                                    {booking.class_name && (
+                                      <span className="text-xs text-muted-foreground">
+                                        Class: {booking.class_name}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
                                 <p className="text-xs text-muted-foreground">
                                   Created {formatDate(booking.created_at)}
                                 </p>

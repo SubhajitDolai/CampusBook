@@ -111,6 +111,22 @@ export function RecentBookingsCard({ bookings }: RecentBookingsCardProps) {
                       <span>{booking.start_time} - {booking.end_time}</span>
                     </div>
                   </div>
+                  {/* Academic Information */}
+                  {(booking.subject || booking.faculty_name || booking.class_name) && (
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      {booking.subject && (
+                        <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
+                          {booking.subject}
+                        </span>
+                      )}
+                      {booking.faculty_name && (
+                        <span>Faculty: {booking.faculty_name}</span>
+                      )}
+                      {booking.class_name && (
+                        <span>Class: {booking.class_name}</span>
+                      )}
+                    </div>
+                  )}
                   <p className="text-xs text-muted-foreground truncate max-w-xs">
                     {booking.reason}
                   </p>

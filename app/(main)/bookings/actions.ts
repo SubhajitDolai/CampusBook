@@ -15,6 +15,10 @@ export interface BookingWithDetails {
   approved_by: string | null
   approved_at: string | null
   created_at: string
+  weekdays?: number[]
+  faculty_name?: string
+  subject?: string
+  class_name?: string
   resources: {
     id: string
     name: string
@@ -80,6 +84,10 @@ export async function getUserBookings(): Promise<BookingWithDetails[]> {
         approved_by,
         approved_at,
         created_at,
+        weekdays,
+        faculty_name,
+        subject,
+        class_name,
         resources (
           id,
           name,
@@ -130,6 +138,10 @@ export async function getUserBookings(): Promise<BookingWithDetails[]> {
         approved_by: booking.approved_by,
         approved_at: booking.approved_at,
         created_at: booking.created_at,
+        weekdays: booking.weekdays,
+        faculty_name: booking.faculty_name,
+        subject: booking.subject,
+        class_name: booking.class_name,
         resources: {
           id: resource?.id || '',
           name: resource?.name || 'Unknown Resource',

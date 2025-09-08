@@ -23,6 +23,9 @@ export interface RecentBooking {
   status: string
   reason: string
   created_at: string
+  faculty_name?: string
+  subject?: string
+  class_name?: string
 }
 
 export interface QuickStats {
@@ -156,6 +159,9 @@ export async function getRecentBookings(limit: number = 5): Promise<RecentBookin
         status,
         reason,
         created_at,
+        faculty_name,
+        subject,
+        class_name,
         resources (
           name,
           buildings (
