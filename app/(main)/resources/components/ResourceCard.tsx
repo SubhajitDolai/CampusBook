@@ -7,6 +7,7 @@ import { MapPin, Users, Clock, Building2 } from 'lucide-react'
 import { ResourceWithDetails } from '../actions'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 import { useRouter } from 'next/navigation'
+import { getStatusBadgeVariant, getButtonText } from '@/lib/status-utils'
 
 interface ResourceCardProps {
   resource: ResourceWithDetails
@@ -30,7 +31,7 @@ export function ResourceCard({ resource }: ResourceCardProps) {
             <CardDescription>{resource.description}</CardDescription>
           </div>
           <Badge 
-            variant={resource.status === 'Available' ? 'default' : 'secondary'}
+            variant={getStatusBadgeVariant(resource.status)}
           >
             {resource.status}
           </Badge>
@@ -58,7 +59,7 @@ export function ResourceCard({ resource }: ResourceCardProps) {
             className="w-full"
             onClick={() => handleNavigation(`/buildings/${resource.building.id}/resources/${resource.id}`)}
           >
-            {resource.status === 'Available' ? 'Book Now' : 'View Details'}
+            {getButtonText(resource.status)}
           </Button>
         </div>
       </CardContent>

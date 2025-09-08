@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { calculateDynamicStatus, type Booking } from '@/lib/dynamic-status'
 
 export async function getBuildingDetails(buildingId: string) {
   const supabase = await createClient()
@@ -76,7 +77,8 @@ export async function getResourceDetails(resourceId: string) {
         description,
         equipment,
         is_active,
-        created_at
+        created_at,
+        status
       `)
       .eq('id', resourceId)
       .eq('is_active', true)
@@ -110,7 +112,8 @@ export async function getResourceWithDetails(resourceId: string) {
         description,
         equipment,
         is_active,
-        created_at
+        created_at,
+        status
       `)
       .eq('id', resourceId)
       .eq('is_active', true)
@@ -153,23 +156,38 @@ export async function getResourceWithDetails(resourceId: string) {
       console.error('Error fetching building:', buildingError)
     }
 
-    // Check for active bookings to determine status
+    // Check for active bookings to determine status (only approved bookings)
     const { data: activeBookings, error: bookingError } = await supabase
       .from('bookings')
       .select('id')
       .eq('resource_id', resourceId)
-      .in('status', ['pending', 'approved'])
+      .eq('status', 'approved')  // Only approved bookings affect resource status
       .gte('end_date', new Date().toISOString().split('T')[0])
 
     if (bookingError) {
       console.error('Error checking active bookings:', bookingError)
     }
 
+    // Fetch active bookings for dynamic status calculation (only approved bookings)
+    const { data: allBookings, error: allBookingsError } = await supabase
+      .from('bookings')
+      .select('start_date, end_date, start_time, end_time, status')
+      .eq('resource_id', resourceId)
+      .eq('status', 'approved')  // Only approved bookings affect resource status
+      .gte('end_date', new Date().toISOString().split('T')[0])
+
+    if (allBookingsError) {
+      console.error('Error fetching bookings for status:', allBookingsError)
+    }
+
+    // Calculate dynamic status
+    const dynamicStatus = calculateDynamicStatus(resource.status, allBookings || [])
+
     // Enhance resource with additional details
     const enhancedResource = {
       ...resource,
       location: `${building?.name || 'Unknown Building'} - ${floor?.name || `Floor ${floor?.floor_number}`}`,
-      status: activeBookings && activeBookings.length > 0 ? 'Booked' : 'Available',
+      status: dynamicStatus,
       equipmentList: resource.equipment ? resource.equipment.split(',').map((item: string) => item.trim()) : []
     }
 

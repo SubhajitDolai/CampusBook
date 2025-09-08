@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { calculateDynamicStatus, type Booking } from '@/lib/dynamic-status'
 
 export interface ResourceWithDetails {
   id: string
@@ -41,6 +42,7 @@ export async function getAllResources(): Promise<ResourceWithDetails[]> {
         equipment,
         is_active,
         created_at,
+        status,
         buildings (
           id,
           name,
@@ -64,10 +66,40 @@ export async function getAllResources(): Promise<ResourceWithDetails[]> {
       return []
     }
 
+    // Get all resource IDs to fetch their bookings
+    const resourceIds = resources.map(r => r.id)
+    
+    // Fetch active bookings for all resources (only approved bookings)
+    const { data: bookings, error: bookingsError } = await supabase
+      .from('bookings')
+      .select('resource_id, start_date, end_date, start_time, end_time, status')
+      .in('resource_id', resourceIds)
+      .eq('status', 'approved')  // Only approved bookings affect resource status
+      .gte('end_date', new Date().toISOString().split('T')[0])
+
+    if (bookingsError) {
+      console.error('Error fetching bookings:', bookingsError)
+    }
+
+    // Group bookings by resource_id
+    const bookingsByResource = new Map<string, Booking[]>()
+    bookings?.forEach(booking => {
+      if (!bookingsByResource.has(booking.resource_id)) {
+        bookingsByResource.set(booking.resource_id, [])
+      }
+      bookingsByResource.get(booking.resource_id)?.push(booking)
+    })
+
     // Transform the data to match the expected format
     const transformedResources: ResourceWithDetails[] = resources.map((resource) => {
       const building = Array.isArray(resource.buildings) ? resource.buildings[0] : resource.buildings
       const floor = Array.isArray(resource.floors) ? resource.floors[0] : resource.floors
+      
+      // Get bookings for this resource
+      const resourceBookings = bookingsByResource.get(resource.id) || []
+      
+      // Calculate dynamic status
+      const dynamicStatus = calculateDynamicStatus(resource.status, resourceBookings)
       
       return {
         id: resource.id,
@@ -81,7 +113,7 @@ export async function getAllResources(): Promise<ResourceWithDetails[]> {
         building: building || { id: '', name: 'Unknown Building', code: '' },
         floor: floor || { id: '', floor_number: 0, name: null },
         location: `${building?.name || 'Unknown Building'} - ${floor?.name || `Floor ${floor?.floor_number}`}`,
-        status: 'Available', // Default status - will be enhanced with booking logic later
+        status: dynamicStatus,
         equipmentList: resource.equipment ? resource.equipment.split(',').map((item: string) => item.trim()) : []
       }
     })
