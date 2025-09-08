@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { TimePicker } from '@/components/ui/time-picker'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { createBooking } from '../actions'
 import React from 'react'
 import { useRouter } from 'next/navigation'
@@ -24,14 +25,51 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
   const [startTime, setStartTime] = React.useState('')
   const [endTime, setEndTime] = React.useState('')
   const [reason, setReason] = React.useState('')
+  const [selectedWeekdays, setSelectedWeekdays] = React.useState<number[]>([1, 2, 3, 4, 5, 6, 7]) // All days by default
 
   const [isSubmitting, setIsSubmitting] = React.useState(false)
+
+  // Weekday options with proper mapping
+  const weekdays = [
+    { id: 1, label: 'Sun', name: 'Sunday' },
+    { id: 2, label: 'Mon', name: 'Monday' },
+    { id: 3, label: 'Tue', name: 'Tuesday' },
+    { id: 4, label: 'Wed', name: 'Wednesday' },
+    { id: 5, label: 'Thu', name: 'Thursday' },
+    { id: 6, label: 'Fri', name: 'Friday' },
+    { id: 7, label: 'Sat', name: 'Saturday' }
+  ]
+
+  const handleWeekdayToggle = (weekdayId: number, checked: boolean) => {
+    if (checked) {
+      setSelectedWeekdays(prev => [...prev, weekdayId].sort())
+    } else {
+      setSelectedWeekdays(prev => prev.filter(id => id !== weekdayId))
+    }
+  }
+
+  const handleSelectAllWeekdays = () => {
+    setSelectedWeekdays([1, 2, 3, 4, 5, 6, 7])
+  }
+
+  const handleSelectWeekdaysOnly = () => {
+    setSelectedWeekdays([2, 3, 4, 5, 6]) // Mon-Fri
+  }
+
+  const handleClearAllWeekdays = () => {
+    setSelectedWeekdays([])
+  }
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!startDate || !endDate || !startTime || !endTime || !reason) {
       toast.error('Please fill in all fields')
+      return
+    }
+
+    if (selectedWeekdays.length === 0) {
+      toast.error('Please select at least one day of the week')
       return
     }
 
@@ -58,7 +96,7 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
       formData.append('startTime', startTime)
       formData.append('endTime', endTime)
       formData.append('reason', reason)
-  
+      formData.append('weekdays', JSON.stringify(selectedWeekdays))
 
       const result = await createBooking(formData)
 
@@ -149,12 +187,76 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
             />
           </div>
 
-
+          {/* Weekday Selection */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label>Select Days of the Week</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSelectAllWeekdays}
+                >
+                  All
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSelectWeekdaysOnly}
+                >
+                  Weekdays
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClearAllWeekdays}
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-7 gap-2">
+              {weekdays.map((weekday) => (
+                <div key={weekday.id} className="flex flex-col items-center space-y-2">
+                  <Checkbox
+                    id={`weekday-${weekday.id}`}
+                    checked={selectedWeekdays.includes(weekday.id)}
+                    onCheckedChange={(checked) => 
+                      handleWeekdayToggle(weekday.id, checked as boolean)
+                    }
+                  />
+                  <Label 
+                    htmlFor={`weekday-${weekday.id}`} 
+                    className="text-xs text-center cursor-pointer"
+                    title={weekday.name}
+                  >
+                    {weekday.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
+            
+            {selectedWeekdays.length === 0 && (
+              <p className="text-sm text-red-500">Please select at least one day</p>
+            )}
+            
+            {selectedWeekdays.length > 0 && (
+              <p className="text-sm text-gray-600">
+                Selected: {selectedWeekdays.map(id => 
+                  weekdays.find(w => w.id === id)?.label
+                ).join(', ')}
+              </p>
+            )}
+          </div>
 
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={!startDate || !endDate || !startTime || !endTime || !reason || isSubmitting}
+            disabled={!startDate || !endDate || !startTime || !endTime || !reason || selectedWeekdays.length === 0 || isSubmitting}
           >
             {isSubmitting ? 'Creating Booking...' : 'Book Resource'}
           </Button>

@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
-import { calculateDynamicStatus, type Booking } from '@/lib/dynamic-status'
+import { calculateDynamicStatus } from '@/lib/dynamic-status'
 
 export async function getBuildingDetails(buildingId: string) {
   const supabase = await createClient()
@@ -28,6 +28,35 @@ export async function getBuildingDetails(buildingId: string) {
     return building
   } catch (error) {
     console.error('Error in getBuildingDetails:', error)
+    return null
+  }
+}
+
+export async function getFloorDetails(floorId: string) {
+  const supabase = await createClient()
+
+  try {
+    const { data: floor, error } = await supabase
+      .from('floors')
+      .select(`
+        id,
+        building_id,
+        floor_number,
+        name,
+        is_active
+      `)
+      .eq('id', floorId)
+      .eq('is_active', true)
+      .single()
+
+    if (error) {
+      console.error('Error fetching floor:', error)
+      return null
+    }
+
+    return floor
+  } catch (error) {
+    console.error('Error in getFloorDetails:', error)
     return null
   }
 }
@@ -127,22 +156,12 @@ export async function getResourceWithDetails(resourceId: string) {
       console.error('Error fetching building:', buildingError)
     }
 
-    // Check for active bookings to determine status (only approved bookings)
-    const { data: activeBookings, error: bookingError } = await supabase
-      .from('bookings')
-      .select('id')
-      .eq('resource_id', resourceId)
-      .eq('status', 'approved')  // Only approved bookings affect resource status
-      .gte('end_date', new Date().toISOString().split('T')[0])
 
-    if (bookingError) {
-      console.error('Error checking active bookings:', bookingError)
-    }
 
     // Fetch active bookings for dynamic status calculation (only approved bookings)
     const { data: allBookings, error: allBookingsError } = await supabase
       .from('bookings')
-      .select('start_date, end_date, start_time, end_time, status')
+      .select('start_date, end_date, start_time, end_time, status, weekdays')
       .eq('resource_id', resourceId)
       .eq('status', 'approved')  // Only approved bookings affect resource status
       .gte('end_date', new Date().toISOString().split('T')[0])
@@ -180,8 +199,21 @@ export async function createBooking(formData: FormData) {
     const startTime = formData.get('startTime') as string
     const endTime = formData.get('endTime') as string
     const reason = formData.get('reason') as string
-    if (!resourceId || !startDate || !endDate || !startTime || !endTime || !reason) {
+    const weekdaysJson = formData.get('weekdays') as string
+    
+    if (!resourceId || !startDate || !endDate || !startTime || !endTime || !reason || !weekdaysJson) {
       return { error: 'All fields are required' }
+    }
+
+    // Parse weekdays array
+    let weekdays: number[]
+    try {
+      weekdays = JSON.parse(weekdaysJson)
+      if (!Array.isArray(weekdays) || weekdays.length === 0) {
+        return { error: 'Please select at least one day of the week' }
+      }
+    } catch {
+      return { error: 'Invalid weekdays format' }
     }
 
     // Get current user ID from authentication
@@ -214,6 +246,7 @@ export async function createBooking(formData: FormData) {
       start_time: startTime,
       end_time: endTime,
       reason: reason,
+      weekdays: weekdays,
       status: 'pending'
     })
 
@@ -227,6 +260,7 @@ export async function createBooking(formData: FormData) {
         start_time: startTime,
         end_time: endTime,
         reason: reason,
+        weekdays: weekdays,
         status: 'pending'
       })
       .select()
@@ -242,7 +276,7 @@ export async function createBooking(formData: FormData) {
     console.error('Error in createBooking:', error)
     return { error: 'Failed to create booking' }
   }
-} 
+}
 
 export async function getResourceBookings(resourceId: string) {
   const supabase = await createClient()
@@ -264,7 +298,8 @@ export async function getResourceBookings(resourceId: string) {
         reason,
         status,
         created_at,
-        user_id
+        user_id,
+        weekdays
       `)
       .eq('resource_id', resourceId)
       .gte('end_date', new Date().toISOString().split('T')[0]) // Only show current and future bookings

@@ -81,7 +81,9 @@ CREATE TABLE bookings (
   end_time TIME NOT NULL,
   reason TEXT NOT NULL,
   status booking_status NOT NULL DEFAULT 'pending',
+  weekdays INTEGER[] NOT NULL DEFAULT '{1,2,3,4,5,6,7}',
   approved_by UUID REFERENCES profiles(id),
   approved_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT check_weekdays CHECK (array_length(weekdays, 1) > 0 AND array_length(weekdays, 1) <= 7)
 ); 

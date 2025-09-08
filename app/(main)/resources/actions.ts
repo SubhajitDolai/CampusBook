@@ -72,7 +72,7 @@ export async function getAllResources(): Promise<ResourceWithDetails[]> {
     // Fetch active bookings for all resources (only approved bookings)
     const { data: bookings, error: bookingsError } = await supabase
       .from('bookings')
-      .select('resource_id, start_date, end_date, start_time, end_time, status')
+      .select('resource_id, start_date, end_date, start_time, end_time, status, weekdays')
       .in('resource_id', resourceIds)
       .eq('status', 'approved')  // Only approved bookings affect resource status
       .gte('end_date', new Date().toISOString().split('T')[0])

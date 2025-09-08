@@ -6,6 +6,7 @@ export interface Booking {
   start_time: string
   end_time: string
   status: 'pending' | 'approved' | 'rejected' | 'cancelled'
+  weekdays?: number[] // Array of weekday numbers (1=Sunday, 2=Monday, ..., 7=Saturday)
 }
 
 export function calculateDynamicStatus(
@@ -21,6 +22,10 @@ export function calculateDynamicStatus(
   const now = new Date()
   const currentDate = now.toISOString().split('T')[0] // YYYY-MM-DD
   const currentTime = now.toTimeString().split(' ')[0].substring(0, 5) // HH:MM
+  
+  // Get current day of week (JavaScript: 0=Sunday, 1=Monday, ..., 6=Saturday)
+  // Convert to our format: (1=Sunday, 2=Monday, ..., 7=Saturday)
+  const currentDayOfWeek = now.getDay() + 1
 
   // Check if resource is currently in use based on APPROVED bookings only
   const isCurrentlyInUse = bookings.some(booking => {
@@ -33,11 +38,19 @@ export function calculateDynamicStatus(
     const endDate = booking.end_date
     const startTime = booking.start_time
     const endTime = booking.end_time
+    const weekdays = booking.weekdays || [1, 2, 3, 4, 5, 6, 7] // Default to all days if not specified
 
     // Check if current date is within booking date range
     const isWithinDateRange = currentDate >= startDate && currentDate <= endDate
 
     if (!isWithinDateRange) {
+      return false
+    }
+
+    // Check if current day of week is included in the booking's selected weekdays
+    const isCurrentDaySelected = weekdays.includes(currentDayOfWeek)
+
+    if (!isCurrentDaySelected) {
       return false
     }
 
