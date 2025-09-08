@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/sidebar"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Users, Clock, Building2 } from 'lucide-react'
-import { getBuildingDetails, getResourceWithDetails, getResourceBookings } from './actions'
+import { MapPin, Users, Clock, Building2, Layers } from 'lucide-react'
+import { getBuildingDetails, getFloorDetails, getResourceWithDetails, getResourceBookings } from './actions'
 import { notFound } from 'next/navigation'
 import BookingForm from './components/BookingForm'
 import ExistingBookings from './components/ExistingBookings'
@@ -26,6 +26,14 @@ interface Building {
   name: string
   code: string
   description: string | null
+  is_active: boolean
+}
+
+interface Floor {
+  id: string
+  building_id: string
+  floor_number: number
+  name: string | null
   is_active: boolean
 }
 
@@ -75,28 +83,37 @@ export default async function BuildingResourceDetailsPage({ params }: { params: 
   console.log('Building resource page params:', { buildingId, resourceId })
   
   let building: Building | null = null
+  let floor: Floor | null = null
   let resource: Resource | null = null
   let bookings: Booking[] = []
   
   try {
+    // First get the resource to find the floor_id
+    const resourceData = await getResourceWithDetails(resourceId)
+    if (!resourceData) {
+      notFound()
+    }
+    
     // Fetch real data from database
-    const [buildingData, resourceData, bookingsData] = await Promise.all([
+    const [buildingData, floorData, bookingsData] = await Promise.all([
       getBuildingDetails(buildingId),
-      getResourceWithDetails(resourceId),
+      getFloorDetails(resourceData.floor_id),
       getResourceBookings(resourceId)
     ])
 
     building = buildingData
+    floor = floorData
     resource = resourceData
     bookings = bookingsData
 
     console.log('Building:', building)
+    console.log('Floor:', floor)
     console.log('Resource:', resource)
     console.log('Bookings:', bookings)
 
     // Handle case where any data doesn't exist
-    if (!building || !resource) {
-      console.log('Building or resource not found')
+    if (!building || !floor || !resource) {
+      console.log('Building, floor, or resource not found')
       notFound()
     }
   } catch (error) {
@@ -126,7 +143,7 @@ export default async function BuildingResourceDetailsPage({ params }: { params: 
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbLink href={`/buildings/${buildingId}/resources`}>Resources</BreadcrumbLink>
+                  <BreadcrumbLink href={`/buildings/${buildingId}/floors/${floor.id}`}>{floor.name}</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
@@ -143,6 +160,9 @@ export default async function BuildingResourceDetailsPage({ params }: { params: 
                 <div className="flex items-center gap-2 mb-2">
                   <Building2 className="h-5 w-5 text-muted-foreground" />
                   <span className="text-muted-foreground">{building.name}</span>
+                  <span className="text-muted-foreground">•</span>
+                  <Layers className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-muted-foreground">{floor.name || `Floor ${floor.floor_number}`}</span>
                 </div>
                 <h1 className="text-3xl font-bold mb-2">{resource.name}</h1>
                 <p className="text-muted-foreground mb-4">{resource.description}</p>
@@ -197,10 +217,6 @@ export default async function BuildingResourceDetailsPage({ params }: { params: 
                       <div className="flex justify-between">
                         <span>Capacity:</span>
                         <span>{resource.capacity} people</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Location:</span>
-                        <span>{resource.location}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Active Bookings:</span>

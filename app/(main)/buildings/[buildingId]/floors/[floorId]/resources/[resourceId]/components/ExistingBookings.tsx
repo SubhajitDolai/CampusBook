@@ -14,6 +14,7 @@ interface Booking {
   reason: string
   status: 'pending' | 'approved' | 'rejected' | 'cancelled'
   created_at: string
+  weekdays?: number[]
   profiles: {
     id: string
     name: string
@@ -54,6 +55,21 @@ const formatTime = (time: string) => {
   const ampm = hour >= 12 ? 'PM' : 'AM'
   const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour
   return `${displayHour}:${minutes} ${ampm}`
+}
+
+const formatWeekdays = (weekdays?: number[]) => {
+  if (!weekdays || weekdays.length === 0) return 'All days'
+  
+  const dayLabels = {
+    1: 'Sun', 2: 'Mon', 3: 'Tue', 4: 'Wed', 
+    5: 'Thu', 6: 'Fri', 7: 'Sat'
+  }
+  
+  // If all days are selected, show "All days"
+  if (weekdays.length === 7) return 'All days'
+  
+  // Show abbreviated day names
+  return weekdays.map(day => dayLabels[day as keyof typeof dayLabels]).join(', ')
 }
 
 export default function ExistingBookings({ bookings }: ExistingBookingsProps) {
@@ -146,6 +162,15 @@ export default function ExistingBookings({ bookings }: ExistingBookingsProps) {
                   </span>
                 </div>
               </div>
+
+              {booking.weekdays && booking.weekdays.length > 0 && booking.weekdays.length < 7 && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">
+                    Days: {formatWeekdays(booking.weekdays)}
+                  </span>
+                </div>
+              )}
 
               {booking.reason && (
                 <div className="flex items-start gap-2">
