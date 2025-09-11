@@ -51,7 +51,6 @@ interface Resource {
 
 export default function BuildingResourcesPage({ params }: { params: Promise<{ buildingId: string }> }) {
   const resolvedParams = React.use(params)
-  console.log('Building resources page params:', resolvedParams)
   
   const [building, setBuilding] = React.useState<Building | null>(null)
   const [resources, setResources] = React.useState<Resource[]>([])
@@ -82,14 +81,8 @@ export default function BuildingResourcesPage({ params }: { params: Promise<{ bu
         setResourceTypes(typesData)
         setFloors(floorsData)
 
-        console.log('Building:', buildingData)
-        console.log('Resources:', resourcesData)
-        console.log('Resource types:', typesData)
-        console.log('Floors:', floorsData)
-
         // Handle case where building doesn't exist
         if (!buildingData) {
-          console.log('Building not found')
           notFound()
         }
       } catch (error) {
@@ -119,9 +112,39 @@ export default function BuildingResourcesPage({ params }: { params: Promise<{ bu
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Loading...</p>
-      </div>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <header className="flex h-16 shrink-0 items-center gap-2">
+            <div className="flex items-center gap-2 px-4">
+              <SidebarTrigger className="-ml-1" />
+              <Separator
+                orientation="vertical"
+                className="mr-2 data-[orientation=vertical]:h-4"
+              />
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/buildings">Buildings</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Building Resources</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+          </header>
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading building resources...</p>
+              </div>
+            </div>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
     )
   }
 

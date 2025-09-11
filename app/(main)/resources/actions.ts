@@ -1,7 +1,13 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { redirect } from 'next/navigation'
 import { calculateDynamicStatus, type Booking } from '@/lib/dynamic-status'
+
+// Database booking type with resource_id for our queries
+interface DatabaseBooking extends Booking {
+  resource_id: string
+}
 
 export interface ResourceWithDetails {
   id: string
@@ -27,11 +33,89 @@ export interface ResourceWithDetails {
   equipmentList: string[]
 }
 
-export async function getAllResources(): Promise<ResourceWithDetails[]> {
+export interface ResourcesPageData {
+  resources: ResourceWithDetails[]
+  resourceTypes: string[]
+  buildings: string[]
+  totalCount: number
+  hasMore: boolean
+}
+
+export interface PaginatedResourcesData {
+  resources: ResourceWithDetails[]
+  hasMore: boolean
+  totalCount: number
+}
+
+const RESOURCES_PER_PAGE = 12 // Pagination size to avoid URL length issues
+
+export async function getInitialResourcesData(): Promise<ResourcesPageData> {
   const supabase = await createClient()
 
   try {
-    const { data: resources, error: resourcesError } = await supabase
+    // Single auth check
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError || !user) {
+      redirect('/login')
+    }
+
+    // Get filter options first (lightweight queries)
+    const [resourceTypesResult, buildingsResult] = await Promise.all([
+      supabase
+        .from('resources')
+        .select('type')
+        .eq('is_active', true),
+      supabase
+        .from('buildings')
+        .select('name')
+        .eq('is_active', true)
+        .order('name')
+    ])
+
+    // Extract unique types and buildings
+    const resourceTypes = ['All', ...Array.from(new Set(
+      (resourceTypesResult.data || []).map(r => r.type)
+    )).sort()]
+
+    const buildings = ['All', ...(buildingsResult.data || []).map(b => b.name)]
+
+    // Get total count
+    const { count: totalCount } = await supabase
+      .from('resources')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_active', true)
+
+    // Get first page of resources with default filters (no filters)
+    const firstPageData = await getPaginatedResources(1, RESOURCES_PER_PAGE, '', 'All', 'All')
+
+    return {
+      resources: firstPageData.resources,
+      resourceTypes,
+      buildings,
+      totalCount: totalCount || 0,
+      hasMore: firstPageData.hasMore
+    }
+  } catch (error) {
+    console.error('Error in getInitialResourcesData:', error)
+    throw error
+  }
+}
+
+export async function getPaginatedResources(
+  page: number = 1,
+  limit: number = RESOURCES_PER_PAGE,
+  searchTerm: string = '',
+  typeFilter: string = 'All',
+  buildingFilter: string = 'All'
+): Promise<PaginatedResourcesData> {
+  const supabase = await createClient()
+
+  try {
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+
+    let query = supabase
       .from('resources')
       .select(`
         id,
@@ -43,7 +127,7 @@ export async function getAllResources(): Promise<ResourceWithDetails[]> {
         is_active,
         created_at,
         status,
-        buildings (
+        buildings!inner (
           id,
           name,
           code
@@ -53,52 +137,80 @@ export async function getAllResources(): Promise<ResourceWithDetails[]> {
           floor_number,
           name
         )
-      `)
+      `, { count: 'exact' })
       .eq('is_active', true)
-      .order('name')
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: true }) // Secondary sort for consistency
+      .range(from, to)
 
-    if (resourcesError) {
-      console.error('Error fetching resources:', resourcesError)
-      throw new Error(`Failed to fetch resources: ${resourcesError.message}`)
+    // Apply filters
+    if (typeFilter !== 'All') {
+      query = query.eq('type', typeFilter)
     }
 
-    if (!resources) {
-      return []
+    if (buildingFilter !== 'All') {
+      query = query.eq('buildings.name', buildingFilter)
     }
 
-    // Get all resource IDs to fetch their bookings
-    const resourceIds = resources.map(r => r.id)
+    // Apply search term
+    if (searchTerm.trim()) {
+      query = query.or(
+        `name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,equipment.ilike.%${searchTerm}%`
+      )
+    }
+
+    const { data: resources, error, count } = await query
+
+    if (error) {
+      console.error('Error fetching paginated resources:', error)
+      throw new Error('Failed to fetch resources')
+    }
+
+    const resourcesData = resources || []
+    const totalCount = count || 0
+
+    // Get bookings for current page resources only (small batch)
+    const resourceIds = resourcesData.map(r => r.id)
     
-    // Fetch active bookings for all resources (only approved bookings)
-    const { data: bookings, error: bookingsError } = await supabase
-      .from('bookings')
-      .select('resource_id, start_date, end_date, start_time, end_time, status, weekdays')
-      .in('resource_id', resourceIds)
-      .eq('status', 'approved')  // Only approved bookings affect resource status
-      .gte('end_date', new Date().toISOString().split('T')[0])
+    let bookings: DatabaseBooking[] = []
+    if (resourceIds.length > 0) {
+      const { data: bookingsData, error: bookingsError } = await supabase
+        .from('bookings')
+        .select('resource_id, start_date, end_date, start_time, end_time, status, weekdays')
+        .in('resource_id', resourceIds)
+        .eq('status', 'approved')
+        .gte('end_date', new Date().toISOString().split('T')[0])
 
-    if (bookingsError) {
-      console.error('Error fetching bookings:', bookingsError)
+      if (bookingsError) {
+        console.error('Error fetching bookings:', bookingsError)
+      }
+      bookings = bookingsData || []
     }
 
     // Group bookings by resource_id
     const bookingsByResource = new Map<string, Booking[]>()
-    bookings?.forEach(booking => {
-      if (!bookingsByResource.has(booking.resource_id)) {
-        bookingsByResource.set(booking.resource_id, [])
+    bookings.forEach(dbBooking => {
+      if (!bookingsByResource.has(dbBooking.resource_id)) {
+        bookingsByResource.set(dbBooking.resource_id, [])
       }
-      bookingsByResource.get(booking.resource_id)?.push(booking)
+      // Convert DatabaseBooking back to Booking for calculateDynamicStatus
+      const booking: Booking = {
+        start_date: dbBooking.start_date,
+        end_date: dbBooking.end_date,
+        start_time: dbBooking.start_time,
+        end_time: dbBooking.end_time,
+        status: dbBooking.status,
+        weekdays: dbBooking.weekdays
+      }
+      bookingsByResource.get(dbBooking.resource_id)?.push(booking)
     })
 
-    // Transform the data to match the expected format
-    const transformedResources: ResourceWithDetails[] = resources.map((resource) => {
+    // Transform the data
+    const transformedResources: ResourceWithDetails[] = resourcesData.map((resource) => {
       const building = Array.isArray(resource.buildings) ? resource.buildings[0] : resource.buildings
       const floor = Array.isArray(resource.floors) ? resource.floors[0] : resource.floors
       
-      // Get bookings for this resource
       const resourceBookings = bookingsByResource.get(resource.id) || []
-      
-      // Calculate dynamic status
       const dynamicStatus = calculateDynamicStatus(resource.status, resourceBookings)
       
       return {
@@ -118,54 +230,15 @@ export async function getAllResources(): Promise<ResourceWithDetails[]> {
       }
     })
 
-    return transformedResources
+    const hasMore = (from + limit) < totalCount
+
+    return {
+      resources: transformedResources,
+      hasMore,
+      totalCount
+    }
   } catch (error) {
-    console.error('Error in getAllResources:', error)
-    throw error
+    console.error('Error in getPaginatedResources:', error)
+    throw new Error('Failed to fetch resources')
   }
 }
-
-export async function getResourceTypes(): Promise<string[]> {
-  const supabase = await createClient()
-
-  try {
-    const { data, error } = await supabase
-      .from('resources')
-      .select('type')
-      .eq('is_active', true)
-
-    if (error) {
-      console.error('Error fetching resource types:', error)
-      return []
-    }
-
-    // Get unique types and format them
-    const types = [...new Set(data.map(resource => resource.type))]
-    return ['All', ...types]
-  } catch (error) {
-    console.error('Error in getResourceTypes:', error)
-    return ['All']
-  }
-}
-
-export async function getBuildings(): Promise<string[]> {
-  const supabase = await createClient()
-
-  try {
-    const { data, error } = await supabase
-      .from('buildings')
-      .select('name')
-      .eq('is_active', true)
-      .order('name')
-
-    if (error) {
-      console.error('Error fetching buildings:', error)
-      return []
-    }
-
-    return ['All', ...data.map(building => building.name)]
-  } catch (error) {
-    console.error('Error in getBuildings:', error)
-    return ['All']
-  }
-} 

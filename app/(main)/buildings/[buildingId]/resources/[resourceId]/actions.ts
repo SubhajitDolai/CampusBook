@@ -241,21 +241,6 @@ export async function createBooking(formData: FormData) {
     }
 
     // Log the booking data for debugging
-    console.log('Creating booking with data:', {
-      resource_id: resourceId,
-      user_id: user.id,
-      start_date: startDate,
-      end_date: endDate,
-      start_time: startTime,
-      end_time: endTime,
-      reason: reason,
-      weekdays: weekdays,
-      faculty_name: facultyName,
-      subject: subject,
-      class_name: className,
-      status: 'pending'
-    })
-
     const { data, error } = await supabase
       .from('bookings')
       .insert({
@@ -290,10 +275,6 @@ export async function createBooking(formData: FormData) {
 export async function getResourceBookings(resourceId: string) {
   const supabase = await createClient()
 
-  console.log('Fetching bookings for resource:', resourceId)
-  console.log('Resource ID type:', typeof resourceId)
-  console.log('Resource ID value:', resourceId)
-
   try {
     // First, get the bookings
     const { data: bookings, error: bookingsError } = await supabase
@@ -324,16 +305,12 @@ export async function getResourceBookings(resourceId: string) {
       return []
     }
 
-    console.log('Found bookings:', bookings?.length || 0)
-
     if (!bookings || bookings.length === 0) {
-      console.log('No bookings found for resource:', resourceId)
       return []
     }
 
     // Get user IDs from bookings
     const userIds = bookings.map(booking => booking.user_id)
-    console.log('User IDs from bookings:', userIds)
 
     // Fetch user profiles
     const { data: profiles, error: profilesError } = await supabase
@@ -363,8 +340,6 @@ export async function getResourceBookings(resourceId: string) {
       }))
     }
 
-    console.log('Found profiles:', profiles?.length || 0)
-
     // Create a map of user profiles
     const profilesMap = new Map(profiles?.map(profile => [profile.id, profile]) || [])
 
@@ -386,7 +361,6 @@ export async function getResourceBookings(resourceId: string) {
       }
     }))
 
-    console.log('Returning bookings with profiles:', bookingsWithProfiles.length)
     return bookingsWithProfiles
   } catch (error) {
     console.error('Error in getResourceBookings:', error)

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { redirect } from 'next/navigation'
 
 export interface UserProfile {
   id: string
@@ -20,6 +21,90 @@ export interface UserProfile {
   cubicle?: string | null
   workstation?: string | null
   created_at: string
+}
+
+export interface UserStats {
+  total: number
+  faculty: number
+  admin: number
+  superAdmin: number
+}
+
+export interface UsersPageData {
+  users: UserProfile[]
+  departments: string[]
+  buildings: string[]
+  stats: UserStats
+}
+
+export async function getAllUsersData(): Promise<UsersPageData> {
+  const supabase = await createClient()
+
+  try {
+    // Single auth check
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError || !user) {
+      redirect('/login')
+    }
+
+    // Single optimized query to get all users data
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select(`
+        id,
+        name,
+        email,
+        university_id,
+        phone,
+        gender,
+        designation,
+        department,
+        role,
+        seating_location,
+        building_name,
+        floor_number,
+        room_number,
+        cabin,
+        cubicle,
+        workstation,
+        created_at
+      `)
+      .order('name', { ascending: true })
+
+    if (profilesError) {
+      throw new Error(`Failed to fetch users: ${profilesError.message}`)
+    }
+
+    const users = profiles || []
+
+    // Calculate stats from fetched data (no separate queries)
+    const stats = {
+      total: users.length,
+      faculty: users.filter(u => u.role === 'faculty').length,
+      admin: users.filter(u => u.role === 'admin').length,
+      superAdmin: users.filter(u => u.role === 'super_admin').length
+    }
+
+    // Extract unique departments and buildings from fetched data
+    const departments = ['All', ...Array.from(new Set(
+      users.map(u => u.department).filter(Boolean)
+    )).sort()]
+
+    const buildings = ['All', ...Array.from(new Set(
+      users.map(u => u.building_name).filter(Boolean)
+    )).sort()]
+
+    return {
+      users,
+      departments,
+      buildings,
+      stats
+    }
+  } catch (error) {
+    console.error('Error in getAllUsersData:', error)
+    throw error
+  }
 }
 
 export async function searchUsers(
@@ -125,95 +210,5 @@ export async function getUserById(userId: string): Promise<UserProfile | null> {
   } catch (error) {
     console.error('Error in getUserById:', error)
     return null
-  }
-}
-
-export async function getDepartments(): Promise<string[]> {
-  const supabase = await createClient()
-
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('department')
-      .not('department', 'is', null)
-
-    if (error) {
-      console.error('Error fetching departments:', error)
-      return []
-    }
-
-    // Get unique departments and sort them
-    const departments = Array.from(new Set(data.map(item => item.department)))
-    return ['All', ...departments.sort()]
-  } catch (error) {
-    console.error('Error in getDepartments:', error)
-    return ['All']
-  }
-}
-
-export async function getBuildings(): Promise<string[]> {
-  const supabase = await createClient()
-
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('building_name')
-      .not('building_name', 'is', null)
-
-    if (error) {
-      console.error('Error fetching buildings:', error)
-      return []
-    }
-
-    // Get unique buildings and sort them
-    const buildings = Array.from(new Set(data.map(item => item.building_name).filter(Boolean)))
-    return ['All', ...buildings.sort()]
-  } catch (error) {
-    console.error('Error in getBuildings:', error)
-    return ['All']
-  }
-}
-
-export async function getUserStats() {
-  const supabase = await createClient()
-
-  try {
-    // Get total users count
-    const { count: totalUsers } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-
-    // Get faculty count
-    const { count: facultyCount } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .eq('role', 'faculty')
-
-    // Get admin count
-    const { count: adminCount } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .eq('role', 'admin')
-
-    // Get super admin count
-    const { count: superAdminCount } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .eq('role', 'super_admin')
-
-    return {
-      total: totalUsers || 0,
-      faculty: facultyCount || 0,
-      admin: adminCount || 0,
-      superAdmin: superAdminCount || 0
-    }
-  } catch (error) {
-    console.error('Error fetching user stats:', error)
-    return {
-      total: 0,
-      faculty: 0,
-      admin: 0,
-      superAdmin: 0
-    }
   }
 }
