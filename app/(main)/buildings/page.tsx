@@ -19,12 +19,7 @@ import { LoadingBarButton } from './LoadingBarButton'
 export default async function BuildingsPage() {
   // Fetch real data from database
   const buildings = await getBuildingsWithStats()
-  console.log('Buildings from DB:', buildings)
   
-  // Show first building ID for debugging
-  if (buildings.length > 0) {
-    console.log('First building ID:', buildings[0].id)
-  }
   return (
     <SidebarProvider>
       <AppSidebar />

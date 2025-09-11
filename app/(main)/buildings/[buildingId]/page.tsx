@@ -45,7 +45,6 @@ interface Floor {
 
 export default async function BuildingDetailsPage({ params }: { params: Promise<{ buildingId: string }> }) {
   const { buildingId } = await params
-  console.log('Building ID:', buildingId)
   
   let building: Building | null = null
   let floors: Floor[] = []
@@ -60,12 +59,8 @@ export default async function BuildingDetailsPage({ params }: { params: Promise<
     building = buildingData
     floors = floorsData || []
 
-    console.log('Building data:', building)
-    console.log('Floors data:', floors)
-
     // Handle case where building doesn't exist
     if (!building) {
-      console.log('Building not found:', buildingId)
       notFound()
     }
   } catch (error) {

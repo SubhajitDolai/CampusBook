@@ -80,7 +80,6 @@ interface Booking {
 
 export default async function BuildingResourceDetailsPage({ params }: { params: Promise<{ buildingId: string; resourceId: string }> }) {
   const { buildingId, resourceId } = await params
-  console.log('Building resource page params:', { buildingId, resourceId })
   
   let building: Building | null = null
   let floor: Floor | null = null
@@ -106,14 +105,8 @@ export default async function BuildingResourceDetailsPage({ params }: { params: 
     resource = resourceData
     bookings = bookingsData
 
-    console.log('Building:', building)
-    console.log('Floor:', floor)
-    console.log('Resource:', resource)
-    console.log('Bookings:', bookings)
-
     // Handle case where any data doesn't exist
     if (!building || !floor || !resource) {
-      console.log('Building, floor, or resource not found')
       notFound()
     }
   } catch (error) {

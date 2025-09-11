@@ -56,7 +56,6 @@ interface Resource {
 
 export default async function FloorDetailsPage({ params }: { params: Promise<{ buildingId: string; floorId: string }> }) {
   const { buildingId, floorId } = await params
-  console.log('Floor page params:', { buildingId, floorId })
   
   let building: Building | null = null
   let floor: Floor | null = null
@@ -74,13 +73,8 @@ export default async function FloorDetailsPage({ params }: { params: Promise<{ b
     floor = floorData
     resources = resourcesData || []
 
-    console.log('Building:', building)
-    console.log('Floor:', floor)
-    console.log('Resources:', resources)
-
     // Handle case where building or floor doesn't exist
     if (!building || !floor) {
-      console.log('Building or floor not found')
       notFound()
     }
   } catch (error) {
