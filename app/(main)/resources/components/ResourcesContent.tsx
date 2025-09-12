@@ -17,6 +17,7 @@ export default function ResourcesContent({ initialData }: ResourcesContentProps)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedType, setSelectedType] = useState('All')
   const [selectedBuilding, setSelectedBuilding] = useState('All')
+  const [selectedStatus, setSelectedStatus] = useState('All')
   const [resources, setResources] = useState<ResourceWithDetails[]>(initialData.resources)
   const [currentPage, setCurrentPage] = useState(1)
   const [hasMore, setHasMore] = useState(initialData.hasMore)
@@ -36,7 +37,8 @@ export default function ResourcesContent({ initialData }: ResourcesContentProps)
           12, // Page size
           debouncedSearchTerm,
           selectedType,
-          selectedBuilding
+          selectedBuilding,
+          selectedStatus
         )
         
         // Always replace resources when filters change (don't append)
@@ -52,7 +54,7 @@ export default function ResourcesContent({ initialData }: ResourcesContentProps)
         setTotalCount(0)
       }
     })
-  }, [debouncedSearchTerm, selectedType, selectedBuilding])
+  }, [debouncedSearchTerm, selectedType, selectedBuilding, selectedStatus])
 
   // Load more function
   const loadMore = useCallback(async () => {
@@ -66,7 +68,8 @@ export default function ResourcesContent({ initialData }: ResourcesContentProps)
         12,
         debouncedSearchTerm,
         selectedType,
-        selectedBuilding
+        selectedBuilding,
+        selectedStatus
       )
       
       // Filter out duplicates by checking existing resource IDs
@@ -84,7 +87,7 @@ export default function ResourcesContent({ initialData }: ResourcesContentProps)
     } finally {
       setIsLoadingMore(false)
     }
-  }, [currentPage, hasMore, isLoadingMore, debouncedSearchTerm, selectedType, selectedBuilding, resources])
+  }, [currentPage, hasMore, isLoadingMore, debouncedSearchTerm, selectedType, selectedBuilding, selectedStatus, resources])
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -104,7 +107,7 @@ export default function ResourcesContent({ initialData }: ResourcesContentProps)
     return () => observer.disconnect()
   }, [loadMore, hasMore, isLoadingMore, isPending])
 
-  const hasActiveFilters = searchTerm || selectedType !== 'All' || selectedBuilding !== 'All'
+  const hasActiveFilters = searchTerm || selectedType !== 'All' || selectedBuilding !== 'All' || selectedStatus !== 'All'
 
   return (
     <div className="space-y-6">
@@ -116,8 +119,11 @@ export default function ResourcesContent({ initialData }: ResourcesContentProps)
         setSelectedType={setSelectedType}
         selectedBuilding={selectedBuilding}
         setSelectedBuilding={setSelectedBuilding}
+        selectedStatus={selectedStatus}
+        setSelectedStatus={setSelectedStatus}
         resourceTypes={initialData.resourceTypes}
         buildings={initialData.buildings}
+        statuses={initialData.statuses}
       />
 
       {/* Results Summary */}

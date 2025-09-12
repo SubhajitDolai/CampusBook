@@ -2,7 +2,7 @@
 
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search, Filter, Building2 } from 'lucide-react'
+import { Search, Filter, Building2, Clock } from 'lucide-react'
 import React from 'react'
 
 interface ResourceFiltersProps {
@@ -12,8 +12,11 @@ interface ResourceFiltersProps {
   setSelectedType: (type: string) => void
   selectedBuilding: string
   setSelectedBuilding: (building: string) => void
+  selectedStatus: string
+  setSelectedStatus: (status: string) => void
   resourceTypes: string[]
   buildings: string[]
+  statuses: string[]
 }
 
 export function ResourceFilters({
@@ -23,8 +26,11 @@ export function ResourceFilters({
   setSelectedType,
   selectedBuilding,
   setSelectedBuilding,
+  selectedStatus,
+  setSelectedStatus,
   resourceTypes,
-  buildings
+  buildings,
+  statuses
 }: ResourceFiltersProps) {
   return (
     <div className="mb-6 space-y-4">
@@ -57,6 +63,17 @@ export function ResourceFilters({
           <SelectContent>
             {buildings.map((building) => (
               <SelectItem key={building} value={building}>{building}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+          <SelectTrigger className="w-full sm:w-48">
+            <Clock className="h-4 w-4 mr-2" />
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            {statuses.map((status) => (
+              <SelectItem key={status} value={status}>{status}</SelectItem>
             ))}
           </SelectContent>
         </Select>

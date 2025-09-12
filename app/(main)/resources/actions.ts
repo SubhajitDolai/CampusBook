@@ -37,6 +37,7 @@ export interface ResourcesPageData {
   resources: ResourceWithDetails[]
   resourceTypes: string[]
   buildings: string[]
+  statuses: string[]
   totalCount: number
   hasMore: boolean
 }
@@ -80,6 +81,9 @@ export async function getInitialResourcesData(): Promise<ResourcesPageData> {
 
     const buildings = ['All', ...(buildingsResult.data || []).map(b => b.name)]
 
+    // Define available statuses based on the enum from schema
+    const statuses = ['All', 'Available', 'In Use', 'Maintenance', 'Unavailable']
+
     // Get total count
     const { count: totalCount } = await supabase
       .from('resources')
@@ -87,12 +91,13 @@ export async function getInitialResourcesData(): Promise<ResourcesPageData> {
       .eq('is_active', true)
 
     // Get first page of resources with default filters (no filters)
-    const firstPageData = await getPaginatedResources(1, RESOURCES_PER_PAGE, '', 'All', 'All')
+    const firstPageData = await getPaginatedResources(1, RESOURCES_PER_PAGE, '', 'All', 'All', 'All')
 
     return {
       resources: firstPageData.resources,
       resourceTypes,
       buildings,
+      statuses,
       totalCount: totalCount || 0,
       hasMore: firstPageData.hasMore
     }
@@ -107,13 +112,17 @@ export async function getPaginatedResources(
   limit: number = RESOURCES_PER_PAGE,
   searchTerm: string = '',
   typeFilter: string = 'All',
-  buildingFilter: string = 'All'
+  buildingFilter: string = 'All',
+  statusFilter: string = 'All'
 ): Promise<PaginatedResourcesData> {
   const supabase = await createClient()
 
   try {
-    const from = (page - 1) * limit
-    const to = from + limit - 1
+    // When status filter is applied, we need to fetch more data because status is calculated dynamically
+    // We'll fetch a larger batch and then filter client-side
+    const batchSize = statusFilter !== 'All' ? limit * 3 : limit // Fetch 3x more when status filter is active
+    const from = (page - 1) * batchSize
+    const to = from + batchSize - 1
 
     let query = supabase
       .from('resources')
@@ -230,12 +239,26 @@ export async function getPaginatedResources(
       }
     })
 
-    const hasMore = (from + limit) < totalCount
+    // Apply status filter after transformation (since status is dynamically calculated)
+    let filteredResources = transformedResources
+    if (statusFilter !== 'All') {
+      filteredResources = transformedResources.filter(resource => resource.status === statusFilter)
+      
+      // When status filtering, trim to requested page size
+      const startIndex = 0
+      const endIndex = limit
+      filteredResources = filteredResources.slice(startIndex, endIndex)
+    }
+
+    // Calculate if there are more results
+    const hasMore = statusFilter !== 'All' 
+      ? filteredResources.length === limit // For status filtering, assume more if we got full page
+      : (from + limit) < totalCount
 
     return {
-      resources: transformedResources,
+      resources: filteredResources,
       hasMore,
-      totalCount
+      totalCount: statusFilter !== 'All' ? filteredResources.length : totalCount
     }
   } catch (error) {
     console.error('Error in getPaginatedResources:', error)
