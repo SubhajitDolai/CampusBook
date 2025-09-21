@@ -129,8 +129,8 @@ export async function getUserBookings(): Promise<BookingWithDetails[]> {
     }
 
     // Fetch approver profiles in a single batch to avoid per-row lookups
-    const approverIds = Array.from(new Set(bookings
-      .map((b: any) => b.approved_by)
+    const approverIds = Array.from(new Set((bookings as Array<{ approved_by?: string | null }>)
+      .map(b => b.approved_by)
       .filter(Boolean))) as string[]
 
     let approverMap: Record<string, ApproverDetails> = {}
@@ -141,7 +141,7 @@ export async function getUserBookings(): Promise<BookingWithDetails[]> {
         .in('id', approverIds)
 
       if (approvers && !approversError) {
-        approverMap = approvers.reduce((acc: Record<string, ApproverDetails>, a: any) => {
+        approverMap = (approvers as ApproverDetails[]).reduce((acc, a) => {
           acc[a.id] = {
             id: a.id,
             name: a.name,
@@ -150,7 +150,7 @@ export async function getUserBookings(): Promise<BookingWithDetails[]> {
             role: a.role
           }
           return acc
-        }, {})
+        }, {} as Record<string, ApproverDetails>)
       } else if (approversError) {
         console.error('Error fetching approvers:', approversError)
       }
