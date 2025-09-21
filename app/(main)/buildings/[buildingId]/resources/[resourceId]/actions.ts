@@ -228,6 +228,22 @@ export async function createBooking(formData: FormData) {
       return { error: 'User not authenticated' }
     }
 
+    // Check that the user's profile is approved
+    const { data: currentProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('approved')
+      .eq('id', user.id)
+      .single()
+
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError)
+      return { error: 'Failed to verify user profile' }
+    }
+
+    if (!currentProfile || currentProfile.approved !== true) {
+      return { error: 'Account pending approval' }
+    }
+
     // Verify that the resource exists and is active
     const { data: resource, error: resourceError } = await supabase
       .from('resources')

@@ -13,12 +13,49 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
+import { createClient } from '@/utils/supabase/client'
+import { Lock, RefreshCw, Clipboard } from 'lucide-react'
 
 interface BookingFormProps {
   resourceId: string
 }
 
 export default function BookingForm({ resourceId }: BookingFormProps) {
+  const [isApproved, setIsApproved] = React.useState<boolean | null>(null)
+  const [isChecking, setIsChecking] = React.useState(false)
+  const [userEmail, setUserEmail] = React.useState<string | null>(null)
+
+  const checkApproval = React.useCallback(async () => {
+    setIsChecking(true)
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setIsApproved(false)
+        setUserEmail(null)
+        return
+      }
+      setUserEmail(user.email ?? null)
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('approved')
+        .eq('id', user.id)
+        .single()
+      if (error) {
+        console.error('Error fetching profile for approval check:', error)
+        setIsApproved(false)
+      } else {
+        setIsApproved(!!profile?.approved)
+      }
+    } catch (err) {
+      console.error('Error checking approval status:', err)
+      setIsApproved(false)
+    } finally {
+      setIsChecking(false)
+    }
+  }, [])
+
+  React.useEffect(() => { checkApproval() }, [checkApproval])
   const router = useRouter()
   const { start } = useGlobalLoadingBar()
   const [startDate, setStartDate] = React.useState<Date>()
@@ -121,6 +158,55 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  // If approval state is known and user is not approved, show message
+  if (isApproved === false) {
+    const contactMessage = `Hello admin, my account (${userEmail || 'unknown'}) is pending approval. Please review and approve my profile so I can create bookings.`
+    return (
+      <Card>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center gap-4 py-8">
+            <div className="rounded-full bg-muted p-4">
+              <Lock className="h-7 w-7 text-muted-foreground" />
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold">Account pending approval</h3>
+              <p className="text-sm text-muted-foreground mt-1">Your account is awaiting admin approval. You cannot create bookings until your account is approved.</p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+                onClick={() => checkApproval()}
+                disabled={isChecking}
+              >
+                <RefreshCw className="h-4 w-4" />
+                {isChecking ? 'Checking...' : 'Refresh status'}
+              </button>
+
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(contactMessage)
+                    toast.success('Copied message to clipboard')
+                  } catch {
+                    toast('Could not copy to clipboard')
+                  }
+                }}
+              >
+                <Clipboard className="h-4 w-4" />
+                Copy contact message
+              </button>
+            </div>
+            <div className="text-xs text-muted-foreground">If you need help, contact support or your department admin.</div>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (

@@ -37,6 +37,7 @@ import {
   GraduationCap
 } from "lucide-react"
 import { getUsers, promoteUserToAdmin, demoteUserToFaculty } from "../actions"
+import { approveUser, unapproveUser } from "../actions"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -52,6 +53,9 @@ type User = {
   designation: string | null
   department: string
   role: string
+  approved?: boolean
+  approved_by?: string | null
+  approved_at?: string | null
   created_at: string
   seating_location?: string | null
   building_name?: string | null
@@ -103,6 +107,34 @@ export default function UsersPage() {
   const { role: currentUserRole, loading: roleLoading } = useCurrentUserRole();
   const [promotingId, setPromotingId] = useState<string | null>(null);
   const [demotingId, setDemotingId] = useState<string | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [unapprovingId, setUnapprovingId] = useState<string | null>(null);
+
+  const handleApprove = async (userId: string) => {
+    setApprovingId(userId);
+    const result = await approveUser(userId);
+    if (result && result.success) {
+      setUsers((prev) => prev.map(u => u.id === userId ? { ...u, approved: true } : u));
+      setFilteredUsers((prev) => prev.map(u => u.id === userId ? { ...u, approved: true } : u));
+      toast.success('User approved')
+    } else {
+      toast.error(result?.error || 'Failed to approve user')
+    }
+    setApprovingId(null);
+  }
+
+  const handleUnapprove = async (userId: string) => {
+    setUnapprovingId(userId);
+    const result = await unapproveUser(userId);
+    if (result && result.success) {
+      setUsers((prev) => prev.map(u => u.id === userId ? { ...u, approved: false } : u));
+      setFilteredUsers((prev) => prev.map(u => u.id === userId ? { ...u, approved: false } : u));
+      toast.success('User unapproved')
+    } else {
+      toast.error(result?.error || 'Failed to unapprove user')
+    }
+    setUnapprovingId(null);
+  }
 
   useEffect(() => {
     async function fetchUsers() {
@@ -307,7 +339,10 @@ export default function UsersPage() {
                       <TableHead>Gender</TableHead>
                       <TableHead>Seating Location</TableHead>
                       <TableHead>Role</TableHead>
-                      {!roleLoading && currentUserRole === 'super_admin' && <TableHead>Action</TableHead>}
+                      {!roleLoading && (currentUserRole === 'super_admin' || currentUserRole === 'admin') && <>
+                        <TableHead>Action</TableHead>
+                        <TableHead>Approval</TableHead>
+                      </>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -375,34 +410,63 @@ export default function UsersPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          {getRoleBadge(user.role)}
+                          <div className="flex items-center gap-2">
+                            {getRoleBadge(user.role)}
+                            {user.approved ? <Badge variant="default">Approved</Badge> : <Badge variant="secondary">Pending</Badge>}
+                          </div>
                         </TableCell>
-                        {!roleLoading && currentUserRole === 'super_admin' && (
-                          <TableCell>
-                            {user.role === 'faculty' && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                disabled={promotingId === user.id}
-                                onClick={() => handlePromoteToAdmin(user.id)}
-                              >
-                                {promotingId === user.id ? 'Promoting...' : 'Make Admin'}
-                              </Button>
-                            )}
-                            {user.role === 'admin' && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                disabled={demotingId === user.id}
-                                onClick={() => handleDemoteToFaculty(user.id)}
-                              >
-                                {demotingId === user.id ? 'Demoting...' : 'Demote to Faculty'}
-                              </Button>
-                            )}
-                            {user.role === 'super_admin' && (
-                              <span className="text-xs text-muted-foreground">Super Admin</span>
-                            )}
-                          </TableCell>
+                        {!roleLoading && (currentUserRole === 'super_admin' || currentUserRole === 'admin') && (
+                          <>
+                            <TableCell>
+                              {user.role === 'faculty' && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={promotingId === user.id}
+                                  onClick={() => handlePromoteToAdmin(user.id)}
+                                >
+                                  {promotingId === user.id ? 'Promoting...' : 'Make Admin'}
+                                </Button>
+                              )}
+                              {user.role === 'admin' && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={demotingId === user.id}
+                                  onClick={() => handleDemoteToFaculty(user.id)}
+                                >
+                                  {demotingId === user.id ? 'Demoting...' : 'Demote to Faculty'}
+                                </Button>
+                              )}
+                              {user.role === 'super_admin' && (
+                                <span className="text-xs text-muted-foreground">Super Admin</span>
+                              )}
+                            </TableCell>
+
+                            <TableCell>
+                              {/* Approval actions moved to their own column */}
+                              {!user.approved && (
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  disabled={approvingId === user.id}
+                                  onClick={() => handleApprove(user.id)}
+                                >
+                                  {approvingId === user.id ? 'Approving...' : 'Approve'}
+                                </Button>
+                              )}
+                              {user.approved && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={unapprovingId === user.id}
+                                  onClick={() => handleUnapprove(user.id)}
+                                >
+                                  {unapprovingId === user.id ? 'Working...' : 'Unapprove'}
+                                </Button>
+                              )}
+                            </TableCell>
+                          </>
                         )}
                       </TableRow>
                     ))}
