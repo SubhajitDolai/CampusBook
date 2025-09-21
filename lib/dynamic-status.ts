@@ -9,6 +9,8 @@ export interface Booking {
   weekdays?: number[] // Array of weekday numbers (1=Sunday, 2=Monday, ..., 7=Saturday)
 }
 
+import { getISTDateString, getISTTimeString, getISTDayOfWeek } from './ist'
+
 export function calculateDynamicStatus(
   manualStatus: string | null,
   bookings: Booking[] = []
@@ -18,14 +20,28 @@ export function calculateDynamicStatus(
     return manualStatus
   }
 
-  // Get current date and time
-  const now = new Date()
-  const currentDate = now.toISOString().split('T')[0] // YYYY-MM-DD
-  const currentTime = now.toTimeString().split(' ')[0].substring(0, 5) // HH:MM
-  
-  // Get current day of week (JavaScript: 0=Sunday, 1=Monday, ..., 6=Saturday)
-  // Convert to our format: (1=Sunday, 2=Monday, ..., 7=Saturday)
-  const currentDayOfWeek = now.getDay() + 1
+  // Use IST-based current date/time/day
+  const currentDate = getISTDateString() // YYYY-MM-DD in IST
+  const currentTime = getISTTimeString() // HH:MM in IST
+  const currentDayOfWeek = getISTDayOfWeek()
+
+
+  // Helper: normalize a time string (HH:MM or HH:MM:SS) to seconds since midnight
+  function normalizeTimeToSeconds(t: string): number {
+    if (!t) return NaN
+    const parts = t.split(':').map(p => parseInt(p, 10))
+    if (parts.length === 2) {
+      const [h, m] = parts
+      return (h * 3600) + (m * 60)
+    }
+    if (parts.length >= 3) {
+      const [h, m, s] = parts
+      return (h * 3600) + (m * 60) + (s || 0)
+    }
+    return NaN
+  }
+
+  const currentSec = normalizeTimeToSeconds(currentTime)
 
   // Check if resource is currently in use based on APPROVED bookings only
   const isCurrentlyInUse = bookings.some(booking => {
@@ -54,8 +70,23 @@ export function calculateDynamicStatus(
       return false
     }
 
-    // Check if current time is within booking time range
-    const isWithinTimeRange = currentTime >= startTime && currentTime <= endTime
+    // Numeric time comparison (handles HH:MM and HH:MM:SS formats)
+    const startSec = normalizeTimeToSeconds(startTime)
+    const endSec = normalizeTimeToSeconds(endTime)
+
+    if (Number.isNaN(startSec) || Number.isNaN(endSec) || Number.isNaN(currentSec)) {
+      // If any time is malformed, skip this booking as a safety measure
+      return false
+    }
+
+    // Handle normal range and overnight spans (start > end means spans midnight)
+    let isWithinTimeRange = false
+    if (startSec <= endSec) {
+      isWithinTimeRange = (currentSec >= startSec && currentSec <= endSec)
+    } else {
+      // Overnight booking (e.g., 22:00 - 02:00): true if current >= start OR current <= end
+      isWithinTimeRange = (currentSec >= startSec || currentSec <= endSec)
+    }
 
     return isWithinTimeRange
   })

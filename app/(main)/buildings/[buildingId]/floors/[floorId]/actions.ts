@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { calculateDynamicStatus, type Booking } from '@/lib/dynamic-status'
+import { getISTDateString } from '@/lib/ist'
 
 export async function getBuildingDetails(buildingId: string) {
   const supabase = await createClient()
@@ -184,7 +185,7 @@ export async function getResourcesWithStatus(floorId: string) {
       .select('resource_id, start_date, end_date, start_time, end_time, status, weekdays')
       .in('resource_id', resourceIds)
       .eq('status', 'approved')  // Only approved bookings affect resource status
-      .gte('end_date', new Date().toISOString().split('T')[0])
+      .gte('end_date', getISTDateString())
 
     if (bookingsError) {
       console.error('Error fetching bookings:', bookingsError)

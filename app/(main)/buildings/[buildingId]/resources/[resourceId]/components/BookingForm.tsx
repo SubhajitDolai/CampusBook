@@ -8,6 +8,7 @@ import { TimePicker } from '@/components/ui/time-picker'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { createBooking } from '../actions'
+import { getISTDateString } from '@/lib/ist'
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -94,8 +95,8 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
       // Create FormData for the server action
       const formData = new FormData()
       formData.append('resourceId', resourceId)
-      formData.append('startDate', startDate.toISOString().split('T')[0])
-      formData.append('endDate', endDate.toISOString().split('T')[0])
+  formData.append('startDate', getISTDateString(startDate))
+  formData.append('endDate', getISTDateString(endDate))
       formData.append('startTime', startTime)
       formData.append('endTime', endTime)
       formData.append('reason', reason)

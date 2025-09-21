@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { getISTDateString } from '@/lib/ist'
 import { redirect } from 'next/navigation'
 import { calculateDynamicStatus, type Booking } from '@/lib/dynamic-status'
 
@@ -168,7 +169,7 @@ export async function getPaginatedResources(
       )
     }
 
-    const { data: resources, error, count } = await query
+  const { data: resources, error, count } = await query
 
     if (error) {
       console.error('Error fetching paginated resources:', error)
@@ -188,7 +189,7 @@ export async function getPaginatedResources(
         .select('resource_id, start_date, end_date, start_time, end_time, status, weekdays')
         .in('resource_id', resourceIds)
         .eq('status', 'approved')
-        .gte('end_date', new Date().toISOString().split('T')[0])
+        .gte('end_date', getISTDateString())
 
       if (bookingsError) {
         console.error('Error fetching bookings:', bookingsError)
