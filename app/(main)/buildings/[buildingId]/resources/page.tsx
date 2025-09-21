@@ -210,7 +210,7 @@ export default function BuildingResourcesPage({ params }: { params: Promise<{ bu
                       <CardDescription>{resource.description}</CardDescription>
                     </div>
                     <Badge 
-                      variant={resource.status === 'Available' ? 'default' : 'secondary'}
+                      variant={resource.status === 'Available' ? 'default' : 'destructive'}
                     >
                       {resource.status}
                     </Badge>

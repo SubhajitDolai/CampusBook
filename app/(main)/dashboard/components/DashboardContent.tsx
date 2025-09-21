@@ -6,26 +6,26 @@ import { QuickActionsCard } from './QuickActionsCard'
 
 export async function DashboardContent() {
   // Single optimized call instead of 3 separate API calls
-  const { stats, recentBookings, quickStats } = await getAllDashboardData()
+  const { stats, recentBookings, quickStats, profile } = await getAllDashboardData()
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6 pt-0">
       {/* Welcome Section */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Welcome back!</h1>
+        <h1 className="text-3xl font-bold mb-2">Welcome back{profile?.name ? `, ${profile.name}` : ''}!</h1>
         <p className="text-muted-foreground">Here&apos;s what&apos;s happening with your bookings today.</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
-          title="Total Bookings"
+          title="My Total Bookings"
           value={stats.totalBookings}
           icon={Calendar}
           description="All time bookings"
         />
         <StatsCard
-          title="Upcoming"
+          title="My Upcoming"
           value={stats.upcomingBookings}
           icon={Clock}
           description="Future bookings"
@@ -40,7 +40,7 @@ export async function DashboardContent() {
           title="Avg Duration"
           value={`${quickStats.averageBookingDuration}h`}
           icon={TrendingUp}
-          description="Average booking length"
+          description="My Average booking length"
         />
       </div>
 

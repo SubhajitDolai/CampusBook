@@ -7,11 +7,11 @@ export function getStatusBadgeVariant(status: string): 'default' | 'secondary' |
     case 'Available':
       return 'default'
     case 'In Use':
-      return 'secondary'
+      return 'destructive'
     case 'Maintenance':
       return 'outline'
     case 'Unavailable':
-      return 'destructive'
+      return 'secondary'
     default:
       return 'outline'
   }

@@ -40,6 +40,7 @@ export async function getAllDashboardData(): Promise<{
   stats: DashboardStats
   recentBookings: RecentBooking[]
   quickStats: QuickStats
+  profile?: { id: string; name: string } | null
 }> {
   const supabase = await createClient()
 
@@ -136,10 +137,27 @@ export async function getAllDashboardData(): Promise<{
     }))
     const quickStats = calculateQuickStats(transformedBookings)
 
+    // Fetch current user's profile (minimal) for display in the dashboard
+    let profile: { id: string; name: string } | null = null
+    try {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, name')
+        .eq('id', user.id)
+        .single()
+
+      if (!profileError && profileData) {
+        profile = { id: profileData.id, name: profileData.name }
+      }
+    } catch (err) {
+      console.error('Failed to fetch profile for dashboard:', err)
+    }
+
     return {
       stats,
       recentBookings,
-      quickStats
+      quickStats,
+      profile
     }
   } catch (error) {
     console.error('Error in getAllDashboardData:', error)

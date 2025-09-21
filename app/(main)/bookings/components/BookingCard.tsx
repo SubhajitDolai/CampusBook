@@ -229,7 +229,7 @@ export function BookingCard({ booking, onCancel, showCancelButton = false }: Boo
               )}
               {booking.approved_by && (
                 <div className="text-xs text-muted-foreground">
-                  Approved by: {booking.approved_by}
+                  Approved by: {booking.approver?.name ?? booking.approved_by}
                 </div>
               )}
             </div>
@@ -248,7 +248,7 @@ export function BookingCard({ booking, onCancel, showCancelButton = false }: Boo
         
         {/* Actions */}
         <div className="flex items-center justify-end pt-4">
-          {showCancelButton && (booking.status === 'approved' || booking.status === 'pending') && onCancel && (
+          {showCancelButton && booking.status === 'pending' && onCancel && (
             <Button 
               variant="outline" 
               size="sm"

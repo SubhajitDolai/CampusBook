@@ -2,6 +2,14 @@
 
 import { createClient } from '@/utils/supabase/server'
 
+export interface ApproverDetails {
+  id: string
+  name: string
+  email: string
+  department: string
+  role: string
+}
+
 export interface BookingWithDetails {
   id: string
   resource_id: string
@@ -14,6 +22,7 @@ export interface BookingWithDetails {
   status: string
   approved_by: string | null
   approved_at: string | null
+  approver?: ApproverDetails | null
   created_at: string
   weekdays?: number[]
   faculty_name?: string
@@ -119,6 +128,34 @@ export async function getUserBookings(): Promise<BookingWithDetails[]> {
       return []
     }
 
+    // Fetch approver profiles in a single batch to avoid per-row lookups
+    const approverIds = Array.from(new Set(bookings
+      .map((b: any) => b.approved_by)
+      .filter(Boolean))) as string[]
+
+    let approverMap: Record<string, ApproverDetails> = {}
+    if (approverIds.length > 0) {
+      const { data: approvers, error: approversError } = await supabase
+        .from('profiles')
+        .select('id, name, email, department, role')
+        .in('id', approverIds)
+
+      if (approvers && !approversError) {
+        approverMap = approvers.reduce((acc: Record<string, ApproverDetails>, a: any) => {
+          acc[a.id] = {
+            id: a.id,
+            name: a.name,
+            email: a.email,
+            department: a.department,
+            role: a.role
+          }
+          return acc
+        }, {})
+      } else if (approversError) {
+        console.error('Error fetching approvers:', approversError)
+      }
+    }
+
     // Transform the data to handle array responses from joins
     const transformedBookings: BookingWithDetails[] = bookings.map((booking) => {
       const resource = Array.isArray(booking.resources) ? booking.resources[0] : booking.resources
@@ -151,6 +188,7 @@ export async function getUserBookings(): Promise<BookingWithDetails[]> {
           buildings: building || { id: '', name: 'Unknown Building', code: '' },
           floors: floor || { id: '', floor_number: 0, name: null }
         },
+        approver: booking.approved_by ? approverMap[booking.approved_by] || null : null,
         profiles: userProfile || {
           id: '',
           name: 'Unknown User',

@@ -144,7 +144,7 @@ export default async function FloorDetailsPage({ params }: { params: Promise<{ b
                       <CardDescription>{resource.description}</CardDescription>
                     </div>
                     <Badge 
-                      variant={resource.status === 'Available' ? 'default' : 'secondary'}
+                      variant={resource.status === 'Available' ? 'default' : 'destructive'}
                     >
                       {resource.status}
                     </Badge>
