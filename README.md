@@ -196,6 +196,36 @@ campusbook/
 - Recurring booking patterns
 - Approval workflows for sensitive resources
 
+---
+
+## 🛠️ Developer notes
+
+These notes summarize recent implementation details and recommended next steps for developers working on CampusBook.
+
+- Approval workflow
+   - `profiles` table now includes `approved BOOLEAN`, `approved_by UUID`, and `approved_at TIMESTAMPTZ` fields.
+   - Admin actions: `approveUser` / `unapproveUser` are implemented in `app/admin/actions.ts` and are role-protected (only `admin` / `super_admin`).
+   - Client gating: booking forms check the user's `profiles.approved` flag and show a friendly "Account pending approval" UI if false.
+   - Server guard: resource `createBooking` server actions verify `profiles.approved === true` before inserting bookings (defense-in-depth).
+
+- Timezone & dynamic status
+   - All dynamic resource status calculations use IST helpers (`lib/ist`) and `lib/dynamic-status` to compute whether a resource is `Available` or `In Use` based on APPROVED bookings only.
+   - Overnight bookings and weekday selections are handled correctly by numeric time comparisons and weekday checks.
+
+- Database
+   - See `database/schema.sql` for the current schema. The `bookings` table includes `approved_by` and `approved_at` fields for tracking approvals.
+   - Ensure migrations are applied to your Supabase instance when deploying (schema changes must be run manually or via your migration tooling).
+
+- Security & recommendations
+   - Server-side checks are implemented but we strongly recommend adding Supabase Row Level Security (RLS) policies to prevent unapproved users from inserting into `bookings` at the DB layer.
+   - Add integration tests for: (1) unapproved user cannot create a booking, (2) admin can approve a user and booking creation succeeds afterward.
+
+- Developer tasks (suggested)
+   1. Add RLS policy SQL and test it in staging.
+   2. Add 2-3 integration tests around the approval/booking flow.
+   3. Optional: surface approver name and timestamp more places (booking details, audit logs).
+
+
 #### 📊 Dashboard & Analytics
 - Personal booking history and statistics
 - Resource utilization metrics
