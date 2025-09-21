@@ -160,6 +160,9 @@ export async function getUsers() {
         designation,
         department,
         role,
+        approved,
+        approved_by,
+        approved_at,
         created_at,
         seating_location,
         building_name,
@@ -175,6 +178,72 @@ export async function getUsers() {
   } catch (error) {
     console.error('Error fetching users:', error)
     return []
+  }
+}
+
+export async function approveUser(userId: string) {
+  const supabase = await createClient();
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: 'User not authenticated' };
+
+    const { data: currentUserProfile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (!currentUserProfile || (currentUserProfile.role !== 'admin' && currentUserProfile.role !== 'super_admin')) {
+      return { error: 'Only admins or super admins can approve users' };
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ approved: true, approved_by: user.id, approved_at: new Date().toISOString() })
+      .eq('id', userId);
+
+    if (error) {
+      console.error('Error approving user:', error);
+      return { error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('Error in approveUser:', err);
+    return { error: 'Failed to approve user' };
+  }
+}
+
+export async function unapproveUser(userId: string) {
+  const supabase = await createClient();
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: 'User not authenticated' };
+
+    const { data: currentUserProfile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (!currentUserProfile || (currentUserProfile.role !== 'admin' && currentUserProfile.role !== 'super_admin')) {
+      return { error: 'Only admins or super admins can unapprove users' };
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ approved: false, approved_by: null, approved_at: null })
+      .eq('id', userId);
+
+    if (error) {
+      console.error('Error unapproving user:', error);
+      return { error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('Error in unapproveUser:', err);
+    return { error: 'Failed to unapprove user' };
   }
 }
 

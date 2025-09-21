@@ -31,6 +31,10 @@ CREATE TABLE profiles (
   cabin VARCHAR(50),
   cubicle VARCHAR(50),
   workstation VARCHAR(50),
+  -- Approval workflow fields
+  approved BOOLEAN NOT NULL DEFAULT false,
+  approved_by UUID,
+  approved_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
