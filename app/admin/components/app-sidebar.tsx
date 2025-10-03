@@ -13,6 +13,7 @@ import {
   Layers,
   LayoutDashboard,
   Boxes,
+  Grid3X3,
 } from "lucide-react"
 import { logout } from "@/app/(auth)/login/actions"
 import {
@@ -102,6 +103,11 @@ export function AppSidebar() {
       title: "Bookings",
       href: "/admin/bookings",
       icon: Calendar,
+    },
+    {
+      title: "Bulk Bookings",
+      href: "/admin/bulk-bookings",
+      icon: Grid3X3,
     },
     {
       title: "Users",
