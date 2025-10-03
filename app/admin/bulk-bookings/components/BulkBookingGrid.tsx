@@ -129,7 +129,7 @@ export function BulkBookingGrid() {
   return (
     <div className="space-y-4">
       {/* Header Actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-2">
           <Button onClick={addRow} variant="outline" size="sm">
             <Plus className="h-4 w-4 mr-2" />
@@ -140,13 +140,14 @@ export function BulkBookingGrid() {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={validateRows} variant="outline" size="sm">
+          <Button onClick={validateRows} variant="outline" size="sm" className="flex-1 sm:flex-none">
             Validate
           </Button>
           <Button 
             onClick={handleSubmit} 
             disabled={isSubmitting || rows.length === 0}
             size="sm"
+            className="flex-1 sm:flex-none"
           >
             <Save className="h-4 w-4 mr-2" />
             {isSubmitting ? 'Creating...' : 'Create All Bookings'}
@@ -154,8 +155,8 @@ export function BulkBookingGrid() {
         </div>
       </div>
 
-      {/* Grid Header */}
-      <Card>
+      {/* Grid Header - Desktop Only */}
+      <Card className="hidden md:block">
         <CardContent className="p-4">
           <div className="grid grid-cols-12 gap-2 text-sm font-medium text-muted-foreground mb-4">
             <div className="col-span-1">#</div>
@@ -190,11 +191,36 @@ export function BulkBookingGrid() {
         </CardContent>
       </Card>
 
+      {/* Mobile Layout */}
+      <div className="md:hidden space-y-4">
+        {rows.map((row, index) => (
+          <BookingRow
+            key={row.tempId}
+            row={row}
+            index={index}
+            conflicts={getRowConflicts(row.tempId)}
+            onUpdate={(updates: Partial<BulkBookingRow>) => updateRow(row.tempId, updates)}
+            onRemove={() => removeRow(row.tempId)}
+            onCopy={() => copyRow(row.tempId)}
+          />
+        ))}
+
+        {rows.length === 0 && (
+          <Card>
+            <CardContent className="p-8">
+              <div className="text-center text-muted-foreground">
+                <p>No booking rows. Click &quot;Add Row&quot; to start.</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
       {/* Conflicts Summary */}
       {conflicts.length > 0 && (
         <Card>
           <CardContent className="p-4">
-            <h3 className="font-medium mb-2">Validation Results</h3>
+            <h3 className="font-medium mb-2 text-sm md:text-base">Validation Results</h3>
             <div className="space-y-2">
               {conflicts.map(conflict => (
                 <div key={conflict.tempId} className="text-sm">
@@ -202,9 +228,9 @@ export function BulkBookingGrid() {
                   {conflict.conflicts.length === 0 ? (
                     <span className="text-green-600 ml-2">✓ No conflicts</span>
                   ) : (
-                    <div className="ml-2 space-y-1">
+                    <div className="ml-2 space-y-1 mt-1">
                       {conflict.conflicts.map((conf, idx: number) => (
-                        <div key={idx} className={`text-${conf.type === 'overlap_approved' ? 'red' : 'yellow'}-600`}>
+                        <div key={idx} className={`text-xs md:text-sm ${conf.type === 'overlap_approved' ? 'text-red-600' : 'text-yellow-600'}`}>
                           ⚠ {conf.message}
                         </div>
                       ))}

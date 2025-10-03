@@ -49,8 +49,8 @@ export default function BulkBookingsPage() {
           {/* Header */}
           <div className="flex flex-col gap-2">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Bulk Bookings</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Bulk Bookings</h1>
+              <p className="text-muted-foreground text-sm md:text-base">
                 Create multiple bookings at once. All bookings will be automatically approved.
               </p>
             </div>
@@ -58,13 +58,13 @@ export default function BulkBookingsPage() {
 
           {/* Bulk Booking Grid */}
           <Card>
-            <CardHeader>
-              <CardTitle>Create Multiple Bookings</CardTitle>
-              <CardDescription>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg md:text-xl">Create Multiple Bookings</CardTitle>
+              <CardDescription className="text-sm">
                 Add rows to create multiple bookings. Use the cascading dropdowns to select Building → Floor → Resource for each booking.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <BulkBookingGrid />
             </CardContent>
           </Card>

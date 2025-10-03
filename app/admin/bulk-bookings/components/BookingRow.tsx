@@ -129,7 +129,149 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
 
   return (
     <Card className={`p-4 ${hasBlockingConflicts ? 'border-red-200 bg-red-50' : hasConflicts ? 'border-yellow-200 bg-yellow-50' : ''}`}>
-      <div className="grid grid-cols-12 gap-4 items-start">
+      {/* Mobile Layout */}
+      <div className="block md:hidden space-y-4">
+        {/* Row Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">Row {index + 1}</span>
+            {hasConflicts && (
+              <AlertCircle className="h-4 w-4 text-red-500" />
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={onCopy} variant="outline" size="sm">
+              <Copy className="h-3 w-3" />
+            </Button>
+            <Button onClick={onRemove} variant="outline" size="sm">
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Location Section */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium text-muted-foreground">Location</h4>
+          <div className="space-y-2">
+            <Select value={row.building_id} onValueChange={(value) => onUpdate({ building_id: value })}>
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Select building" />
+              </SelectTrigger>
+              <SelectContent>
+                {buildings.map(building => (
+                  <SelectItem key={building.id} value={building.id}>
+                    {building.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select 
+              value={row.floor_id} 
+              onValueChange={(value) => onUpdate({ floor_id: value })}
+              disabled={!row.building_id || loadingFloors}
+            >
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Select floor" />
+              </SelectTrigger>
+              <SelectContent>
+                {floors.map(floor => (
+                  <SelectItem key={floor.id} value={floor.id}>
+                    {floor.name || `Floor ${floor.floor_number}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select 
+              value={row.resource_id} 
+              onValueChange={(value) => onUpdate({ resource_id: value })}
+              disabled={!row.floor_id || loadingResources}
+            >
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Select resource" />
+              </SelectTrigger>
+              <SelectContent>
+                {resources.map(resource => (
+                  <SelectItem key={resource.id} value={resource.id}>
+                    {resource.name} ({resource.type}, {resource.capacity} seats)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Date & Time Section */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium text-muted-foreground">Schedule</h4>
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              type="date"
+              value={row.start_date}
+              onChange={(e) => onUpdate({ start_date: e.target.value })}
+              className="h-10"
+              placeholder="Start date"
+            />
+            <Input
+              type="date"
+              value={row.end_date}
+              onChange={(e) => onUpdate({ end_date: e.target.value })}
+              className="h-10"
+              placeholder="End date"
+            />
+            <Input
+              type="time"
+              value={row.start_time}
+              onChange={(e) => onUpdate({ start_time: e.target.value })}
+              className="h-10"
+              placeholder="Start time"
+            />
+            <Input
+              type="time"
+              value={row.end_time}
+              onChange={(e) => onUpdate({ end_time: e.target.value })}
+              className="h-10"
+              placeholder="End time"
+            />
+          </div>
+        </div>
+
+        {/* Course & Details Section */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium text-muted-foreground">Course Details</h4>
+          <div className="space-y-2">
+            <Input
+              value={row.subject}
+              onChange={(e) => onUpdate({ subject: e.target.value })}
+              placeholder="Subject *"
+              className="h-10"
+            />
+            <Input
+              value={row.class_name}
+              onChange={(e) => onUpdate({ class_name: e.target.value })}
+              placeholder="Class *"
+              className="h-10"
+            />
+            <Input
+              value={row.faculty_name}
+              onChange={(e) => onUpdate({ faculty_name: e.target.value })}
+              placeholder="Faculty name"
+              className="h-10"
+            />
+            <Textarea
+              value={row.reason}
+              onChange={(e) => onUpdate({ reason: e.target.value })}
+              placeholder="Reason *"
+              className="resize-none"
+              rows={3}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Layout */}
+      <div className="hidden md:grid grid-cols-12 gap-4 items-start">
         {/* Row Number */}
         <div className="col-span-1 flex items-center justify-center">
           <span className="text-sm font-medium">{index + 1}</span>
@@ -271,9 +413,9 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
       {/* Weekdays */}
       <div className="mt-4 pt-4 border-t">
         <Label className="text-sm font-medium mb-2 block">Days of the week</Label>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 md:gap-2">
           {weekdays.map((weekday) => (
-            <div key={weekday.id} className="flex items-center space-x-1">
+            <div key={weekday.id} className="flex items-center space-x-1 min-w-0">
               <Checkbox
                 id={`${row.tempId}-weekday-${weekday.id}`}
                 checked={row.weekdays.includes(weekday.id)}
@@ -283,7 +425,7 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
               />
               <Label 
                 htmlFor={`${row.tempId}-weekday-${weekday.id}`} 
-                className="text-xs cursor-pointer"
+                className="text-xs cursor-pointer whitespace-nowrap"
               >
                 {weekday.label}
               </Label>
