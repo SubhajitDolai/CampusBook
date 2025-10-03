@@ -166,7 +166,7 @@ export default function HeroSection() {
                                     className="rounded-(--radius) mx-auto flex w-fit items-center gap-2 border p-1 pr-3"
                                 >
                                     <span className="bg-muted rounded-[calc(var(--radius)-0.25rem)] px-2 py-1 text-xs">New</span>
-                                    <span className="text-sm">Introducing CampusBook</span>
+                                    <span className="text-sm text-blue-500 dark:text-white">Introducing CampusBook</span>
                                     <span className="bg-(--color-border) block h-4 w-px"></span>
                                     <ArrowRight className="size-4" />
                                 </button>
@@ -199,56 +199,56 @@ export default function HeroSection() {
                                     modules={[Autoplay, EffectCoverflow]}>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <CalendarCheck className="h-10 w-10 mb-4" />
+                                            <CalendarCheck className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
                                             <p className="text-center text-lg font-medium">Instant Booking</p>
                                             <span className="text-muted-foreground text-sm mt-2">Reserve any campus space in just a few clicks.</span>
                                         </div>
                                     </SwiperSlide>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <Clock className="h-10 w-10 mb-4" />
+                                            <Clock className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
                                             <p className="text-center text-lg font-medium">Real-Time Availability</p>
                                             <span className="text-muted-foreground text-sm mt-2">See up-to-date schedules and avoid double bookings.</span>
                                         </div>
                                     </SwiperSlide>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <Bell className="h-10 w-10 mb-4" />
+                                            <Bell className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
                                             <p className="text-center text-lg font-medium">Automated Reminders</p>
                                             <span className="text-muted-foreground text-sm mt-2">Get notified before your bookings start.</span>
                                         </div>
                                     </SwiperSlide>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <Smartphone className="h-10 w-10 mb-4" />
+                                            <Smartphone className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
                                             <p className="text-center text-lg font-medium">Mobile Friendly</p>
                                             <span className="text-muted-foreground text-sm mt-2">Book and manage resources from any device.</span>
                                         </div>
                                     </SwiperSlide>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <Fingerprint className="h-10 w-10 mb-4" />
+                                            <Fingerprint className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
                                             <p className="text-center text-lg font-medium">Secure Access</p>
                                             <span className="text-muted-foreground text-sm mt-2">Your bookings and data are always protected.</span>
                                         </div>
                                     </SwiperSlide>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <Settings2 className="h-10 w-10 mb-4" />
+                                            <Settings2 className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
                                             <p className="text-center text-lg font-medium">Easy Management</p>
                                             <span className="text-muted-foreground text-sm mt-2">View, edit, or cancel bookings with ease.</span>
                                         </div>
                                     </SwiperSlide>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <BarChart3 className="h-10 w-10 mb-4" />
+                                            <BarChart3 className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
                                             <p className="text-center text-lg font-medium">Analytics</p>
                                             <span className="text-muted-foreground text-sm mt-2">Track your bookings and usage statistics.</span>
                                         </div>
                                     </SwiperSlide>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <ShieldCheck className="h-10 w-10 mb-4" />
+                                            <ShieldCheck className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
                                             <p className="text-center text-lg font-medium">Access Control</p>
                                             <span className="text-muted-foreground text-sm mt-2">Only authorized faculty can book and manage specific resources.</span>
                                         </div>

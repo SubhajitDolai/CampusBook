@@ -112,6 +112,7 @@ export default function IntegrationsSection() {
                         <p className="text-muted-foreground">From lecture halls to labs, CampusBook covers all your university resource needs.</p>
 
                         <Button
+                            className='text-blue-500 dark:text-white'
                             variant="outline"
                             size="sm"
                             onClick={handleClick}

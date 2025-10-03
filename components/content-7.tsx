@@ -17,42 +17,42 @@ export default function ContentSection() {
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2">
                                     <Zap className="size-4" />
-                                    <h3 className="text-sm font-medium">Book Instantly</h3>
+                                    <h3 className="text-blue-500 dark:text-white text-sm font-medium">Book Instantly</h3>
                                 </div>
                                 <p className="text-muted-foreground text-sm">Reserve rooms, labs, and more in seconds.</p>
                             </div>
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2">
                                     <Cpu className="size-4" />
-                                    <h3 className="text-sm font-medium">Stay Organized</h3>
+                                    <h3 className="text-blue-500 dark:text-white text-sm font-medium">Stay Organized</h3>
                                 </div>
                                 <p className="text-muted-foreground text-sm">Manage all your bookings in one place with ease.</p>
                             </div>
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2">
                                     <Clock className="size-4" />
-                                    <h3 className="text-sm font-medium">Real-Time Availability</h3>
+                                    <h3 className="text-blue-500 dark:text-white text-sm font-medium">Real-Time Availability</h3>
                                 </div>
                                 <p className="text-muted-foreground text-sm">See up-to-date schedules and avoid double bookings.</p>
                             </div>
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2">
                                     <Bell className="size-4" />
-                                    <h3 className="text-sm font-medium">Automated Reminders</h3>
+                                    <h3 className="text-blue-500 dark:text-white text-sm font-medium">Automated Reminders</h3>
                                 </div>
                                 <p className="text-muted-foreground text-sm">Get notified before your bookings start.</p>
                             </div>
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2">
                                     <Smartphone className="size-4" />
-                                    <h3 className="text-sm font-medium">Mobile Friendly</h3>
+                                    <h3 className="text-blue-500 dark:text-white text-sm font-medium">Mobile Friendly</h3>
                                 </div>
                                 <p className="text-muted-foreground text-sm">Book and manage resources from any device.</p>
                             </div>
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2">
                                     <Fingerprint className="size-4" />
-                                    <h3 className="text-sm font-medium">Secure Access</h3>
+                                    <h3 className="text-blue-500 dark:text-white text-sm font-medium">Secure Access</h3>
                                 </div>
                                 <p className="text-muted-foreground text-sm">Your bookings and data are always protected.</p>
                             </div>
