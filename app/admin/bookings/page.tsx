@@ -69,6 +69,7 @@ type Booking = {
   faculty_name?: string
   subject?: string
   class_name?: string
+  weekdays?: number[]
   resources?: {
     id: string
     name: string
@@ -260,18 +261,26 @@ export default function BookingsPage() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
+    // Use simple string manipulation to avoid hydration issues
+    const date = new Date(dateString)
+    const year = date.getFullYear()
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const day = date.getDate().toString().padStart(2, '0')
+    return `${month}/${day}/${year}`
   }
 
+  const formatTime = (timeString: string) => {
+    // Convert 24-hour format to 12-hour AM/PM format to avoid hydration issues
+    const [hours, minutes] = timeString.slice(0, 5).split(':')
+    const hour24 = parseInt(hours)
+    const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24
+    const ampm = hour24 >= 12 ? 'PM' : 'AM'
+    return `${hour12}:${minutes} ${ampm}`
+  }
 
-
-  const formatDateTime = (dateString: string, timeString: string) => {
-    const date = new Date(dateString)
-    const time = new Date(`2000-01-01T${timeString}`)
-    return `${date.toLocaleDateString()} at ${time.toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    })}`
+  const formatWeekdays = (weekdays: number[]) => {
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    return weekdays.sort().map(day => dayNames[day - 1]).join(', ')
   }
 
   return (
@@ -388,6 +397,7 @@ export default function BookingsPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
+                    type="text"
                     placeholder="Search bookings by reason, user, or resource..."
                     className="pl-10"
                     value={searchTerm}
@@ -453,6 +463,7 @@ export default function BookingsPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Booking Details</TableHead>
+                        <TableHead>Academic Info</TableHead>
                         <TableHead>Resource</TableHead>
                         <TableHead>User</TableHead>
                         <TableHead>Schedule</TableHead>
@@ -470,30 +481,36 @@ export default function BookingsPage() {
                               </div>
                               <div>
                                 <p className="font-medium line-clamp-2">{booking.reason}</p>
-                                {/* Academic Information */}
-                                {(booking.subject || booking.faculty_name || booking.class_name) && (
-                                  <div className="flex items-center gap-2 mt-1">
-                                    {booking.subject && (
-                                      <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs">
-                                        {booking.subject}
-                                      </span>
-                                    )}
-                                    {booking.faculty_name && (
-                                      <span className="text-xs text-muted-foreground">
-                                        Faculty: {booking.faculty_name}
-                                      </span>
-                                    )}
-                                    {booking.class_name && (
-                                      <span className="text-xs text-muted-foreground">
-                                        Class: {booking.class_name}
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
                                 <p className="text-xs text-muted-foreground">
                                   Created {formatDate(booking.created_at)}
                                 </p>
                               </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {booking.subject && (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-xs font-medium text-muted-foreground">Subject:</span>
+                                  <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-medium">
+                                    {booking.subject}
+                                  </span>
+                                </div>
+                              )}
+                              {booking.class_name && (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-xs font-medium text-muted-foreground">Class:</span>
+                                  <span className="bg-green-50 text-green-700 px-2 py-1 rounded text-xs font-medium">
+                                    {booking.class_name}
+                                  </span>
+                                </div>
+                              )}
+                              {booking.faculty_name && (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-xs font-medium text-muted-foreground">Faculty:</span>
+                                  <span className="text-xs font-medium">{booking.faculty_name}</span>
+                                </div>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -509,6 +526,11 @@ export default function BookingsPage() {
                               <div className="text-xs text-muted-foreground">
                                 Floor {booking.resources?.floors?.floor_number}
                               </div>
+                              {booking.resources?.capacity && (
+                                <div className="text-xs text-muted-foreground">
+                                  Capacity: {booking.resources.capacity} seats
+                                </div>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -521,21 +543,29 @@ export default function BookingsPage() {
                                 {booking.profiles?.email}
                               </div>
                               <div className="text-xs text-muted-foreground">
-                                {booking.profiles?.university_id}
+                                ID: {booking.profiles?.university_id}
                               </div>
                               <div className="text-xs text-muted-foreground">
                                 {booking.profiles?.department}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Role: {booking.profiles?.role}
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="space-y-1">
                               <div className="text-sm">
-                                <span className="font-medium">From:</span> {formatDateTime(booking.start_date, booking.start_time)}
+                                <span className="font-medium">Date:</span> {formatDate(booking.start_date)} <span className="font-medium">to</span> {formatDate(booking.end_date)}
                               </div>
                               <div className="text-sm">
-                                <span className="font-medium">To:</span> {formatDateTime(booking.end_date, booking.end_time)}
+                                <span className="font-medium">Time:</span> {formatTime(booking.start_time)} <span className="font-medium">to</span> {formatTime(booking.end_time)}
                               </div>
+                              {booking.weekdays && booking.weekdays.length > 0 && (
+                                <div className="text-xs text-muted-foreground">
+                                  <span className="font-medium">Days:</span> {formatWeekdays(booking.weekdays)}
+                                </div>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell>
