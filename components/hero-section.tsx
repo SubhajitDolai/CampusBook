@@ -199,56 +199,56 @@ export default function HeroSection() {
                                     modules={[Autoplay, EffectCoverflow]}>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <CalendarCheck className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
+                                            <CalendarCheck className="h-10 w-10 mb-4" />
                                             <p className="text-center text-lg font-medium">Instant Booking</p>
                                             <span className="text-muted-foreground text-sm mt-2">Reserve any campus space in just a few clicks.</span>
                                         </div>
                                     </SwiperSlide>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <Clock className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
+                                            <Clock className="h-10 w-10 mb-4" />
                                             <p className="text-center text-lg font-medium">Real-Time Availability</p>
                                             <span className="text-muted-foreground text-sm mt-2">See up-to-date schedules and avoid double bookings.</span>
                                         </div>
                                     </SwiperSlide>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <Bell className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
+                                            <Bell className="h-10 w-10 mb-4" />
                                             <p className="text-center text-lg font-medium">Automated Reminders</p>
                                             <span className="text-muted-foreground text-sm mt-2">Get notified before your bookings start.</span>
                                         </div>
                                     </SwiperSlide>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <Smartphone className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
+                                            <Smartphone className="h-10 w-10 mb-4" />
                                             <p className="text-center text-lg font-medium">Mobile Friendly</p>
                                             <span className="text-muted-foreground text-sm mt-2">Book and manage resources from any device.</span>
                                         </div>
                                     </SwiperSlide>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <Fingerprint className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
+                                            <Fingerprint className="h-10 w-10 mb-4" />
                                             <p className="text-center text-lg font-medium">Secure Access</p>
                                             <span className="text-muted-foreground text-sm mt-2">Your bookings and data are always protected.</span>
                                         </div>
                                     </SwiperSlide>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <Settings2 className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
+                                            <Settings2 className="h-10 w-10 mb-4" />
                                             <p className="text-center text-lg font-medium">Easy Management</p>
                                             <span className="text-muted-foreground text-sm mt-2">View, edit, or cancel bookings with ease.</span>
                                         </div>
                                     </SwiperSlide>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <BarChart3 className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
+                                            <BarChart3 className="h-10 w-10 mb-4" />
                                             <p className="text-center text-lg font-medium">Analytics</p>
                                             <span className="text-muted-foreground text-sm mt-2">Track your bookings and usage statistics.</span>
                                         </div>
                                     </SwiperSlide>
                                     <SwiperSlide className="px-2">
                                         <div className="bg-background rounded-(--radius) h-44 max-w-lg border p-9 flex flex-col items-center justify-center">
-                                            <ShieldCheck className="h-10 w-10 mb-4 text-blue-500 dark:text-white" />
+                                            <ShieldCheck className="h-10 w-10 mb-4" />
                                             <p className="text-center text-lg font-medium">Access Control</p>
                                             <span className="text-muted-foreground text-sm mt-2">Only authorized faculty can book and manage specific resources.</span>
                                         </div>
