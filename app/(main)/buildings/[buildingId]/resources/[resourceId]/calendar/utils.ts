@@ -5,8 +5,9 @@ export function generateCalendarEvents(bookings: CalendarBooking[]): CalendarEve
   const events: CalendarEvent[] = []
 
   bookings.forEach((booking) => {
-    const startDate = new Date(booking.start_date)
-    const endDate = new Date(booking.end_date)
+    // Parse dates using IST timezone offset (+05:30)
+    const startDate = new Date(booking.start_date + 'T00:00:00+05:30')
+    const endDate = new Date(booking.end_date + 'T00:00:00+05:30')
     
     // Parse time strings
     const [startHour, startMinute] = booking.start_time.split(':').map(Number)
@@ -21,11 +22,14 @@ export function generateCalendarEvents(bookings: CalendarBooking[]): CalendarEve
       const dbDayOfWeek = dayOfWeek === 0 ? 1 : dayOfWeek + 1
       
       if (booking.weekdays.includes(dbDayOfWeek)) {
-        const eventStart = new Date(currentDate)
-        eventStart.setHours(startHour, startMinute, 0, 0)
+        // Create dates in IST timezone by using local date constructor
+        const year = currentDate.getFullYear()
+        const month = currentDate.getMonth()
+        const day = currentDate.getDate()
         
-        const eventEnd = new Date(currentDate)
-        eventEnd.setHours(endHour, endMinute, 0, 0)
+        // Create event start and end times in local timezone (IST)
+        const eventStart = new Date(year, month, day, startHour, startMinute)
+        const eventEnd = new Date(year, month, day, endHour, endMinute)
         
         events.push({
           id: `${booking.id}-${currentDate.toISOString().split('T')[0]}`,

@@ -16,11 +16,13 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { MapPin, Users, Clock, Building2, Layers, Calendar } from 'lucide-react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { getBuildingDetails, getFloorDetails, getResourceWithDetails, getResourceBookings } from './actions'
 import { notFound } from 'next/navigation'
 import BookingForm from './components/BookingForm'
 import ExistingBookings from './components/ExistingBookings'
-import { LoadingBarButton } from '../../../../../LoadingBarButton'
+// ...existing code...
 
 interface Building {
   id: string
@@ -143,18 +145,18 @@ export default async function ResourceDetailsPage({ params }: { params: Promise<
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="mb-8">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
                   <Building2 className="h-5 w-5 text-muted-foreground" />
                   <span className="text-muted-foreground">{building.name}</span>
                   <span className="text-muted-foreground">•</span>
                   <Layers className="h-5 w-5 text-muted-foreground" />
                   <span className="text-muted-foreground">{floor.name || `Floor ${floor.floor_number}`}</span>
                 </div>
-                <h1 className="text-3xl font-bold mb-2">{resource.name}</h1>
+                <h1 className="text-2xl md:text-3xl font-bold mb-2 truncate">{resource.name}</h1>
                 <p className="text-muted-foreground mb-4">{resource.description}</p>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <MapPin className="h-4 w-4" />
                     <span>{resource.location}</span>
@@ -169,18 +171,18 @@ export default async function ResourceDetailsPage({ params }: { params: Promise<
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <LoadingBarButton 
-                  href={`/buildings/${buildingId}/resources/${resourceId}/calendar`}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <Calendar className="h-4 w-4" />
-                  Calendar View
-                </LoadingBarButton>
-                <Badge variant={resource.status === 'Available' ? 'default' : 'destructive'}>
-                  {resource.status}
-                </Badge>
+              <div className="flex items-center gap-3 mt-3 md:mt-0 w-full md:w-auto justify-end">
+                <Link href={`/buildings/${buildingId}/resources/${resourceId}/calendar`} className="w-full md:w-auto">
+                  <Button variant="outline" size="sm" className="w-full md:w-auto">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Calendar View 
+                  </Button>
+                </Link>
+                <div className="ml-0 md:ml-0">
+                  <Badge variant={resource.status === 'Available' ? 'default' : 'destructive'}>
+                    {resource.status}
+                  </Badge>
+                </div>
               </div>
             </div>
           </div>

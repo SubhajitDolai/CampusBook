@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { GlobalRouteChangeHandler } from "@/components/GlobalRouteChangeHandler";
 import { LoadingBarProvider } from "@/components/providers/LoadingBarProvider";
+import { Toaster } from "sonner";
 // import { Analytics } from "@vercel/analytics/react";
 // import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -41,6 +42,7 @@ export default function RootLayout({
           <LoadingBarProvider>
             <GlobalRouteChangeHandler />
             {children}
+            <Toaster />
           </LoadingBarProvider>
           {/* <Analytics /> */}
           {/* <SpeedInsights /> */}

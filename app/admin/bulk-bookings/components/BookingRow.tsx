@@ -8,7 +8,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Copy, Trash2, AlertCircle } from 'lucide-react'
+import { toast } from 'sonner'
 import { BulkBookingRow, getBuildingsForBulk, getFloorsForBulk, getResourcesForBulk } from '../actions'
 
 interface BookingRowProps {
@@ -124,6 +136,16 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
     onUpdate({ weekdays: newWeekdays })
   }
 
+  const handleCopy = () => {
+    onCopy()
+    toast.success('Row copied successfully!')
+  }
+
+  const handleDelete = () => {
+    onRemove()
+    toast.success('Row deleted successfully!')
+  }
+
   const hasConflicts = conflicts.length > 0
   const hasBlockingConflicts = conflicts.some(c => c.type !== 'overlap_pending')
 
@@ -140,12 +162,28 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
             )}
           </div>
           <div className="flex gap-2">
-            <Button onClick={onCopy} variant="outline" size="sm">
+            <Button onClick={handleCopy} variant="outline" size="sm">
               <Copy className="h-3 w-3" />
             </Button>
-            <Button onClick={onRemove} variant="outline" size="sm">
-              <Trash2 className="h-3 w-3" />
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Trash2 className="h-3 w-3 text-red-500" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Booking Row</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this booking row? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
 
@@ -401,12 +439,28 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
 
         {/* Actions */}
         <div className="col-span-1 flex flex-col gap-2">
-          <Button onClick={onCopy} variant="outline" size="sm">
+          <Button onClick={handleCopy} variant="outline" size="sm">
             <Copy className="h-3 w-3" />
           </Button>
-          <Button onClick={onRemove} variant="outline" size="sm">
-            <Trash2 className="h-3 w-3" />
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Trash2 className="h-3 w-3 text-red-500" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Booking Row</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this booking row? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 

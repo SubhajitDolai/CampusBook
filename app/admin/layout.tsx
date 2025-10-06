@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { Toaster } from 'sonner'
 
 export default async function AdminLayout({
   children,
@@ -34,7 +35,12 @@ export default async function AdminLayout({
     }
 
     // User is authorized - render admin layout
-    return <>{children}</>
+    return (
+      <>
+        {children}
+        <Toaster />
+      </>
+    )
 
   } catch (error) {
     console.error('Admin layout error:', error)

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Plus, Save } from 'lucide-react'
+import { Plus, Save, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { BookingRow } from './BookingRow'
 import { BulkBookingRow, createBulkBookings, validateBulkBookings, ConflictCheck } from '../actions'
@@ -11,6 +11,7 @@ import { BulkBookingRow, createBulkBookings, validateBulkBookings, ConflictCheck
 export function BulkBookingGrid() {
   const [rows, setRows] = useState<BulkBookingRow[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isValidating, setIsValidating] = useState(false)
   const [conflicts, setConflicts] = useState<ConflictCheck[]>([])
 
   // Initialize with one empty row
@@ -76,6 +77,7 @@ export function BulkBookingGrid() {
       return false
     }
 
+    setIsValidating(true)
     try {
       const { conflicts: validationResults } = await validateBulkBookings(completeRows)
       setConflicts(validationResults)
@@ -89,11 +91,14 @@ export function BulkBookingGrid() {
         return false
       }
       
+      toast.success('Validation completed successfully!')
       return completeRows
     } catch (error) {
       console.error('Validation error:', error)
       toast.error('Failed to validate bookings')
       return false
+    } finally {
+      setIsValidating(false)
     }
   }
 
@@ -140,8 +145,15 @@ export function BulkBookingGrid() {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={validateRows} variant="outline" size="sm" className="flex-1 sm:flex-none">
-            Validate
+          <Button 
+            onClick={validateRows} 
+            variant="outline" 
+            size="sm" 
+            className="flex-1 sm:flex-none"
+            disabled={isValidating || rows.length === 0}
+          >
+            {isValidating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {isValidating ? 'Validating...' : 'Validate'}
           </Button>
           <Button 
             onClick={handleSubmit} 

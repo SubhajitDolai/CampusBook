@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/app/admin/components/app-sidebar"
+import { AppSidebar } from "../../../../../components/app-sidebar"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -88,7 +88,7 @@ export default async function CalendarPage({ params }: CalendarPageProps) {
       <AppSidebar />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-            <div className="flex items-center gap-2 px-4">
+            <div className="flex items-center gap-2 px-4 min-w-0">
             <SidebarTrigger className="-ml-1" />
             <Separator
               orientation="vertical"
@@ -125,7 +125,7 @@ export default async function CalendarPage({ params }: CalendarPageProps) {
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-4">
               <div className="flex-1">
-                <h1 className="text-3xl font-bold tracking-tight">Resource Calendar</h1>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Resource Calendar</h1>
                 <p className="text-muted-foreground">
                   View all bookings for {resource.name} in calendar format
                 </p>
@@ -199,7 +199,7 @@ export default async function CalendarPage({ params }: CalendarPageProps) {
             </Card>
 
             {/* Booking Stats */}
-            <div className="grid gap-4 md:grid-cols-5">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-5">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total</CardTitle>
@@ -258,7 +258,7 @@ export default async function CalendarPage({ params }: CalendarPageProps) {
           </div>
 
           {/* Calendar */}
-          <Card className="flex-1">
+            <Card className="flex-1 overflow-hidden">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
@@ -268,9 +268,9 @@ export default async function CalendarPage({ params }: CalendarPageProps) {
                 Interactive calendar view showing all bookings for this resource. Click on any booking to view details.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-auto">
               <div className="mb-4">
-                <div className="flex items-center gap-4 text-sm">
+                <div className="flex flex-wrap items-center gap-3 text-sm">
                   <div className="flex items-center gap-2">
                     <div className="h-3 w-3 rounded bg-green-500"></div>
                     <span>Approved</span>
@@ -290,8 +290,8 @@ export default async function CalendarPage({ params }: CalendarPageProps) {
                 </div>
               </div>
               
-              <div style={{ height: '600px' }}>
-                <ResourceCalendar 
+              <div className="h-[380px] sm:h-[520px] md:h-[600px]">
+                <ResourceCalendar
                   events={events}
                 />
               </div>
