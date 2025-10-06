@@ -1,7 +1,7 @@
 'use client'
 
 import { Calendar, momentLocalizer } from 'react-big-calendar'
-import moment from 'moment'
+import moment from 'moment-timezone'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { CalendarEvent } from '../actions'
 import { Badge } from '@/components/ui/badge'
@@ -15,6 +15,8 @@ import {
 import { useState } from 'react'
 import { Clock, User, Calendar as CalendarIcon, MapPin, Users } from 'lucide-react'
 
+// Set moment to use IST timezone
+moment.tz.setDefault('Asia/Kolkata')
 const localizer = momentLocalizer(moment)
 
 interface ResourceCalendarProps {
@@ -91,11 +93,8 @@ export default function ResourceCalendar({ events }: ResourceCalendarProps) {
   }
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const year = date.getFullYear()
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const day = date.getDate().toString().padStart(2, '0')
-    return `${month}/${day}/${year}`
+    // Use moment with IST timezone to format dates
+    return moment.tz(dateString, 'Asia/Kolkata').format('MM/DD/YYYY')
   }
 
   const formatWeekdays = (weekdays: number[]) => {
@@ -180,8 +179,20 @@ export default function ResourceCalendar({ events }: ResourceCalendarProps) {
         style={{ height: '100%' }}
         step={30}
         timeslots={2}
-        min={new Date(2024, 0, 1, 5, 0)} // 5 AM
-        max={new Date(2024, 0, 1, 23, 0)} // 11 PM
+        min={moment().startOf('day').hour(5).toDate()} // 5 AM IST
+        max={moment().startOf('day').hour(23).toDate()} // 11 PM IST
+        formats={{
+          timeGutterFormat: 'h:mm A',
+          dayFormat: 'ddd M/D',
+          dateFormat: 'D',
+          dayHeaderFormat: 'dddd, MMMM Do',
+          dayRangeHeaderFormat: ({ start, end }) => 
+            `${moment(start).format('MMMM Do')} - ${moment(end).format('MMMM Do, YYYY')}`,
+          agendaDateFormat: 'ddd M/D',
+          agendaTimeFormat: 'h:mm A',
+          agendaTimeRangeFormat: ({ start, end }) => 
+            `${moment(start).format('h:mm A')} - ${moment(end).format('h:mm A')}`
+        }}
       />
 
       {/* Event Details Dialog */}
