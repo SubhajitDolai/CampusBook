@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Users, Clock } from 'lucide-react'
+import { MapPin, Users, Clock, Calendar } from 'lucide-react'
 
 
 import { getBuildingDetails, getBuildingResources, getResourceTypes, getFloorsByBuilding } from './actions'
@@ -230,9 +230,18 @@ export default function BuildingResourcesPage({ params }: { params: Promise<{ bu
                       <Clock className="h-4 w-4" />
                       <span>{resource.type}</span>
                     </div>
-                    <LoadingBarButton href={`/buildings/${resolvedParams.buildingId}/resources/${resource.id}`} className="w-full">
-                      {resource.status === 'Available' ? 'Book Now' : 'View Details'}
-                    </LoadingBarButton>
+                    <div className="flex gap-2">
+                      <LoadingBarButton href={`/buildings/${resolvedParams.buildingId}/resources/${resource.id}`} className="flex-1">
+                        {resource.status === 'Available' ? 'Book Now' : 'View Details'}
+                      </LoadingBarButton>
+                      <LoadingBarButton 
+                        href={`/buildings/${resolvedParams.buildingId}/resources/${resource.id}/calendar`} 
+                        variant="outline"
+                        className="px-3"
+                      >
+                        <Calendar className="h-4 w-4" />
+                      </LoadingBarButton>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
