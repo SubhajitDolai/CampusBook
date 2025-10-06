@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Users, Clock, Building2 } from 'lucide-react'
+import { MapPin, Users, Clock, Building2, Calendar } from 'lucide-react'
 import { ResourceWithDetails } from '../actions'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 import { useRouter } from 'next/navigation'
@@ -55,12 +55,21 @@ export function ResourceCard({ resource }: ResourceCardProps) {
             <Clock className="h-4 w-4" />
             <span>{resource.type}</span>
           </div>
-          <Button 
-            className="w-full"
-            onClick={() => handleNavigation(`/buildings/${resource.building.id}/resources/${resource.id}`)}
-          >
-            {getButtonText(resource.status)}
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              className="flex-1"
+              onClick={() => handleNavigation(`/buildings/${resource.building.id}/resources/${resource.id}`)}
+            >
+              {getButtonText(resource.status)}
+            </Button>
+            <Button 
+              variant="outline"
+              size="default"
+              onClick={() => handleNavigation(`/buildings/${resource.building.id}/resources/${resource.id}/calendar`)}
+            >
+              <Calendar className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

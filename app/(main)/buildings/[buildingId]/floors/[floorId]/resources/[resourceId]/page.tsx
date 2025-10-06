@@ -15,11 +15,12 @@ import {
 } from "@/components/ui/sidebar"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Users, Clock, Building2, Layers } from 'lucide-react'
+import { MapPin, Users, Clock, Building2, Layers, Calendar } from 'lucide-react'
 import { getBuildingDetails, getFloorDetails, getResourceWithDetails, getResourceBookings } from './actions'
 import { notFound } from 'next/navigation'
 import BookingForm from './components/BookingForm'
 import ExistingBookings from './components/ExistingBookings'
+import { LoadingBarButton } from '../../../../../LoadingBarButton'
 
 interface Building {
   id: string
@@ -168,9 +169,19 @@ export default async function ResourceDetailsPage({ params }: { params: Promise<
                   </div>
                 </div>
               </div>
-              <Badge variant={resource.status === 'Available' ? 'default' : 'destructive'}>
-                {resource.status}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <LoadingBarButton 
+                  href={`/buildings/${buildingId}/resources/${resourceId}/calendar`}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Calendar View
+                </LoadingBarButton>
+                <Badge variant={resource.status === 'Available' ? 'default' : 'destructive'}>
+                  {resource.status}
+                </Badge>
+              </div>
             </div>
           </div>
 

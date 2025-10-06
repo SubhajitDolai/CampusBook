@@ -15,7 +15,9 @@ import {
 } from "@/components/ui/sidebar"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Users, Clock, Building2, Layers } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { MapPin, Users, Clock, Building2, Layers, Calendar } from 'lucide-react'
+import Link from 'next/link'
 import { getBuildingDetails, getFloorDetails, getResourceWithDetails, getResourceBookings } from './actions'
 import { notFound } from 'next/navigation'
 import BookingForm from './components/BookingForm'
@@ -174,9 +176,17 @@ export default async function BuildingResourceDetailsPage({ params }: { params: 
                   </div>
                 </div>
               </div>
-              <Badge variant={resource.status === 'Available' ? 'default' : 'destructive'}>
-                {resource.status}
-              </Badge>
+              <div className="flex items-center gap-3">
+                <Link href={`/buildings/${buildingId}/resources/${resourceId}/calendar`}>
+                  <Button variant="outline" size="sm">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    View Calendar
+                  </Button>
+                </Link>
+                <Badge variant={resource.status === 'Available' ? 'default' : 'destructive'}>
+                  {resource.status}
+                </Badge>
+              </div>
             </div>
           </div>
 

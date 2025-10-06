@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Layers, MapPin, Users, Building2 } from 'lucide-react'
+import { Layers, MapPin, Users, Building2, Calendar } from 'lucide-react'
 import React from 'react'
 import { getBuildingDetails, getFloorWithStats, getResourcesWithStatus } from './actions'
 import { notFound } from 'next/navigation'
@@ -160,9 +160,18 @@ export default async function FloorDetailsPage({ params }: { params: Promise<{ b
                       <Users className="h-4 w-4" />
                       <span>Capacity: {resource.capacity}</span>
                     </div>
-                    <LoadingBarButton href={`/buildings/${buildingId}/floors/${floorId}/resources/${resource.id}`} className="w-full">
-                      {resource.status === 'Available' ? 'Book Now' : 'View Details'}
-                    </LoadingBarButton>
+                    <div className="flex gap-2">
+                      <LoadingBarButton href={`/buildings/${buildingId}/floors/${floorId}/resources/${resource.id}`} className="flex-1">
+                        {resource.status === 'Available' ? 'Book Now' : 'View Details'}
+                      </LoadingBarButton>
+                      <LoadingBarButton 
+                        href={`/buildings/${buildingId}/resources/${resource.id}/calendar`} 
+                        variant="outline"
+                        className="flex-shrink-0"
+                      >
+                        <Calendar className="h-4 w-4" />
+                      </LoadingBarButton>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
