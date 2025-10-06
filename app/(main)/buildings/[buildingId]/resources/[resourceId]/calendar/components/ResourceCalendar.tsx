@@ -179,19 +179,24 @@ export default function ResourceCalendar({ events }: ResourceCalendarProps) {
         style={{ height: '100%' }}
         step={30}
         timeslots={2}
-        min={moment().startOf('day').hour(5).toDate()} // 5 AM IST
-        max={moment().startOf('day').hour(23).toDate()} // 11 PM IST
+        min={moment.tz('2024-01-01 05:00', 'YYYY-MM-DD HH:mm', 'Asia/Kolkata').toDate()} // 5 AM IST
+        max={moment.tz('2024-01-01 23:00', 'YYYY-MM-DD HH:mm', 'Asia/Kolkata').toDate()} // 11 PM IST
+        culture="en-IN"
         formats={{
-          timeGutterFormat: 'h:mm A',
-          dayFormat: 'ddd M/D',
-          dateFormat: 'D',
-          dayHeaderFormat: 'dddd, MMMM Do',
+          timeGutterFormat: (date) => moment.tz(date, 'Asia/Kolkata').format('h:mm A'),
+          dayFormat: (date) => moment.tz(date, 'Asia/Kolkata').format('ddd M/D'),
+          dateFormat: (date) => moment.tz(date, 'Asia/Kolkata').format('D'),
+          dayHeaderFormat: (date) => moment.tz(date, 'Asia/Kolkata').format('dddd, MMMM Do'),
           dayRangeHeaderFormat: ({ start, end }) => 
-            `${moment(start).format('MMMM Do')} - ${moment(end).format('MMMM Do, YYYY')}`,
-          agendaDateFormat: 'ddd M/D',
-          agendaTimeFormat: 'h:mm A',
+            `${moment.tz(start, 'Asia/Kolkata').format('MMMM Do')} - ${moment.tz(end, 'Asia/Kolkata').format('MMMM Do, YYYY')}`,
+          agendaDateFormat: (date) => moment.tz(date, 'Asia/Kolkata').format('ddd M/D'),
+          agendaTimeFormat: (date) => moment.tz(date, 'Asia/Kolkata').format('h:mm A'),
           agendaTimeRangeFormat: ({ start, end }) => 
-            `${moment(start).format('h:mm A')} - ${moment(end).format('h:mm A')}`
+            `${moment.tz(start, 'Asia/Kolkata').format('h:mm A')} - ${moment.tz(end, 'Asia/Kolkata').format('h:mm A')}`,
+          eventTimeRangeFormat: ({ start, end }) => 
+            `${moment.tz(start, 'Asia/Kolkata').format('h:mm A')} - ${moment.tz(end, 'Asia/Kolkata').format('h:mm A')}`,
+          selectRangeFormat: ({ start, end }) => 
+            `${moment.tz(start, 'Asia/Kolkata').format('h:mm A')} - ${moment.tz(end, 'Asia/Kolkata').format('h:mm A')}`
         }}
       />
 
