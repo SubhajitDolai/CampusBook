@@ -339,10 +339,12 @@ export default function UsersPage() {
                       <TableHead>Gender</TableHead>
                       <TableHead>Seating Location</TableHead>
                       <TableHead>Role</TableHead>
-                      {!roleLoading && (currentUserRole === 'super_admin' || currentUserRole === 'admin') && <>
+                      {!roleLoading && (currentUserRole === 'super_admin' || currentUserRole === 'admin') && (
                         <TableHead>Action</TableHead>
+                      )}
+                      {!roleLoading && (currentUserRole === 'super_admin' || currentUserRole === 'admin') && (
                         <TableHead>Approval</TableHead>
-                      </>}
+                      )}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -444,26 +446,33 @@ export default function UsersPage() {
                             </TableCell>
 
                             <TableCell>
-                              {/* Approval actions moved to their own column */}
-                              {!user.approved && (
-                                <Button
-                                  size="sm"
-                                  variant="default"
-                                  disabled={approvingId === user.id}
-                                  onClick={() => handleApprove(user.id)}
-                                >
-                                  {approvingId === user.id ? 'Approving...' : 'Approve'}
-                                </Button>
+                              {/* Approval actions - super_admin can approve anyone, admin can only approve faculty */}
+                              {(currentUserRole === 'super_admin' || (currentUserRole === 'admin' && user.role === 'faculty')) && (
+                                <>
+                                  {!user.approved && (
+                                    <Button
+                                      size="sm"
+                                      variant="default"
+                                      disabled={approvingId === user.id}
+                                      onClick={() => handleApprove(user.id)}
+                                    >
+                                      {approvingId === user.id ? 'Approving...' : 'Approve'}
+                                    </Button>
+                                  )}
+                                  {user.approved && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      disabled={unapprovingId === user.id}
+                                      onClick={() => handleUnapprove(user.id)}
+                                    >
+                                      {unapprovingId === user.id ? 'Working...' : 'Unapprove'}
+                                    </Button>
+                                  )}
+                                </>
                               )}
-                              {user.approved && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={unapprovingId === user.id}
-                                  onClick={() => handleUnapprove(user.id)}
-                                >
-                                  {unapprovingId === user.id ? 'Working...' : 'Unapprove'}
-                                </Button>
+                              {currentUserRole === 'admin' && user.role !== 'faculty' && (
+                                <span className="text-xs text-muted-foreground">No permission</span>
                               )}
                             </TableCell>
                           </>
