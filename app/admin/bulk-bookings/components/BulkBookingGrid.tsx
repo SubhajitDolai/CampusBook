@@ -60,6 +60,26 @@ export function BulkBookingGrid() {
   }, [])
 
   const validateRows = async () => {
+    // Check for temporal validation errors first
+    const hasTemporalErrors = rows.some(row => {
+      if (row.start_date && row.end_date && new Date(row.end_date) < new Date(row.start_date)) {
+        return true
+      }
+      if (row.start_time && row.end_time) {
+        const startMinutes = parseInt(row.start_time.split(':')[0]) * 60 + parseInt(row.start_time.split(':')[1])
+        const endMinutes = parseInt(row.end_time.split(':')[0]) * 60 + parseInt(row.end_time.split(':')[1])
+        if (endMinutes <= startMinutes) {
+          return true
+        }
+      }
+      return false
+    })
+    
+    if (hasTemporalErrors) {
+      toast.error('Please fix date and time validation errors')
+      return false
+    }
+    
     // Filter out incomplete rows
     const completeRows = rows.filter(row => 
       row.resource_id && 

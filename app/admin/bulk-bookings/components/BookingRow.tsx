@@ -60,6 +60,33 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
   const [resources, setResources] = useState<Resource[]>([])
   const [loadingFloors, setLoadingFloors] = useState(false)
   const [loadingResources, setLoadingResources] = useState(false)
+  const [localErrors, setLocalErrors] = useState<string[]>([])
+  
+  // Validation helper
+  const validateTemporalRange = (startDate: string, endDate: string, startTime: string, endTime: string) => {
+    const errors: string[] = []
+    
+    if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+      errors.push('End date cannot be before start date')
+    }
+    
+    if (startTime && endTime) {
+      const startMinutes = parseInt(startTime.split(':')[0]) * 60 + parseInt(startTime.split(':')[1])
+      const endMinutes = parseInt(endTime.split(':')[0]) * 60 + parseInt(endTime.split(':')[1])
+      
+      if (endMinutes <= startMinutes) {
+        errors.push('End time must be after start time')
+      }
+    }
+    
+    return errors
+  }
+  
+  // Validate on row changes
+  useEffect(() => {
+    const errors = validateTemporalRange(row.start_date, row.end_date, row.start_time, row.end_time)
+    setLocalErrors(errors)
+  }, [row.start_date, row.end_date, row.start_time, row.end_time])
 
   // Load buildings on mount
   useEffect(() => {
@@ -148,9 +175,10 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
 
   const hasConflicts = conflicts.length > 0
   const hasBlockingConflicts = conflicts.some(c => c.type !== 'overlap_pending')
+  const hasValidationErrors = localErrors.length > 0
 
   return (
-    <Card className={`p-4 ${hasBlockingConflicts ? 'border-red-200 bg-red-50' : hasConflicts ? 'border-yellow-200 bg-yellow-50' : ''}`}>
+    <Card className={`p-4 ${hasValidationErrors || hasBlockingConflicts ? 'border-red-200 bg-red-50' : hasConflicts ? 'border-yellow-200 bg-yellow-50' : ''}`}>
       {/* Mobile Layout */}
       <div className="block md:hidden space-y-4">
         {/* Row Header */}
@@ -248,28 +276,29 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
               type="date"
               value={row.start_date}
               onChange={(e) => onUpdate({ start_date: e.target.value })}
-              className="h-10"
+              className={`h-10 ${localErrors.some(e => e.includes('date')) ? 'border-red-500' : ''}`}
               placeholder="Start date"
             />
             <Input
               type="date"
               value={row.end_date}
               onChange={(e) => onUpdate({ end_date: e.target.value })}
-              className="h-10"
+              className={`h-10 ${localErrors.some(e => e.includes('date')) ? 'border-red-500' : ''}`}
               placeholder="End date"
+              min={row.start_date || undefined}
             />
             <Input
               type="time"
               value={row.start_time}
               onChange={(e) => onUpdate({ start_time: e.target.value })}
-              className="h-10"
+              className={`h-10 ${localErrors.some(e => e.includes('time')) ? 'border-red-500' : ''}`}
               placeholder="Start time"
             />
             <Input
               type="time"
               value={row.end_time}
               onChange={(e) => onUpdate({ end_time: e.target.value })}
-              className="h-10"
+              className={`h-10 ${localErrors.some(e => e.includes('time')) ? 'border-red-500' : ''}`}
               placeholder="End time"
             />
           </div>
@@ -374,15 +403,16 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
             type="date"
             value={row.start_date}
             onChange={(e) => onUpdate({ start_date: e.target.value })}
-            className="h-8"
+            className={`h-8 ${localErrors.some(e => e.includes('date')) ? 'border-red-500' : ''}`}
             placeholder="Start date"
           />
           <Input
             type="date"
             value={row.end_date}
             onChange={(e) => onUpdate({ end_date: e.target.value })}
-            className="h-8"
+            className={`h-8 ${localErrors.some(e => e.includes('date')) ? 'border-red-500' : ''}`}
             placeholder="End date"
+            min={row.start_date || undefined}
           />
         </div>
 
@@ -392,14 +422,14 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
             type="time"
             value={row.start_time}
             onChange={(e) => onUpdate({ start_time: e.target.value })}
-            className="h-8"
+            className={`h-8 ${localErrors.some(e => e.includes('time')) ? 'border-red-500' : ''}`}
             placeholder="Start time"
           />
           <Input
             type="time"
             value={row.end_time}
             onChange={(e) => onUpdate({ end_time: e.target.value })}
-            className="h-8"
+            className={`h-8 ${localErrors.some(e => e.includes('time')) ? 'border-red-500' : ''}`}
             placeholder="End time"
           />
         </div>
@@ -488,6 +518,19 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
         </div>
       </div>
 
+      {/* Local Validation Errors */}
+      {localErrors.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-red-200">
+          <div className="space-y-1">
+            {localErrors.map((error, idx) => (
+              <div key={idx} className="text-sm text-red-600">
+                ⚠ {error}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
       {/* Conflicts */}
       {conflicts.length > 0 && (
         <div className="mt-4 pt-4 border-t">

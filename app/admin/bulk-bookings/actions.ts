@@ -88,6 +88,27 @@ export async function validateBulkBookings(rows: BulkBookingRow[]) {
   for (const row of rows) {
     const rowConflicts: ConflictCheck['conflicts'] = []
     
+    // Temporal validation - check date range
+    if (row.start_date && row.end_date && new Date(row.end_date) < new Date(row.start_date)) {
+      rowConflicts.push({
+        type: 'resource_inactive',
+        message: 'End date cannot be before start date'
+      })
+    }
+    
+    // Temporal validation - check time range
+    if (row.start_time && row.end_time) {
+      const startTimeMinutes = parseInt(row.start_time.split(':')[0]) * 60 + parseInt(row.start_time.split(':')[1])
+      const endTimeMinutes = parseInt(row.end_time.split(':')[0]) * 60 + parseInt(row.end_time.split(':')[1])
+      
+      if (endTimeMinutes <= startTimeMinutes) {
+        rowConflicts.push({
+          type: 'resource_inactive',
+          message: 'End time must be after start time'
+        })
+      }
+    }
+    
     // Check if resource exists and is active
     const { data: resource } = await supabase
       .from('resources')
@@ -101,35 +122,58 @@ export async function validateBulkBookings(rows: BulkBookingRow[]) {
         message: 'Resource not found or inactive'
       })
     } else {
-      // Check for conflicting approved bookings
-      const { data: conflictingBookings } = await supabase
-        .from('bookings')
-        .select('id, start_date, end_date, start_time, end_time, weekdays')
-        .eq('resource_id', row.resource_id)
-        .eq('status', 'approved')
-        .not('end_date', 'lt', row.start_date)
-        .not('start_date', 'gt', row.end_date)
-      
-      if (conflictingBookings && conflictingBookings.length > 0) {
-        for (const conflict of conflictingBookings) {
-          // Check weekday intersection
-          const hasWeekdayOverlap = row.weekdays.some(day => 
-            conflict.weekdays.includes(day)
-          )
+      // Skip conflict checking if temporal validation already failed
+      if (rowConflicts.length === 0) {
+        // Check for conflicting approved bookings
+        const { data: approvedBookings } = await supabase
+          .from('bookings')
+          .select('id, start_date, end_date, start_time, end_time, weekdays, status')
+          .eq('resource_id', row.resource_id)
+          .eq('status', 'approved')
+          .gte('end_date', row.start_date)
+          .lte('start_date', row.end_date)
+        
+        // Check for conflicting pending bookings
+        const { data: pendingBookings } = await supabase
+          .from('bookings')
+          .select('id, start_date, end_date, start_time, end_time, weekdays, status')
+          .eq('resource_id', row.resource_id)
+          .eq('status', 'pending')
+          .gte('end_date', row.start_date)
+          .lte('start_date', row.end_date)
+        
+        const allConflictingBookings = [...(approvedBookings || []), ...(pendingBookings || [])]
+        
+        if (allConflictingBookings && allConflictingBookings.length > 0) {
+          const rowStartMinutes = parseInt(row.start_time.split(':')[0]) * 60 + parseInt(row.start_time.split(':')[1])
+          const rowEndMinutes = parseInt(row.end_time.split(':')[0]) * 60 + parseInt(row.end_time.split(':')[1])
           
-          if (hasWeekdayOverlap) {
-            // Check time overlap
-            const rowStart = row.start_time
-            const rowEnd = row.end_time
-            const conflictStart = conflict.start_time
-            const conflictEnd = conflict.end_time
+          for (const conflict of allConflictingBookings) {
+            // Check weekday intersection
+            const hasWeekdayOverlap = row.weekdays.some(day => 
+              conflict.weekdays.includes(day)
+            )
             
-            if (!(rowEnd <= conflictStart || rowStart >= conflictEnd)) {
-              rowConflicts.push({
-                type: 'overlap_approved',
-                message: `Conflicts with existing booking (${conflictStart}-${conflictEnd})`,
-                conflictingBookingId: conflict.id
-              })
+            if (hasWeekdayOverlap) {
+              // Improved time overlap check using minutes
+              const conflictStartMinutes = parseInt(conflict.start_time.split(':')[0]) * 60 + parseInt(conflict.start_time.split(':')[1])
+              const conflictEndMinutes = parseInt(conflict.end_time.split(':')[0]) * 60 + parseInt(conflict.end_time.split(':')[1])
+              
+              // Check if times overlap
+              const timeOverlap = (
+                (rowStartMinutes < conflictEndMinutes && rowEndMinutes > conflictStartMinutes)
+              )
+              
+              if (timeOverlap) {
+                const conflictType = conflict.status === 'approved' ? 'overlap_approved' : 'overlap_pending'
+                const statusText = conflict.status === 'approved' ? 'approved' : 'pending'
+                
+                rowConflicts.push({
+                  type: conflictType,
+                  message: `Conflicts with ${statusText} booking (${conflict.start_time}-${conflict.end_time}) on ${row.weekdays.filter(day => conflict.weekdays.includes(day)).map(day => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][day - 1]).join(', ')}`,
+                  conflictingBookingId: conflict.id
+                })
+              }
             }
           }
         }

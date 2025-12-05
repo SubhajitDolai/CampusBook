@@ -69,6 +69,7 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
   const [className, setClassName] = React.useState('')
 
   const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [isCheckingConflicts, setIsCheckingConflicts] = React.useState(false)
 
   // Weekday options with proper mapping
   const weekdays = [
@@ -104,7 +105,7 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!startDate || !endDate || !startTime || !endTime || !reason || !subject || !className) {
+    if (!startDate || !endDate || !startTime || !endTime || !reason || !facultyName || !subject || !className) {
       toast.error('Please fill in all required fields')
       return
     }
@@ -120,11 +121,64 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
       return
     }
 
-    // Validate that end time is not before start time for same day bookings
-    if (startDate.getTime() === endDate.getTime() && endTime <= startTime) {
+    // Improved temporal validation - convert time strings to comparable format
+    const startTimeMinutes = parseInt(startTime.split(':')[0]) * 60 + parseInt(startTime.split(':')[1])
+    const endTimeMinutes = parseInt(endTime.split(':')[0]) * 60 + parseInt(endTime.split(':')[1])
+    
+    if (endTimeMinutes <= startTimeMinutes) {
       toast.error('End time must be after start time')
       return
     }
+
+    // Check for booking conflicts
+    setIsCheckingConflicts(true)
+    try {
+      const supabase = createClient()
+      
+      // Check for overlapping bookings
+      const { data: conflictingBookings, error } = await supabase
+        .from('bookings')
+        .select('id, start_date, end_date, start_time, end_time, weekdays')
+        .eq('resource_id', resourceId)
+        .in('status', ['pending', 'approved'])
+        .gte('end_date', getISTDateString(startDate))
+        .lte('start_date', getISTDateString(endDate))
+      
+      if (error) {
+        console.error('Error checking conflicts:', error)
+        toast.error('Failed to check for booking conflicts. Please try again.')
+        setIsCheckingConflicts(false)
+        return
+      }
+
+      // Check for time and weekday conflicts
+      const hasConflict = conflictingBookings?.some(booking => {
+        const bookingStartMinutes = parseInt(booking.start_time.split(':')[0]) * 60 + parseInt(booking.start_time.split(':')[1])
+        const bookingEndMinutes = parseInt(booking.end_time.split(':')[0]) * 60 + parseInt(booking.end_time.split(':')[1])
+        
+        // Check if times overlap
+        const timeOverlap = (
+          (startTimeMinutes < bookingEndMinutes && endTimeMinutes > bookingStartMinutes)
+        )
+        
+        // Check if weekdays overlap
+        const weekdayOverlap = selectedWeekdays.some(day => booking.weekdays.includes(day))
+        
+        return timeOverlap && weekdayOverlap
+      })
+
+      if (hasConflict) {
+        toast.error('This time slot conflicts with an existing booking. Please choose a different time or date.')
+        setIsCheckingConflicts(false)
+        return
+      }
+    } catch (error) {
+      console.error('Error checking conflicts:', error)
+      toast.error('Failed to check for booking conflicts. Please try again.')
+      setIsCheckingConflicts(false)
+      return
+    }
+    setIsCheckingConflicts(false)
 
     setIsSubmitting(true)
 
@@ -283,7 +337,7 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
           {/* Academic Information */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="facultyName">Faculty Name (Optional)</Label>
+              <Label htmlFor="facultyName">Faculty Name *</Label>
               <input
                 id="facultyName"
                 type="text"
@@ -291,6 +345,7 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
                 value={facultyName}
                 onChange={(e) => setFacultyName(e.target.value)}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                required
               />
             </div>
 
@@ -390,9 +445,9 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={!startDate || !endDate || !startTime || !endTime || !reason || !subject || !className || selectedWeekdays.length === 0 || isSubmitting}
+            disabled={!startDate || !endDate || !startTime || !endTime || !reason || !facultyName || !subject || !className || selectedWeekdays.length === 0 || isSubmitting || isCheckingConflicts}
           >
-            {isSubmitting ? 'Creating Booking...' : 'Book Resource'}
+            {isCheckingConflicts ? 'Checking Conflicts...' : isSubmitting ? 'Creating Booking...' : 'Book Resource'}
           </Button>
         </form>
       </CardContent>
