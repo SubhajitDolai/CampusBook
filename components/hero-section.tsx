@@ -18,13 +18,13 @@ import { useTheme } from 'next-themes';
 
 const menuItems = [
     { name: 'Home', href: '#home' },
-    { name: 'Features', href: '#features' },
     { name: 'Integrations', href: '#integrations' },
+    { name: 'Features', href: '#features' },
     { name: 'How It Works', href: '#how-it-works' },
     { name: 'Stats', href: '#stats' },
     { name: 'Testimonials', href: '#testimonials' },
-    { name: 'FAQ', href: '#faq' },
     { name: 'Team', href: '#team' },
+    { name: 'FAQ', href: '#faq' },
 ];
 
 export default function HeroSection() {

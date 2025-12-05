@@ -173,13 +173,33 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
             </Select>
           </div>
 
-          {/* Specific Location */}
+          {/* Cabin */}
           <div className="grid gap-2">
-            <Label htmlFor="specific_location">Specific Location</Label>
+            <Label htmlFor="cabin">Cabin</Label>
             <Input
-              id="specific_location"
-              name="specific_location"
-              placeholder="e.g. Cabin 3, Cubicle A5, Workstation 12"
+              id="cabin"
+              name="cabin"
+              placeholder="e.g. Cabin 3"
+            />
+          </div>
+
+          {/* Cubicle */}
+          <div className="grid gap-2">
+            <Label htmlFor="cubicle">Cubicle</Label>
+            <Input
+              id="cubicle"
+              name="cubicle"
+              placeholder="e.g. Cubicle A5"
+            />
+          </div>
+
+          {/* Workstation */}
+          <div className="grid gap-2">
+            <Label htmlFor="workstation">Workstation</Label>
+            <Input
+              id="workstation"
+              name="workstation"
+              placeholder="e.g. Workstation 12"
             />
           </div>
         </div>

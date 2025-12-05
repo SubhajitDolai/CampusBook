@@ -25,7 +25,9 @@ export async function completeOnboarding(formData: FormData) {
   const building_name = formData.get('building_name') as string
   const floor_number = formData.get('floor_number') as string
   const room_number = formData.get('room_number') as string
-  const specific_location = formData.get('specific_location') as string
+  const cabin = formData.get('cabin') as string
+  const cubicle = formData.get('cubicle') as string
+  const workstation = formData.get('workstation') as string
 
   // Validate required fields
   if (!name || !university_id || !phone || !gender || !department || !designation) {
@@ -64,9 +66,9 @@ export async function completeOnboarding(formData: FormData) {
     building_name: building_name || null,
     floor_number: floor_number ? parseInt(floor_number) : null,
     room_number: room_number ? parseInt(room_number) : null,
-    cabin: seating_location === 'cabin' ? specific_location : null,
-    cubicle: seating_location === 'cubicle' ? specific_location : null,
-    workstation: seating_location === 'workstation' ? specific_location : null
+    cabin: cabin || null,
+    cubicle: cubicle || null,
+    workstation: workstation || null
   }
 
   if (existingProfile) {

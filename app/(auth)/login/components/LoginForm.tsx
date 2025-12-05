@@ -61,7 +61,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
       } else if (msg.includes('banned')) {
         setAlertTitle('Account Suspended')
         setAlertDescription('Your account has been suspended, please contact support.')
-        setAlertAction(() => router.push('/banned'))
+        setAlertAction(() => () => router.push('/banned'))
         setAlertOpen(true)
       } else {
         setAlertTitle('Error')

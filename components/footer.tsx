@@ -7,13 +7,13 @@ import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 const links = [
     { title: 'Home', href: '#home' },
-    { title: 'Features', href: '#features' },
     { title: 'Integrations', href: '#integrations' },
+    { title: 'Features', href: '#features' },
     { title: 'How It Works', href: '#how-it-works' },
     { title: 'Stats', href: '#stats' },
     { title: 'Testimonials', href: '#testimonials' },
-    { title: 'FAQ', href: '#faq' },
     { title: 'Team', href: '#team' },
+    { title: 'FAQ', href: '#faq' },
 ]
 
 export default function FooterSection() {
