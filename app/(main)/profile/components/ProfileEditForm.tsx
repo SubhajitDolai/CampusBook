@@ -22,10 +22,10 @@ const formSchema = z.object({
   gender: z.enum(["male", "female", "other"]),
   designation: z.string().min(1, "Designation is required"),
   department: z.string().min(1, "Department is required"),
-  seating_location: z.string().optional(),
-  building_name: z.string().optional(),
-  floor_number: z.string().optional(),
-  room_number: z.string().optional(),
+  seating_location: z.string().min(1, "Seating location type is required"),
+  building_name: z.string().min(1, "Building name is required"),
+  floor_number: z.string().min(1, "Floor number is required"),
+  room_number: z.string().min(1, "Room number is required"),
   cabin: z.string().optional(),
   cubicle: z.string().optional(),
   workstation: z.string().optional()
@@ -73,10 +73,10 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         gender: data.gender,
         designation: data.designation,
         department: data.department,
-        seating_location: data.seating_location || null,
-        building_name: data.building_name || null,
-        floor_number: data.floor_number ? parseInt(data.floor_number, 10) : null,
-        room_number: data.room_number ? parseInt(data.room_number, 10) : null,
+        seating_location: data.seating_location,
+        building_name: data.building_name,
+        floor_number: parseInt(data.floor_number, 10),
+        room_number: parseInt(data.room_number, 10),
         cabin: data.cabin || null,
         cubicle: data.cubicle || null,
         workstation: data.workstation || null
@@ -252,7 +252,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
                       name="building_name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Building Name</FormLabel>
+                          <FormLabel>Building Name *</FormLabel>
                           <FormControl>
                             <Input placeholder="e.g. Main Building, Block A" {...field} />
                           </FormControl>
@@ -265,7 +265,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
                       name="floor_number"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Floor Number</FormLabel>
+                          <FormLabel>Floor Number *</FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
@@ -283,7 +283,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
                       name="room_number"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Room Number</FormLabel>
+                          <FormLabel>Room Number *</FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
@@ -303,7 +303,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
                       name="seating_location"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Seating Location Type</FormLabel>
+                          <FormLabel>Seating Location Type *</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>

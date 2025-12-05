@@ -160,7 +160,7 @@ export default function HeroSection() {
                     <div className="relative py-24 lg:py-28">
                         <div className="mx-auto max-w-7xl px-6 md:px-12">
                             <div className="text-center sm:mx-auto sm:w-10/12 lg:mr-auto lg:mt-0 lg:w-4/5">
-                                <button
+                                {/* <button
                                     type="button"
                                     onClick={() => { start(); router.push('/dashboard'); }}
                                     className="rounded-(--radius) mx-auto flex w-fit items-center gap-2 border p-1 pr-3"
@@ -169,7 +169,7 @@ export default function HeroSection() {
                                     <span className="text-sm text-blue-500 dark:text-white">Introducing CampusBook</span>
                                     <span className="bg-(--color-border) block h-4 w-px"></span>
                                     <ArrowRight className="size-4" />
-                                </button>
+                                </button> */}
 
                                 <h1 className="mt-8 text-4xl font-semibold md:text-5xl xl:text-5xl xl:[line-height:1.125]">
                                     Book University Resources<br /> With Ease and Simplicity

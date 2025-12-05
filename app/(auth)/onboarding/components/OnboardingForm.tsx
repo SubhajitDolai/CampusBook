@@ -124,42 +124,45 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
           
           {/* Building Name */}
           <div className="grid gap-2">
-            <Label htmlFor="building_name">Building Name</Label>
+            <Label htmlFor="building_name">Building Name *</Label>
             <Input
               id="building_name"
               name="building_name"
               placeholder="e.g. Main Building, Block A"
+              required
             />
           </div>
 
           {/* Floor Number */}
           <div className="grid gap-2">
-            <Label htmlFor="floor_number">Floor Number</Label>
+            <Label htmlFor="floor_number">Floor Number *</Label>
             <Input
               id="floor_number"
               name="floor_number"
               type="number"
               placeholder="e.g. 2"
               min="0"
+              required
             />
           </div>
 
           {/* Room Number */}
           <div className="grid gap-2">
-            <Label htmlFor="room_number">Room Number</Label>
+            <Label htmlFor="room_number">Room Number *</Label>
             <Input
               id="room_number"
               name="room_number"
               type="number"
               placeholder="e.g. 201"
               min="0"
+              required
             />
           </div>
 
           {/* Seating Location Type */}
           <div className="grid gap-2">
-            <Label htmlFor="seating_location">Seating Location Type</Label>
-            <Select name="seating_location">
+            <Label htmlFor="seating_location">Seating Location Type *</Label>
+            <Select name="seating_location" required>
               <SelectTrigger>
                 <SelectValue placeholder="Select seating type" />
               </SelectTrigger>
