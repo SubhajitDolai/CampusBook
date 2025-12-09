@@ -3,7 +3,7 @@
 import { Calendar, momentLocalizer, View } from 'react-big-calendar'
 import moment from 'moment-timezone'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
-import { ScheduleEvent } from '../actions'
+import { ClassScheduleEvent } from '../actions'
 import { Badge } from '@/components/ui/badge'
 import {
   Dialog,
@@ -13,23 +13,23 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { useState, useCallback } from 'react'
-import { Clock, User, Calendar as CalendarIcon, MapPin, Building, Layers } from 'lucide-react'
+import { Clock, User, Calendar as CalendarIcon, MapPin } from 'lucide-react'
 
 // Set moment to use IST timezone
 moment.tz.setDefault('Asia/Kolkata')
 const localizer = momentLocalizer(moment)
 
-interface ScheduleCalendarProps {
-  events: ScheduleEvent[]
+interface ClassScheduleCalendarProps {
+  events: ClassScheduleEvent[]
 }
 
-export default function ScheduleCalendar({ events }: ScheduleCalendarProps) {
-  const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null)
+export default function ClassScheduleCalendar({ events }: ClassScheduleCalendarProps) {
+  const [selectedEvent, setSelectedEvent] = useState<ClassScheduleEvent | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [view, setView] = useState<View>('week')
   const [date, setDate] = useState(new Date())
 
-  const handleSelectEvent = (event: ScheduleEvent) => {
+  const handleSelectEvent = (event: ClassScheduleEvent) => {
     setSelectedEvent(event)
     setIsDialogOpen(true)
   }
@@ -42,7 +42,7 @@ export default function ScheduleCalendar({ events }: ScheduleCalendarProps) {
     setView(newView)
   }, [])
 
-  const getEventStyle = (event: ScheduleEvent) => {
+  const getEventStyle = (event: ClassScheduleEvent) => {
     const booking = event.resource
     let backgroundColor = '#3174ad' // default blue
     let borderColor = '#265985'
@@ -224,13 +224,13 @@ export default function ScheduleCalendar({ events }: ScheduleCalendarProps) {
         events={events}
         startAccessor="start"
         endAccessor="end"
-        onSelectEvent={handleSelectEvent}
-        eventPropGetter={getEventStyle}
-        views={['month', 'week', 'day']}
         view={view}
         date={date}
         onNavigate={handleNavigate}
         onView={handleViewChange}
+        onSelectEvent={handleSelectEvent}
+        eventPropGetter={getEventStyle}
+        views={['month', 'week', 'day']}
         popup
         style={{ height: '100%' }}
         step={30}
@@ -282,6 +282,19 @@ export default function ScheduleCalendar({ events }: ScheduleCalendarProps) {
                   {getStatusBadge(selectedEvent.resource.status)}
                 </div>
               </div>
+
+              {/* Faculty Info */}
+              {selectedEvent.resource.faculty_name && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">Faculty</span>
+                  </div>
+                  <div className="pl-6">
+                    <div className="text-sm font-medium">{selectedEvent.resource.faculty_name}</div>
+                  </div>
+                </div>
+              )}
 
               {/* Location Info */}
               {selectedEvent.resource.resources && (
