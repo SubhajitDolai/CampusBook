@@ -49,6 +49,7 @@ import {
   Check,
   X
 } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import { getBookings, approveBooking, rejectBooking, deleteBooking, getBookingStats } from "./actions"
@@ -120,6 +121,7 @@ export default function BookingsPage() {
   const [stats, setStats] = useState<BookingStats>({ total: 0, pending: 0, approved: 0, rejected: 0, cancelled: 0 })
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [isLoading, setIsLoading] = useState(true)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [deletingBooking, setDeletingBooking] = useState<Booking | null>(null)
   const [approvingId, setApprovingId] = useState<string | null>(null)
@@ -132,11 +134,14 @@ export default function BookingsPage() {
 
   const fetchBookings = async () => {
     try {
+      setIsLoading(true)
       const bookingsData = await getBookings()
       setBookings(bookingsData)
       setFilteredBookings(bookingsData)
     } catch (error) {
       console.error('Error fetching bookings:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -328,7 +333,11 @@ export default function BookingsPage() {
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.total}</div>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold">{stats.total}</div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   All bookings
                 </p>
@@ -340,7 +349,11 @@ export default function BookingsPage() {
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.pending}</div>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold">{stats.pending}</div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Awaiting approval
                 </p>
@@ -352,7 +365,11 @@ export default function BookingsPage() {
                 <CheckCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.approved}</div>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold">{stats.approved}</div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Confirmed bookings
                 </p>
@@ -364,7 +381,11 @@ export default function BookingsPage() {
                 <XCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.rejected}</div>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold">{stats.rejected}</div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Declined requests
                 </p>
@@ -376,7 +397,11 @@ export default function BookingsPage() {
                 <Ban className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.cancelled}</div>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold">{stats.cancelled}</div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Cancelled bookings
                 </p>
@@ -445,7 +470,28 @@ export default function BookingsPage() {
 
               {/* Bookings Table */}
               <div className="rounded-md border">
-                {filteredBookings.length === 0 ? (
+                {isLoading ? (
+                  <div className="p-4 space-y-4">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="flex items-center gap-4">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div className="flex-1 space-y-2">
+                          <Skeleton className="h-4 w-[250px]" />
+                          <Skeleton className="h-3 w-[150px]" />
+                        </div>
+                        <Skeleton className="h-6 w-24" />
+                        <Skeleton className="h-6 w-32" />
+                        <Skeleton className="h-6 w-28" />
+                        <Skeleton className="h-6 w-20" />
+                        <div className="flex gap-2">
+                          <Skeleton className="h-8 w-8" />
+                          <Skeleton className="h-8 w-8" />
+                          <Skeleton className="h-8 w-8" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : filteredBookings.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12">
                     <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
                       <Calendar className="h-8 w-8 text-muted-foreground" />

@@ -76,8 +76,12 @@ export function UserCard({ user }: UserCardProps) {
               {getRoleBadge(user.role)}
             </div>
             <CardDescription className="flex items-center gap-1">
+              <User className="h-4 w-4" />
+              <span className="truncate">{user.designation || 'Staff'}</span>
+            </CardDescription>
+            <CardDescription className="flex items-center gap-1 mt-0.5">
               {getDepartmentIcon(user.department)}
-              <span className="truncate">{user.designation || 'Staff'} • {user.department}</span>
+              <span className="truncate">{user.department}</span>
             </CardDescription>
           </div>
         </div>

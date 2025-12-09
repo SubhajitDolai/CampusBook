@@ -39,6 +39,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Building2,
   Search,
@@ -65,6 +66,7 @@ export default function BuildingsPage() {
   const [buildings, setBuildings] = useState<Building[]>([])
   const [filteredBuildings, setFilteredBuildings] = useState<Building[]>([])
   const [searchTerm, setSearchTerm] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editingBuilding, setEditingBuilding] = useState<Building | null>(null)
@@ -90,11 +92,14 @@ export default function BuildingsPage() {
 
   const fetchBuildings = async () => {
     try {
+      setIsLoading(true)
       const buildingsData = await getBuildings()
       setBuildings(buildingsData)
       setFilteredBuildings(buildingsData)
     } catch (error) {
       console.error('Error fetching buildings:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -366,7 +371,11 @@ export default function BuildingsPage() {
                 <Building2 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{filteredBuildings.length}</div>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold">{filteredBuildings.length}</div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   All buildings
                 </p>
@@ -378,9 +387,13 @@ export default function BuildingsPage() {
                 <CheckCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {filteredBuildings.filter(b => b.is_active).length}
-                </div>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold">
+                    {filteredBuildings.filter(b => b.is_active).length}
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Currently active
                 </p>
@@ -392,9 +405,13 @@ export default function BuildingsPage() {
                 <XCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {filteredBuildings.filter(b => !b.is_active).length}
-                </div>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold">
+                    {filteredBuildings.filter(b => !b.is_active).length}
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Currently inactive
                 </p>
@@ -425,7 +442,26 @@ export default function BuildingsPage() {
 
               {/* Buildings Table */}
               <div className="rounded-md border">
-                {filteredBuildings.length === 0 ? (
+                {isLoading ? (
+                  <div className="p-4 space-y-4">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="flex items-center gap-4">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div className="flex-1 space-y-2">
+                          <Skeleton className="h-4 w-[200px]" />
+                          <Skeleton className="h-3 w-[150px]" />
+                        </div>
+                        <Skeleton className="h-6 w-16" />
+                        <Skeleton className="h-4 w-[180px]" />
+                        <Skeleton className="h-6 w-20" />
+                        <div className="flex gap-2">
+                          <Skeleton className="h-8 w-8" />
+                          <Skeleton className="h-8 w-8" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : filteredBuildings.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12">
                     <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
                       <Building2 className="h-8 w-8 text-muted-foreground" />

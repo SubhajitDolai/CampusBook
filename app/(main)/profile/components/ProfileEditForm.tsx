@@ -135,11 +135,12 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         <User className="h-4 w-4" />
-                        Full Name *
+                        Full Name
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter your full name" {...field} />
+                        <Input placeholder="Enter your full name" {...field} disabled className="bg-muted cursor-not-allowed" />
                       </FormControl>
+                      <p className="text-xs text-muted-foreground">Name cannot be changed</p>
                       <FormMessage />
                     </FormItem>
                   )}

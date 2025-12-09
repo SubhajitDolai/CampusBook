@@ -36,6 +36,7 @@ import {
   Phone,
   GraduationCap
 } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 import { getUsers, promoteUserToAdmin, demoteUserToFaculty } from "../actions"
 import { approveUser, unapproveUser } from "../actions"
 import { useState, useEffect } from "react"
@@ -104,6 +105,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
   const [searchTerm, setSearchTerm] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
   const { role: currentUserRole, loading: roleLoading } = useCurrentUserRole();
   const [promotingId, setPromotingId] = useState<string | null>(null);
   const [demotingId, setDemotingId] = useState<string | null>(null);
@@ -138,9 +140,16 @@ export default function UsersPage() {
 
   useEffect(() => {
     async function fetchUsers() {
-      const usersData = await getUsers()
-      setUsers(usersData)
-      setFilteredUsers(usersData)
+      try {
+        setIsLoading(true)
+        const usersData = await getUsers()
+        setUsers(usersData)
+        setFilteredUsers(usersData)
+      } catch (error) {
+        console.error('Error fetching users:', error)
+      } finally {
+        setIsLoading(false)
+      }
     }
     fetchUsers()
   }, [])
@@ -257,7 +266,11 @@ export default function UsersPage() {
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{filteredUsers.length}</div>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold">{filteredUsers.length}</div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   All registered users
                 </p>
@@ -269,9 +282,13 @@ export default function UsersPage() {
                 <GraduationCap className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {filteredUsers.filter(u => u.role === 'faculty').length}
-                </div>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold">
+                    {filteredUsers.filter(u => u.role === 'faculty').length}
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Teaching staff
                 </p>
@@ -283,9 +300,13 @@ export default function UsersPage() {
                 <Settings className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {filteredUsers.filter(u => u.role === 'admin').length}
-                </div>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold">
+                    {filteredUsers.filter(u => u.role === 'admin').length}
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   System administrators
                 </p>
@@ -297,9 +318,13 @@ export default function UsersPage() {
                 <Building2 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {filteredUsers.filter(u => u.role === 'super_admin').length}
-                </div>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold">
+                    {filteredUsers.filter(u => u.role === 'super_admin').length}
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   System owners
                 </p>
@@ -330,6 +355,25 @@ export default function UsersPage() {
 
               {/* Users Table */}
               <div className="rounded-md border">
+                {isLoading ? (
+                  <div className="p-4 space-y-4">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="flex items-center gap-4">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div className="flex-1 space-y-2">
+                          <Skeleton className="h-4 w-[180px]" />
+                          <Skeleton className="h-3 w-[120px]" />
+                        </div>
+                        <Skeleton className="h-6 w-32" />
+                        <Skeleton className="h-6 w-40" />
+                        <Skeleton className="h-6 w-20" />
+                        <Skeleton className="h-6 w-28" />
+                        <Skeleton className="h-6 w-20" />
+                        <Skeleton className="h-8 w-24" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -481,6 +525,7 @@ export default function UsersPage() {
                     ))}
                   </TableBody>
                 </Table>
+                )}
               </div>
             </CardContent>
           </Card>
