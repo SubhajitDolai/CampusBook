@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Verify Your CampusBook Account</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; padding: 20px 20px 40px 20px;">
+    <tr>
+      <td align="center" valign="top">
+        
+        <table width="500" cellpadding="0" cellspacing="0" border="0" style="max-width: 500px; width: 100%; background-color: #fafafa; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e5e5e5;">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background-color: #09090b; padding: 48px 40px 36px 40px; text-align: center;">
+              <div style="width: 48px; height: 48px; background-color: #ffffff; border-radius: 8px; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 24px; height: 24px; background-color: #09090b; border-radius: 4px;"></div>
+              </div>
+              <h1 style="margin: 0; color: #ffffff; font-size: 26px; font-weight: 600; letter-spacing: -0.5px;">CampusBook</h1>
+              <p style="margin: 6px 0 0 0; color: #a1a1aa; font-size: 13px; font-weight: 500;">MIT-WPU Resource Booking Platform</p>
+            </td>
+          </tr>
+          
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 48px 40px;">
+              
+              <!-- Welcome Message -->
+              <div style="text-align: center; margin-bottom: 36px;">
+                <h2 style="margin: 0 0 12px 0; color: #09090b; font-size: 22px; font-weight: 600; line-height: 1.3;">Verify Your Email</h2>
+                <p style="margin: 0; color: #71717a; font-size: 15px; line-height: 1.6; max-width: 340px; margin-left: auto; margin-right: auto;">
+                  Welcome to CampusBook! Please verify your email address to activate your account and start booking campus resources.
+                </p>
+              </div>
+              
+              <!-- CTA Button -->
+              <div style="text-align: center; margin: 36px 0;">
+                <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+                  <tr>
+                    <td style="background-color: #09090b; border-radius: 6px; border: 1px solid #27272a;">
+                      <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email" 
+                         style="display: block; color: #ffffff; text-decoration: none; padding: 12px 32px; font-size: 14px; font-weight: 500; border-radius: 6px;">
+                        Verify Email Address
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              
+              <!-- Alternative Link -->
+              <p style="margin: 24px 0 36px 0; font-size: 12px; color: #a1a1aa; text-align: center; line-height: 1.5;">
+                Can't click the button? Copy this link:<br>
+                <span style="color: #71717a; word-break: break-all; font-family: 'Courier New', monospace;">{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email</span>
+              </p>
+              
+              <!-- Features Grid -->
+              <div style="margin: 40px 0 32px 0;">
+                <h3 style="margin: 0 0 24px 0; color: #09090b; font-size: 17px; font-weight: 600; text-align: center;">What you can do</h3>
+                
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                  <tr>
+                    <td width="48%" style="vertical-align: top; padding-right: 6px;">
+                      <div style="background-color: #ffffff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 18px;">
+                        <h4 style="margin: 0 0 6px 0; color: #09090b; font-size: 14px; font-weight: 600;">Book Resources</h4>
+                        <p style="margin: 0; color: #71717a; font-size: 12px; line-height: 1.4;">Reserve classrooms, labs, and facilities with real-time availability</p>
+                      </div>
+                    </td>
+                    <td width="4%"></td>
+                    <td width="48%" style="vertical-align: top; padding-left: 6px;">
+                      <div style="background-color: #ffffff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 18px;">
+                        <h4 style="margin: 0 0 6px 0; color: #09090b; font-size: 14px; font-weight: 600;">Track Bookings</h4>
+                        <p style="margin: 0; color: #71717a; font-size: 12px; line-height: 1.4;">View booking history and manage upcoming reservations</p>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+                
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                  <tr>
+                    <td width="48%" style="vertical-align: top; padding-right: 6px;">
+                      <div style="background-color: #ffffff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 18px;">
+                        <h4 style="margin: 0 0 6px 0; color: #09090b; font-size: 14px; font-weight: 600;">View Schedules</h4>
+                        <p style="margin: 0; color: #71717a; font-size: 12px; line-height: 1.4;">Check your personal schedule and class timetables at a glance</p>
+                      </div>
+                    </td>
+                    <td width="4%"></td>
+                    <td width="48%" style="vertical-align: top; padding-left: 6px;">
+                      <div style="background-color: #ffffff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 18px;">
+                        <h4 style="margin: 0 0 6px 0; color: #09090b; font-size: 14px; font-weight: 600;">Browse Buildings</h4>
+                        <p style="margin: 0; color: #71717a; font-size: 12px; line-height: 1.4;">Explore campus buildings, floors, and available resources</p>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              
+              <!-- Security Note -->
+              <div style="background-color: #ffffff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px; margin: 32px 0;">
+                <p style="margin: 0; color: #71717a; font-size: 12px; line-height: 1.5; text-align: center;">
+                  <strong style="color: #09090b;">Security:</strong> This verification link expires in 1 hour. If you didn't create a CampusBook account, you can safely ignore this email.
+                </p>
+              </div>
+              
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #ffffff; padding: 24px 40px; text-align: center; border-top: 1px solid #e5e5e5;">
+              <p style="margin: 0 0 8px 0; color: #71717a; font-size: 13px;">
+                Need help? Contact support at help@campusbook.mitwpu.edu.in
+              </p>
+              <p style="margin: 0; color: #a1a1aa; font-size: 11px;">
+                © 2025 CampusBook • MIT-WPU Resource Booking Platform
+              </p>
+            </td>
+          </tr>
+          
+        </table>
+        
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
