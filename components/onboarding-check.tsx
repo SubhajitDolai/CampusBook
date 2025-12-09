@@ -13,7 +13,7 @@ export default async function OnboardingCheck() {
     .eq('id', userData.user.id)
     .single();
 
-  if (!profile) redirect('/onboarding');
+  if (!profile || !profile.phone) redirect('/onboarding');
 
   return null;
 }

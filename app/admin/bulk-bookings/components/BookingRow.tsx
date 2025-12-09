@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -19,9 +19,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Copy, Trash2, AlertCircle } from 'lucide-react'
+import { Copy, Trash2, AlertCircle, Search, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { BulkBookingRow, getBuildingsForBulk, getFloorsForBulk, getResourcesForBulk } from '../actions'
+import { createClient } from '@/utils/supabase/client'
+
+interface FacultyOption {
+  name: string
+  email: string
+}
 
 interface BookingRowProps {
   row: BulkBookingRow
@@ -61,6 +67,92 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
   const [loadingFloors, setLoadingFloors] = useState(false)
   const [loadingResources, setLoadingResources] = useState(false)
   const [localErrors, setLocalErrors] = useState<string[]>([])
+  
+  // Faculty search state
+  const [facultyNameInput, setFacultyNameInput] = useState(row.faculty_name || '')
+  const [facultyOptions, setFacultyOptions] = useState<FacultyOption[]>([])
+  const [isSearchingFaculty, setIsSearchingFaculty] = useState(false)
+  const [showFacultyDropdown, setShowFacultyDropdown] = useState(false)
+  const facultyInputRef = useRef<HTMLInputElement>(null)
+  const facultyInputRefDesktop = useRef<HTMLInputElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const dropdownRefDesktop = useRef<HTMLDivElement>(null)
+
+  // Search for faculty names
+  const searchFaculty = useCallback(async (query: string) => {
+    if (query.length < 2) {
+      setFacultyOptions([])
+      return
+    }
+    
+    setIsSearchingFaculty(true)
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('name, email')
+        .ilike('name', `%${query}%`)
+        .limit(10)
+      
+      if (error) {
+        console.error('Error searching faculty:', error)
+        setFacultyOptions([])
+      } else {
+        setFacultyOptions(data || [])
+      }
+    } catch (err) {
+      console.error('Error searching faculty:', err)
+      setFacultyOptions([])
+    } finally {
+      setIsSearchingFaculty(false)
+    }
+  }, [])
+
+  // Debounced faculty search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (facultyNameInput && !row.faculty_name) {
+        searchFaculty(facultyNameInput)
+      }
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [facultyNameInput, row.faculty_name, searchFaculty])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node
+      if (
+        (dropdownRef.current && !dropdownRef.current.contains(target) &&
+         facultyInputRef.current && !facultyInputRef.current.contains(target)) &&
+        (dropdownRefDesktop.current && !dropdownRefDesktop.current.contains(target) &&
+         facultyInputRefDesktop.current && !facultyInputRefDesktop.current.contains(target))
+      ) {
+        setShowFacultyDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Sync facultyNameInput when row.faculty_name changes externally (e.g., copy)
+  useEffect(() => {
+    setFacultyNameInput(row.faculty_name || '')
+  }, [row.faculty_name])
+
+  const handleSelectFaculty = (option: FacultyOption) => {
+    onUpdate({ faculty_name: option.name })
+    setFacultyNameInput(option.name)
+    setShowFacultyDropdown(false)
+    setFacultyOptions([])
+  }
+
+  const handleClearFaculty = () => {
+    onUpdate({ faculty_name: '' })
+    setFacultyNameInput('')
+    setFacultyOptions([])
+    facultyInputRef.current?.focus()
+  }
   
   // Validation helper
   const validateTemporalRange = (startDate: string, endDate: string, startTime: string, endTime: string) => {
@@ -320,12 +412,67 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
               placeholder="Class *"
               className="h-10"
             />
-            <Input
-              value={row.faculty_name}
-              onChange={(e) => onUpdate({ faculty_name: e.target.value })}
-              placeholder="Faculty name"
-              className="h-10"
-            />
+            {/* Faculty Name with Autocomplete */}
+            <div className="relative">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  ref={facultyInputRef}
+                  value={facultyNameInput}
+                  onChange={(e) => {
+                    setFacultyNameInput(e.target.value)
+                    if (row.faculty_name) {
+                      onUpdate({ faculty_name: '' })
+                    }
+                    setShowFacultyDropdown(true)
+                  }}
+                  onFocus={() => {
+                    if (facultyNameInput.length >= 2 && !row.faculty_name) {
+                      setShowFacultyDropdown(true)
+                    }
+                  }}
+                  placeholder="Search faculty name"
+                  className="h-10 pl-9 pr-8"
+                />
+                {row.faculty_name && (
+                  <button
+                    type="button"
+                    onClick={handleClearFaculty}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              {showFacultyDropdown && facultyOptions.length > 0 && (
+                <div
+                  ref={dropdownRef}
+                  className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border rounded-md shadow-md max-h-48 overflow-auto"
+                >
+                  {facultyOptions.map((option, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleSelectFaculty(option)}
+                      className="w-full px-3 py-2 text-left hover:bg-accent flex flex-col"
+                    >
+                      <span className="font-medium">{option.name}</span>
+                      <span className="text-xs text-muted-foreground">{option.email}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {showFacultyDropdown && isSearchingFaculty && (
+                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border rounded-md shadow-md p-3 text-sm text-muted-foreground">
+                  Searching...
+                </div>
+              )}
+              {showFacultyDropdown && !isSearchingFaculty && facultyNameInput.length >= 2 && facultyOptions.length === 0 && !row.faculty_name && (
+                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border rounded-md shadow-md p-3 text-sm text-muted-foreground">
+                  No faculty found
+                </div>
+              )}
+            </div>
             <Textarea
               value={row.reason}
               onChange={(e) => onUpdate({ reason: e.target.value })}
@@ -452,12 +599,67 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
 
         {/* Details */}
         <div className="col-span-2 space-y-2">
-          <Input
-            value={row.faculty_name}
-            onChange={(e) => onUpdate({ faculty_name: e.target.value })}
-            placeholder="Faculty name"
-            className="h-8"
-          />
+          {/* Faculty Name with Autocomplete - Desktop */}
+          <div className="relative">
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+              <Input
+                ref={facultyInputRefDesktop}
+                value={facultyNameInput}
+                onChange={(e) => {
+                  setFacultyNameInput(e.target.value)
+                  if (row.faculty_name) {
+                    onUpdate({ faculty_name: '' })
+                  }
+                  setShowFacultyDropdown(true)
+                }}
+                onFocus={() => {
+                  if (facultyNameInput.length >= 2 && !row.faculty_name) {
+                    setShowFacultyDropdown(true)
+                  }
+                }}
+                placeholder="Search faculty"
+                className="h-8 pl-7 pr-6 text-sm"
+              />
+              {row.faculty_name && (
+                <button
+                  type="button"
+                  onClick={handleClearFaculty}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+            {showFacultyDropdown && facultyOptions.length > 0 && (
+              <div
+                ref={dropdownRefDesktop}
+                className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border rounded-md shadow-md max-h-40 overflow-auto"
+              >
+                {facultyOptions.map((option, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleSelectFaculty(option)}
+                    className="w-full px-2 py-1.5 text-left hover:bg-accent flex flex-col"
+                  >
+                    <span className="font-medium text-sm">{option.name}</span>
+                    <span className="text-xs text-muted-foreground">{option.email}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {showFacultyDropdown && isSearchingFaculty && (
+              <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border rounded-md shadow-md p-2 text-xs text-muted-foreground">
+                Searching...
+              </div>
+            )}
+            {showFacultyDropdown && !isSearchingFaculty && facultyNameInput.length >= 2 && facultyOptions.length === 0 && !row.faculty_name && (
+              <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border rounded-md shadow-md p-2 text-xs text-muted-foreground">
+                No faculty found
+              </div>
+            )}
+          </div>
           <Textarea
             value={row.reason}
             onChange={(e) => onUpdate({ reason: e.target.value })}

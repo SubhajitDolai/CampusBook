@@ -24,12 +24,12 @@ export async function login(formData: FormData) {
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role, university_id')
+      .select('role, university_id, phone')
       .eq('id', user.id)
       .single()
 
     // Check if profile is complete (has university_id)
-    if (!profile || !profile.university_id) {
+    if (!profile || !profile.university_id || !profile.phone) {
       redirect('/onboarding')
     }
 

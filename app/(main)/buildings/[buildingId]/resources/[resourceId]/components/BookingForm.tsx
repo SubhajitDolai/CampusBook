@@ -14,7 +14,13 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 import { createClient } from '@/utils/supabase/client'
-import { Lock, RefreshCw, Clipboard } from 'lucide-react'
+import { Lock, RefreshCw, Clipboard, Search, X, Check } from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+interface FacultyOption {
+  name: string
+  email: string
+}
 
 interface BookingFormProps {
   resourceId: string
@@ -65,6 +71,12 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
   const [reason, setReason] = React.useState('')
   const [selectedWeekdays, setSelectedWeekdays] = React.useState<number[]>([1, 2, 3, 4, 5, 6, 7]) // All days by default
   const [facultyName, setFacultyName] = React.useState('')
+  const [facultyNameInput, setFacultyNameInput] = React.useState('')
+  const [facultyOptions, setFacultyOptions] = React.useState<FacultyOption[]>([])
+  const [isSearchingFaculty, setIsSearchingFaculty] = React.useState(false)
+  const [showFacultyDropdown, setShowFacultyDropdown] = React.useState(false)
+  const facultyInputRef = React.useRef<HTMLInputElement>(null)
+  const dropdownRef = React.useRef<HTMLDivElement>(null)
   const [subject, setSubject] = React.useState('')
   const [className, setClassName] = React.useState('')
 
@@ -100,6 +112,76 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
 
   const handleClearAllWeekdays = () => {
     setSelectedWeekdays([])
+  }
+
+  // Search for faculty names
+  const searchFaculty = React.useCallback(async (query: string) => {
+    if (query.length < 2) {
+      setFacultyOptions([])
+      return
+    }
+    
+    setIsSearchingFaculty(true)
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('name, email')
+        .ilike('name', `%${query}%`)
+        .limit(10)
+      
+      if (error) {
+        console.error('Error searching faculty:', error)
+        setFacultyOptions([])
+      } else {
+        setFacultyOptions(data || [])
+      }
+    } catch (err) {
+      console.error('Error searching faculty:', err)
+      setFacultyOptions([])
+    } finally {
+      setIsSearchingFaculty(false)
+    }
+  }, [])
+
+  // Debounced search
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (facultyNameInput && !facultyName) {
+        searchFaculty(facultyNameInput)
+      }
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [facultyNameInput, facultyName, searchFaculty])
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        facultyInputRef.current &&
+        !facultyInputRef.current.contains(event.target as Node)
+      ) {
+        setShowFacultyDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleSelectFaculty = (option: FacultyOption) => {
+    setFacultyName(option.name)
+    setFacultyNameInput(option.name)
+    setShowFacultyDropdown(false)
+    setFacultyOptions([])
+  }
+
+  const handleClearFaculty = () => {
+    setFacultyName('')
+    setFacultyNameInput('')
+    setFacultyOptions([])
+    facultyInputRef.current?.focus()
   }
 
   const handleBooking = async (e: React.FormEvent) => {
@@ -338,15 +420,79 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="facultyName">Faculty Name *</Label>
-              <input
-                id="facultyName"
-                type="text"
-                placeholder="Faculty conducting the class"
-                value={facultyName}
-                onChange={(e) => setFacultyName(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                required
-              />
+              <div className="relative">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    ref={facultyInputRef}
+                    id="facultyName"
+                    type="text"
+                    placeholder="Search faculty name..."
+                    value={facultyNameInput}
+                    onChange={(e) => {
+                      setFacultyNameInput(e.target.value)
+                      setFacultyName('')
+                      setShowFacultyDropdown(true)
+                    }}
+                    onFocus={() => {
+                      if (facultyNameInput.length >= 2 && !facultyName) {
+                        setShowFacultyDropdown(true)
+                      }
+                    }}
+                    className={cn(
+                      "flex h-10 w-full rounded-md border border-input bg-background pl-9 pr-9 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                      facultyName && "border-green-500 bg-green-50 dark:bg-green-950/20"
+                    )}
+                    required
+                  />
+                  {facultyName ? (
+                    <button
+                      type="button"
+                      onClick={handleClearFaculty}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  ) : isSearchingFaculty ? (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    </div>
+                  ) : null}
+                </div>
+                
+                {/* Dropdown */}
+                {showFacultyDropdown && facultyOptions.length > 0 && !facultyName && (
+                  <div
+                    ref={dropdownRef}
+                    className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg"
+                  >
+                    <ul className="max-h-60 overflow-auto py-1">
+                      {facultyOptions.map((option) => (
+                        <li
+                          key={option.name}
+                          onClick={() => handleSelectFaculty(option)}
+                          className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                        >
+                          <Check className={cn("h-4 w-4", facultyName === option.name ? "opacity-100" : "opacity-0")} />
+                          <div className="flex flex-col">
+                            <span className="font-medium">{option.name}</span>
+                            {option.email && <span className="text-xs text-muted-foreground">{option.email}</span>}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {showFacultyDropdown && facultyNameInput.length >= 2 && facultyOptions.length === 0 && !isSearchingFaculty && !facultyName && (
+                  <div
+                    ref={dropdownRef}
+                    className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg"
+                  >
+                    <div className="px-3 py-2 text-sm text-muted-foreground">No faculty found</div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">

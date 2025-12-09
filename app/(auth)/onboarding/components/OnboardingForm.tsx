@@ -12,8 +12,30 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useGlobalLoadingBar } from "@/components/providers/LoadingBarProvider"
 
-export function OnboardingForm({ className, ...props }: React.ComponentPropsWithoutRef<"form">) {
+interface ProfileData {
+  name?: string | null
+  university_id?: string | null
+  phone?: string | null
+  gender?: string | null
+  department?: string | null
+  designation?: string | null
+  building_name?: string | null
+  floor_number?: number | null
+  room_number?: number | null
+  seating_location?: string | null
+  cabin?: string | null
+  cubicle?: string | null
+  workstation?: string | null
+}
+
+interface OnboardingFormProps extends React.ComponentPropsWithoutRef<"form"> {
+  initialData?: ProfileData | null
+}
+
+export function OnboardingForm({ className, initialData, ...props }: OnboardingFormProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const [gender, setGender] = useState(initialData?.gender || '')
+  const [seatingLocation, setSeatingLocation] = useState(initialData?.seating_location || '')
   const router = useRouter()
   const { start, finish } = useGlobalLoadingBar()
 
@@ -54,6 +76,9 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
             id="name"
             name="name"
             placeholder="Enter your full name"
+            defaultValue={initialData?.name || ''}
+            disabled={!!initialData?.name}
+            className={initialData?.name ? 'bg-muted' : ''}
             required
           />
         </div>
@@ -65,6 +90,9 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
             id="university_id"
             name="university_id"
             placeholder="e.g. 1132231374"
+            defaultValue={initialData?.university_id || ''}
+            disabled={!!initialData?.university_id}
+            className={initialData?.university_id ? 'bg-muted' : ''}
             required
           />
         </div>
@@ -77,6 +105,9 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
             name="phone"
             type="tel"
             placeholder="+91 9172660318"
+            defaultValue={initialData?.phone || ''}
+            disabled={!!initialData?.phone}
+            className={initialData?.phone ? 'bg-muted' : ''}
             required
           />
         </div>
@@ -84,8 +115,8 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
         {/* Gender */}
         <div className="grid gap-2">
           <Label htmlFor="gender">Gender *</Label>
-          <Select name="gender" required>
-            <SelectTrigger>
+          <Select name="gender" value={gender} onValueChange={setGender} disabled={!!initialData?.gender} required>
+            <SelectTrigger className={initialData?.gender ? 'bg-muted' : ''}>
               <SelectValue placeholder="Select gender" />
             </SelectTrigger>
             <SelectContent>
@@ -103,6 +134,9 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
             id="department"
             name="department"
             placeholder="e.g. Computer Science & Engineering"
+            defaultValue={initialData?.department || ''}
+            disabled={!!initialData?.department}
+            className={initialData?.department ? 'bg-muted' : ''}
             required
           />
         </div>
@@ -114,6 +148,9 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
             id="designation"
             name="designation"
             placeholder="e.g. Assistant Professor"
+            defaultValue={initialData?.designation || ''}
+            disabled={!!initialData?.designation}
+            className={initialData?.designation ? 'bg-muted' : ''}
             required
           />
         </div>
@@ -129,6 +166,9 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
               id="building_name"
               name="building_name"
               placeholder="e.g. Main Building, Block A"
+              defaultValue={initialData?.building_name || ''}
+              disabled={!!initialData?.building_name}
+              className={initialData?.building_name ? 'bg-muted' : ''}
               required
             />
           </div>
@@ -142,6 +182,9 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
               type="number"
               placeholder="e.g. 2"
               min="0"
+              defaultValue={initialData?.floor_number?.toString() || ''}
+              disabled={initialData?.floor_number != null}
+              className={initialData?.floor_number != null ? 'bg-muted' : ''}
               required
             />
           </div>
@@ -155,6 +198,9 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
               type="number"
               placeholder="e.g. 201"
               min="0"
+              defaultValue={initialData?.room_number?.toString() || ''}
+              disabled={initialData?.room_number != null}
+              className={initialData?.room_number != null ? 'bg-muted' : ''}
               required
             />
           </div>
@@ -162,8 +208,8 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
           {/* Seating Location Type */}
           <div className="grid gap-2">
             <Label htmlFor="seating_location">Seating Location Type *</Label>
-            <Select name="seating_location" required>
-              <SelectTrigger>
+            <Select name="seating_location" value={seatingLocation} onValueChange={setSeatingLocation} disabled={!!initialData?.seating_location} required>
+              <SelectTrigger className={initialData?.seating_location ? 'bg-muted' : ''}>
                 <SelectValue placeholder="Select seating type" />
               </SelectTrigger>
               <SelectContent>
@@ -183,6 +229,9 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
               id="cabin"
               name="cabin"
               placeholder="e.g. Cabin 3"
+              defaultValue={initialData?.cabin || ''}
+              disabled={!!initialData?.cabin}
+              className={initialData?.cabin ? 'bg-muted' : ''}
             />
           </div>
 
@@ -193,6 +242,9 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
               id="cubicle"
               name="cubicle"
               placeholder="e.g. Cubicle A5"
+              defaultValue={initialData?.cubicle || ''}
+              disabled={!!initialData?.cubicle}
+              className={initialData?.cubicle ? 'bg-muted' : ''}
             />
           </div>
 
@@ -203,6 +255,9 @@ export function OnboardingForm({ className, ...props }: React.ComponentPropsWith
               id="workstation"
               name="workstation"
               placeholder="e.g. Workstation 12"
+              defaultValue={initialData?.workstation || ''}
+              disabled={!!initialData?.workstation}
+              className={initialData?.workstation ? 'bg-muted' : ''}
             />
           </div>
         </div>
