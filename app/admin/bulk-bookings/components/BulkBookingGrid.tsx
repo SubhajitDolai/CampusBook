@@ -33,7 +33,11 @@ export function BulkBookingGrid() {
       reason: '',
       faculty_name: '',
       subject: '',
-      class_name: ''
+      class_name: '',
+      year: '',
+      course: '',
+      specialization: '',
+      batch: ''
     }
     setRows(prev => [...prev, newRow])
   }
@@ -80,22 +84,37 @@ export function BulkBookingGrid() {
       return false
     }
     
-    // Filter out incomplete rows
-    const completeRows = rows.filter(row => 
-      row.resource_id && 
-      row.start_date && 
-      row.end_date && 
-      row.start_time && 
-      row.end_time &&
-      row.reason &&
-      row.subject &&
-      row.class_name
-    )
+    // Check for incomplete rows and show specific error
+    const incompleteRows: string[] = []
+    rows.forEach((row, index) => {
+      const missing: string[] = []
+      if (!row.building_id) missing.push('Building')
+      if (!row.floor_id) missing.push('Floor')
+      if (!row.resource_id) missing.push('Resource')
+      if (!row.start_date) missing.push('Start Date')
+      if (!row.end_date) missing.push('End Date')
+      if (!row.start_time) missing.push('Start Time')
+      if (!row.end_time) missing.push('End Time')
+      if (!row.subject) missing.push('Subject')
+      if (!row.course) missing.push('Course')
+      if (!row.year) missing.push('Year')
+      if (!row.faculty_name) missing.push('Faculty Name')
+      if (!row.reason) missing.push('Reason')
+      
+      if (missing.length > 0) {
+        incompleteRows.push(`Row ${index + 1}: ${missing.join(', ')}`)
+      }
+    })
 
-    if (completeRows.length === 0) {
-      toast.error('Please complete at least one booking row')
+    if (incompleteRows.length > 0) {
+      toast.error('Please complete all required fields', {
+        description: incompleteRows.join(' | ')
+      })
       return false
     }
+
+    // All rows are complete
+    const completeRows = rows
 
     setIsValidating(true)
     try {

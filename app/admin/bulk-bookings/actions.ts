@@ -16,7 +16,12 @@ export interface BulkBookingRow {
   reason: string
   faculty_name: string
   subject: string
-  class_name: string
+  class_name: string // Combined storage
+  // Frontend class components
+  year?: string
+  course?: string
+  specialization?: string
+  batch?: string
 }
 
 export interface ConflictCheck {

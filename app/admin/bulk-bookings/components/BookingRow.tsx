@@ -67,6 +67,7 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
   const [loadingFloors, setLoadingFloors] = useState(false)
   const [loadingResources, setLoadingResources] = useState(false)
   const [localErrors, setLocalErrors] = useState<string[]>([])
+  const [showValidation, setShowValidation] = useState(false)
   
   // Faculty search state
   const [facultyNameInput, setFacultyNameInput] = useState(row.faculty_name || '')
@@ -152,6 +153,22 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
     setFacultyNameInput('')
     setFacultyOptions([])
     facultyInputRef.current?.focus()
+  }
+
+  // Update class component and combine into class_name
+  const updateClassField = (field: 'year' | 'course' | 'specialization' | 'batch', value: string) => {
+    const updates: Partial<BulkBookingRow> = { [field]: value }
+    
+    const year = field === 'year' ? value : (row.year || '')
+    const course = field === 'course' ? value : (row.course || '')
+    const specialization = field === 'specialization' ? value : (row.specialization || '')
+    const batch = field === 'batch' ? value : (row.batch || '')
+    
+    // Combine: "FY B.Tech CSE - A"
+    const parts = [year, course, specialization].filter(Boolean)
+    updates.class_name = parts.length > 0 ? `${parts.join(' ')}${batch ? ' - ' + batch : ''}` : ''
+    
+    onUpdate(updates)
   }
   
   // Validation helper
@@ -270,7 +287,7 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
   const hasValidationErrors = localErrors.length > 0
 
   return (
-    <Card className={`p-4 ${hasValidationErrors || hasBlockingConflicts ? 'border-red-200 bg-red-50' : hasConflicts ? 'border-yellow-200 bg-yellow-50' : ''}`}>
+    <Card className={`p-4 ${hasValidationErrors || hasBlockingConflicts ? 'border-red-500/30 bg-red-50 dark:bg-red-950/20 dark:border-red-500/50' : hasConflicts ? 'border-yellow-500/30 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-500/50' : ''}`}>
       {/* Mobile Layout */}
       <div className="block md:hidden space-y-4">
         {/* Row Header */}
@@ -278,7 +295,7 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">Row {index + 1}</span>
             {hasConflicts && (
-              <AlertCircle className="h-4 w-4 text-red-500" />
+              <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
             )}
           </div>
           <div className="flex gap-2">
@@ -288,7 +305,7 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <Trash2 className="h-3 w-3 text-red-500" />
+                  <Trash2 className="h-3 w-3 text-red-600 dark:text-red-400" />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -313,7 +330,7 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
           <div className="space-y-2">
             <Select value={row.building_id} onValueChange={(value) => onUpdate({ building_id: value })}>
               <SelectTrigger className="h-10">
-                <SelectValue placeholder="Select building" />
+                <SelectValue placeholder="Select building *" />
               </SelectTrigger>
               <SelectContent>
                 {buildings.map(building => (
@@ -330,7 +347,7 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
               disabled={!row.building_id || loadingFloors}
             >
               <SelectTrigger className="h-10">
-                <SelectValue placeholder="Select floor" />
+                <SelectValue placeholder="Select floor *" />
               </SelectTrigger>
               <SelectContent>
                 {floors.map(floor => (
@@ -347,7 +364,7 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
               disabled={!row.floor_id || loadingResources}
             >
               <SelectTrigger className="h-10">
-                <SelectValue placeholder="Select resource" />
+                <SelectValue placeholder="Select resource *" />
               </SelectTrigger>
               <SelectContent>
                 {resources.map(resource => (
@@ -368,14 +385,14 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
               type="date"
               value={row.start_date}
               onChange={(e) => onUpdate({ start_date: e.target.value })}
-              className={`h-10 ${localErrors.some(e => e.includes('date')) ? 'border-red-500' : ''}`}
+              className={`h-10 ${localErrors.some(e => e.includes('date')) ? 'border-red-600 dark:border-red-400' : ''}`}
               placeholder="Start date"
             />
             <Input
               type="date"
               value={row.end_date}
               onChange={(e) => onUpdate({ end_date: e.target.value })}
-              className={`h-10 ${localErrors.some(e => e.includes('date')) ? 'border-red-500' : ''}`}
+              className={`h-10 ${localErrors.some(e => e.includes('date')) ? 'border-red-600 dark:border-red-400' : ''}`}
               placeholder="End date"
               min={row.start_date || undefined}
             />
@@ -383,14 +400,14 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
               type="time"
               value={row.start_time}
               onChange={(e) => onUpdate({ start_time: e.target.value })}
-              className={`h-10 ${localErrors.some(e => e.includes('time')) ? 'border-red-500' : ''}`}
+              className={`h-10 ${localErrors.some(e => e.includes('time')) ? 'border-red-600 dark:border-red-400' : ''}`}
               placeholder="Start time"
             />
             <Input
               type="time"
               value={row.end_time}
               onChange={(e) => onUpdate({ end_time: e.target.value })}
-              className={`h-10 ${localErrors.some(e => e.includes('time')) ? 'border-red-500' : ''}`}
+              className={`h-10 ${localErrors.some(e => e.includes('time')) ? 'border-red-600 dark:border-red-400' : ''}`}
               placeholder="End time"
             />
           </div>
@@ -406,12 +423,48 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
               placeholder="Subject *"
               className="h-10"
             />
-            <Input
-              value={row.class_name}
-              onChange={(e) => onUpdate({ class_name: e.target.value })}
-              placeholder="Class *"
-              className="h-10"
-            />
+            {/* Class Fields - Clean 4 inputs */}
+            <div className="space-y-2 border rounded-lg p-3 bg-muted/30">
+              <p className="text-xs font-medium text-muted-foreground">Class Details</p>
+              <Input
+                value={row.course || ''}
+                onChange={(e) => updateClassField('course', e.target.value)}
+                placeholder="Course - B.Tech *"
+                className="h-10"
+              />
+              <Input
+                value={row.specialization || ''}
+                onChange={(e) => updateClassField('specialization', e.target.value)}
+                placeholder="Specialization - CSE (Optional)"
+                className="h-10"
+              />
+              <Select value={row.year || ''} onValueChange={(v) => updateClassField('year', v)}>
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="Year (e.g., FY, SY, TY) *" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="FY">FY - First Year</SelectItem>
+                  <SelectItem value="SY">SY - Second Year</SelectItem>
+                  <SelectItem value="TY">TY - Third Year</SelectItem>
+                  <SelectItem value="Final Year">Final Year</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={row.batch || ''} onValueChange={(v) => updateClassField('batch', v)}>
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="Batch (Optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)).map(letter => (
+                    <SelectItem key={letter} value={letter}>{letter}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {row.class_name && (
+                <div className="text-xs text-muted-foreground bg-background/50 p-2 rounded border">
+                  <span className="font-medium">Saved as:</span> {row.class_name}
+                </div>
+              )}
+            </div>
             {/* Faculty Name with Autocomplete */}
             <div className="relative">
               <div className="relative">
@@ -431,7 +484,17 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
                       setShowFacultyDropdown(true)
                     }
                   }}
-                  placeholder="Search faculty name"
+                  onBlur={() => {
+                    // Delay to allow dropdown click to register
+                    setTimeout(() => {
+                      if (!row.faculty_name && facultyNameInput) {
+                        setFacultyNameInput('')
+                        setFacultyOptions([])
+                      }
+                      setShowFacultyDropdown(false)
+                    }, 200)
+                  }}
+                  placeholder="Search faculty name *"
                   className="h-10 pl-9 pr-8"
                 />
                 {row.faculty_name && (
@@ -453,7 +516,10 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
                     <button
                       key={idx}
                       type="button"
-                      onClick={() => handleSelectFaculty(option)}
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        handleSelectFaculty(option)
+                      }}
                       className="w-full px-3 py-2 text-left hover:bg-accent flex flex-col"
                     >
                       <span className="font-medium">{option.name}</span>
@@ -473,6 +539,11 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
                 </div>
               )}
             </div>
+            {facultyNameInput && !row.faculty_name && !showFacultyDropdown && (
+              <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                Please select a faculty from the dropdown
+              </p>
+            )}
             <Textarea
               value={row.reason}
               onChange={(e) => onUpdate({ reason: e.target.value })}
@@ -490,7 +561,7 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
         <div className="col-span-1 flex items-center justify-center">
           <span className="text-sm font-medium">{index + 1}</span>
           {hasConflicts && (
-            <AlertCircle className="h-4 w-4 ml-2 text-red-500" />
+            <AlertCircle className="h-4 w-4 ml-2 text-red-600 dark:text-red-400" />
           )}
         </div>
 
@@ -498,7 +569,7 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
         <div className="col-span-2 space-y-2">
           <Select value={row.building_id} onValueChange={(value) => onUpdate({ building_id: value })}>
             <SelectTrigger className="h-8">
-              <SelectValue placeholder="Select building" />
+              <SelectValue placeholder="Building *" />
             </SelectTrigger>
             <SelectContent>
               {buildings.map(building => (
@@ -515,7 +586,7 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
             disabled={!row.building_id || loadingFloors}
           >
             <SelectTrigger className="h-8">
-              <SelectValue placeholder="Select floor" />
+              <SelectValue placeholder="Floor *" />
             </SelectTrigger>
             <SelectContent>
               {floors.map(floor => (
@@ -532,7 +603,7 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
             disabled={!row.floor_id || loadingResources}
           >
             <SelectTrigger className="h-8">
-              <SelectValue placeholder="Select resource" />
+              <SelectValue placeholder="Resource *" />
             </SelectTrigger>
             <SelectContent>
               {resources.map(resource => (
@@ -550,14 +621,14 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
             type="date"
             value={row.start_date}
             onChange={(e) => onUpdate({ start_date: e.target.value })}
-            className={`h-8 ${localErrors.some(e => e.includes('date')) ? 'border-red-500' : ''}`}
+            className={`h-8 ${localErrors.some(e => e.includes('date')) ? 'border-red-600 dark:border-red-400' : ''}`}
             placeholder="Start date"
           />
           <Input
             type="date"
             value={row.end_date}
             onChange={(e) => onUpdate({ end_date: e.target.value })}
-            className={`h-8 ${localErrors.some(e => e.includes('date')) ? 'border-red-500' : ''}`}
+            className={`h-8 ${localErrors.some(e => e.includes('date')) ? 'border-red-600 dark:border-red-400' : ''}`}
             placeholder="End date"
             min={row.start_date || undefined}
           />
@@ -569,32 +640,59 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
             type="time"
             value={row.start_time}
             onChange={(e) => onUpdate({ start_time: e.target.value })}
-            className={`h-8 ${localErrors.some(e => e.includes('time')) ? 'border-red-500' : ''}`}
+            className={`h-8 ${localErrors.some(e => e.includes('time')) ? 'border-red-600 dark:border-red-400' : ''}`}
             placeholder="Start time"
           />
           <Input
             type="time"
             value={row.end_time}
             onChange={(e) => onUpdate({ end_time: e.target.value })}
-            className={`h-8 ${localErrors.some(e => e.includes('time')) ? 'border-red-500' : ''}`}
+            className={`h-8 ${localErrors.some(e => e.includes('time')) ? 'border-red-600 dark:border-red-400' : ''}`}
             placeholder="End time"
           />
         </div>
 
         {/* Course Info */}
-        <div className="col-span-2 space-y-2">
+        <div className="col-span-2 space-y-1">
           <Input
             value={row.subject}
             onChange={(e) => onUpdate({ subject: e.target.value })}
             placeholder="Subject *"
-            className="h-8"
+            className="h-8 text-xs"
           />
           <Input
-            value={row.class_name}
-            onChange={(e) => onUpdate({ class_name: e.target.value })}
-            placeholder="Class *"
-            className="h-8"
+            value={row.course || ''}
+            onChange={(e) => updateClassField('course', e.target.value)}
+            placeholder="Course *"
+            className="h-7 text-xs"
           />
+          <Input
+            value={row.specialization || ''}
+            onChange={(e) => updateClassField('specialization', e.target.value)}
+            placeholder="Specialization"
+            className="h-7 text-xs"
+          />
+          <Select value={row.year || ''} onValueChange={(v) => updateClassField('year', v)}>
+            <SelectTrigger className="h-7 text-s">
+              <SelectValue placeholder="Year *" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="FY">FY</SelectItem>
+              <SelectItem value="SY">SY</SelectItem>
+              <SelectItem value="TY">TY</SelectItem>
+              <SelectItem value="Final Year">Final</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={row.batch || ''} onValueChange={(v) => updateClassField('batch', v)}>
+            <SelectTrigger className="h-7 text-s">
+              <SelectValue placeholder="Batch" />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)).map(letter => (
+                <SelectItem key={letter} value={letter}>{letter}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Details */}
@@ -618,7 +716,17 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
                     setShowFacultyDropdown(true)
                   }
                 }}
-                placeholder="Search faculty"
+                onBlur={() => {
+                  // Delay to allow dropdown click to register
+                  setTimeout(() => {
+                    if (!row.faculty_name && facultyNameInput) {
+                      setFacultyNameInput('')
+                      setFacultyOptions([])
+                    }
+                    setShowFacultyDropdown(false)
+                  }, 200)
+                }}
+                placeholder="Search faculty *"
                 className="h-8 pl-7 pr-6 text-sm"
               />
               {row.faculty_name && (
@@ -640,7 +748,10 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
                   <button
                     key={idx}
                     type="button"
-                    onClick={() => handleSelectFaculty(option)}
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      handleSelectFaculty(option)
+                    }}
                     className="w-full px-2 py-1.5 text-left hover:bg-accent flex flex-col"
                   >
                     <span className="font-medium text-sm">{option.name}</span>
@@ -658,6 +769,11 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
               <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border rounded-md shadow-md p-2 text-xs text-muted-foreground">
                 No faculty found
               </div>
+            )}
+            {facultyNameInput && !row.faculty_name && !showFacultyDropdown && (
+              <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-0.5">
+                Please select from dropdown
+              </p>
             )}
           </div>
           <Textarea
@@ -677,7 +793,7 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" size="sm">
-                <Trash2 className="h-3 w-3 text-red-500" />
+                <Trash2 className="h-3 w-3 text-red-600 dark:text-red-400" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -722,10 +838,10 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
 
       {/* Local Validation Errors */}
       {localErrors.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-red-200">
+        <div className="mt-4 pt-4 border-t border-red-500/30 dark:border-red-500/50">
           <div className="space-y-1">
             {localErrors.map((error, idx) => (
-              <div key={idx} className="text-sm text-red-600">
+              <div key={idx} className="text-sm text-red-600 dark:text-red-400">
                 ⚠ {error}
               </div>
             ))}
@@ -738,7 +854,7 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
         <div className="mt-4 pt-4 border-t">
           <div className="space-y-1">
             {conflicts.map((conflict, idx) => (
-              <div key={idx} className={`text-sm ${conflict.type === 'overlap_approved' ? 'text-red-600' : 'text-yellow-600'}`}>
+              <div key={idx} className={`text-sm ${conflict.type === 'overlap_approved' ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
                 ⚠ {conflict.message}
               </div>
             ))}

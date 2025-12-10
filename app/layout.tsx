@@ -5,8 +5,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { GlobalRouteChangeHandler } from "@/components/GlobalRouteChangeHandler";
 import { LoadingBarProvider } from "@/components/providers/LoadingBarProvider";
 import { Toaster } from "sonner";
-// import { Analytics } from "@vercel/analytics/react";
-// import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,8 +44,8 @@ export default function RootLayout({
             {children}
             <Toaster />
           </LoadingBarProvider>
-          {/* <Analytics /> */}
-          {/* <SpeedInsights /> */}
+          <Analytics />
+          <SpeedInsights />
         </ThemeProvider>
       </body>
     </html>

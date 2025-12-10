@@ -175,6 +175,66 @@ export async function rejectBooking(bookingId: string) {
   }
 }
 
+export async function updateBooking(bookingId: string, updates: {
+  start_date?: string
+  end_date?: string
+  start_time?: string
+  end_time?: string
+  reason?: string
+  faculty_name?: string
+  subject?: string
+  class_name?: string
+  weekdays?: number[]
+}) {
+  try {
+    const supabase = await createClient()
+    
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return { error: 'User not authenticated' }
+    }
+
+    // Get current user's role - only super_admin can edit
+    const { data: currentUserProfile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (!currentUserProfile || currentUserProfile.role !== 'super_admin') {
+      return { error: 'Only super admins can edit bookings' }
+    }
+
+    // Check if booking exists
+    const { data: booking } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('id', bookingId)
+      .single()
+
+    if (!booking) {
+      return { error: 'Booking not found' }
+    }
+
+    // Update the booking
+    const { error } = await supabase
+      .from('bookings')
+      .update(updates)
+      .eq('id', bookingId)
+
+    if (error) {
+      console.error('Error updating booking:', error)
+      return { error: error.message }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating booking:', error)
+    return { error: 'Failed to update booking' }
+  }
+}
+
 export async function deleteBooking(bookingId: string) {
   try {
     const supabase = await createClient()
@@ -211,6 +271,28 @@ export async function deleteBooking(bookingId: string) {
   } catch (error) {
     console.error('Error deleting booking:', error)
     return { error: 'Failed to delete booking' }
+  }
+}
+
+export async function getCurrentUserRole() {
+  try {
+    const supabase = await createClient()
+    
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return { role: null }
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    return { role: profile?.role || null }
+  } catch (error) {
+    console.error('Error fetching user role:', error)
+    return { role: null }
   }
 }
 

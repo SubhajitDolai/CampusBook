@@ -47,12 +47,23 @@ import {
   Loader2,
   Ban,
   Check,
-  X
+  X,
+  Edit
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { getBookings, approveBooking, rejectBooking, deleteBooking, getBookingStats } from "./actions"
+import { getBookings, approveBooking, rejectBooking, deleteBooking, getBookingStats, updateBooking, getCurrentUserRole } from "./actions"
 
 type Booking = {
   id: string
@@ -126,11 +137,35 @@ export default function BookingsPage() {
   const [deletingBooking, setDeletingBooking] = useState<Booking | null>(null)
   const [approvingId, setApprovingId] = useState<string | null>(null)
   const [rejectingId, setRejectingId] = useState<string | null>(null)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [editingBooking, setEditingBooking] = useState<Booking | null>(null)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+  const [editForm, setEditForm] = useState({
+    start_date: '',
+    end_date: '',
+    start_time: '',
+    end_time: '',
+    reason: '',
+    faculty_name: '',
+    subject: '',
+    class_name: '',
+    weekdays: [] as number[]
+  })
 
   useEffect(() => {
     fetchBookings()
     fetchStats()
+    fetchUserRole()
   }, [])
+
+  const fetchUserRole = async () => {
+    try {
+      const { role } = await getCurrentUserRole()
+      setIsSuperAdmin(role === 'super_admin')
+    } catch (error) {
+      console.error('Error fetching user role:', error)
+    }
+  }
 
   const fetchBookings = async () => {
     try {
@@ -232,6 +267,51 @@ export default function BookingsPage() {
       console.error('Error deleting booking:', error)
       toast.error('Failed to delete booking')
     }
+  }
+
+  const handleEditBooking = (booking: Booking) => {
+    setEditingBooking(booking)
+    setEditForm({
+      start_date: booking.start_date,
+      end_date: booking.end_date,
+      start_time: booking.start_time,
+      end_time: booking.end_time,
+      reason: booking.reason,
+      faculty_name: booking.faculty_name || '',
+      subject: booking.subject || '',
+      class_name: booking.class_name || '',
+      weekdays: booking.weekdays || [1, 2, 3, 4, 5, 6, 7]
+    })
+    setIsEditDialogOpen(true)
+  }
+
+  const handleUpdateBooking = async () => {
+    if (!editingBooking) return
+    
+    try {
+      const result = await updateBooking(editingBooking.id, editForm)
+      if (result.success) {
+        await fetchBookings()
+        await fetchStats()
+        setIsEditDialogOpen(false)
+        setEditingBooking(null)
+        toast.success('Booking updated successfully')
+      } else {
+        toast.error(result.error || 'Failed to update booking')
+      }
+    } catch (error) {
+      console.error('Error updating booking:', error)
+      toast.error('Failed to update booking')
+    }
+  }
+
+  const handleWeekdayToggle = (weekdayId: number, checked: boolean) => {
+    setEditForm(prev => ({
+      ...prev,
+      weekdays: checked
+        ? [...prev.weekdays, weekdayId].sort()
+        : prev.weekdays.filter(id => id !== weekdayId)
+    }))
   }
 
   const getStatusBadge = (status: string) => {
@@ -654,6 +734,15 @@ export default function BookingsPage() {
                                   </Button>
                                 </>
                               )}
+                              {isSuperAdmin && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleEditBooking(booking)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              )}
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -676,6 +765,142 @@ export default function BookingsPage() {
           </Card>
         </div>
       </SidebarInset>
+
+      {/* Edit Booking Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Booking</DialogTitle>
+            <DialogDescription>
+              Update the booking details below. All changes will be saved immediately.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {/* Date and Time Section */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-start-date">Start Date *</Label>
+                <Input
+                  id="edit-start-date"
+                  type="date"
+                  value={editForm.start_date}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, start_date: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-end-date">End Date *</Label>
+                <Input
+                  id="edit-end-date"
+                  type="date"
+                  value={editForm.end_date}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, end_date: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-start-time">Start Time *</Label>
+                <Input
+                  id="edit-start-time"
+                  type="time"
+                  value={editForm.start_time}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, start_time: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-end-time">End Time *</Label>
+                <Input
+                  id="edit-end-time"
+                  type="time"
+                  value={editForm.end_time}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, end_time: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            {/* Weekdays Section */}
+            <div className="space-y-2">
+              <Label>Weekdays *</Label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: 1, name: 'Sunday' },
+                  { id: 2, name: 'Monday' },
+                  { id: 3, name: 'Tuesday' },
+                  { id: 4, name: 'Wednesday' },
+                  { id: 5, name: 'Thursday' },
+                  { id: 6, name: 'Friday' },
+                  { id: 7, name: 'Saturday' }
+                ].map(day => (
+                  <div key={day.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`edit-weekday-${day.id}`}
+                      checked={editForm.weekdays.includes(day.id)}
+                      onCheckedChange={(checked) => handleWeekdayToggle(day.id, checked as boolean)}
+                    />
+                    <Label htmlFor={`edit-weekday-${day.id}`} className="text-sm font-normal cursor-pointer">
+                      {day.name}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Subject and Class Section */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-subject">Subject</Label>
+                <Input
+                  id="edit-subject"
+                  placeholder="e.g., Data Structures"
+                  value={editForm.subject}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, subject: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-class-name">Class Name</Label>
+                <Input
+                  id="edit-class-name"
+                  placeholder="e.g., FY B.Tech CSE - A"
+                  value={editForm.class_name}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, class_name: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            {/* Faculty Name */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-faculty-name">Faculty Name</Label>
+              <Input
+                id="edit-faculty-name"
+                placeholder="Faculty name"
+                value={editForm.faculty_name}
+                onChange={(e) => setEditForm(prev => ({ ...prev, faculty_name: e.target.value }))}
+              />
+            </div>
+
+            {/* Reason */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-reason">Reason *</Label>
+              <Textarea
+                id="edit-reason"
+                placeholder="Purpose of booking"
+                value={editForm.reason}
+                onChange={(e) => setEditForm(prev => ({ ...prev, reason: e.target.value }))}
+                className="min-h-[100px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateBooking}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { TimePicker } from '@/components/ui/time-picker'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createBooking } from '../actions'
 import { getISTDateString } from '@/lib/ist'
 import React from 'react'
@@ -79,6 +80,10 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
   const dropdownRef = React.useRef<HTMLDivElement>(null)
   const [subject, setSubject] = React.useState('')
   const [className, setClassName] = React.useState('')
+  const [year, setYear] = React.useState('')
+  const [course, setCourse] = React.useState('')
+  const [specialization, setSpecialization] = React.useState('')
+  const [batch, setBatch] = React.useState('')
 
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [isCheckingConflicts, setIsCheckingConflicts] = React.useState(false)
@@ -182,6 +187,23 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
     setFacultyNameInput('')
     setFacultyOptions([])
     facultyInputRef.current?.focus()
+  }
+
+  // Update class field and combine into className
+  const updateClassField = (field: 'year' | 'course' | 'specialization' | 'batch', value: string) => {
+    if (field === 'year') setYear(value)
+    if (field === 'course') setCourse(value)
+    if (field === 'specialization') setSpecialization(value)
+    if (field === 'batch') setBatch(value)
+    
+    const yearVal = field === 'year' ? value : year
+    const courseVal = field === 'course' ? value : course
+    const specializationVal = field === 'specialization' ? value : specialization
+    const batchVal = field === 'batch' ? value : batch
+    
+    // Combine: "FY B.Tech CSE - A"
+    const parts = [yearVal, courseVal, specializationVal].filter(Boolean)
+    setClassName(parts.length > 0 ? `${parts.join(' ')}${batchVal ? ' - ' + batchVal : ''}` : '')
   }
 
   const handleBooking = async (e: React.FormEvent) => {
@@ -507,19 +529,78 @@ export default function BookingForm({ resourceId }: BookingFormProps) {
                 required
               />
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="className">Class *</Label>
-              <input
-                id="className"
-                type="text"
-                placeholder="e.g., SY DSBDA, FY BTech, TE Computer"
-                value={className}
-                onChange={(e) => setClassName(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                required
-              />
+          {/* Class Details - 4 Component Fields */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Class Details *</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="course">Course *</Label>
+                <input
+                  id="course"
+                  type="text"
+                  placeholder="e.g., B.Tech, M.Tech, MCA"
+                  value={course}
+                  onChange={(e) => updateClassField('course', e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="specialization">Specialization</Label>
+                <input
+                  id="specialization"
+                  type="text"
+                  placeholder="e.g., CSE, AIML, DSBDA"
+                  value={specialization}
+                  onChange={(e) => updateClassField('specialization', e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="year">Year *</Label>
+                <Select value={year} onValueChange={(value) => updateClassField('year', value)} required>
+                  <SelectTrigger id="year">
+                    <SelectValue placeholder="Select year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FY">FY - First Year</SelectItem>
+                    <SelectItem value="SY">SY - Second Year</SelectItem>
+                    <SelectItem value="TY">TY - Third Year</SelectItem>
+                    <SelectItem value="Final">Final Year</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="batch">Batch</Label>
+                <Select value={batch} onValueChange={(value) => updateClassField('batch', value)}>
+                  <SelectTrigger id="batch">
+                    <SelectValue placeholder="Select batch" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="A">Batch A</SelectItem>
+                    <SelectItem value="B">Batch B</SelectItem>
+                    <SelectItem value="C">Batch C</SelectItem>
+                    <SelectItem value="D">Batch D</SelectItem>
+                    <SelectItem value="E">Batch E</SelectItem>
+                    <SelectItem value="F">Batch F</SelectItem>
+                    <SelectItem value="G">Batch G</SelectItem>
+                    <SelectItem value="H">Batch H</SelectItem>
+                    <SelectItem value="I">Batch I</SelectItem>
+                    <SelectItem value="J">Batch J</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+            {className && (
+              <p className="text-sm text-muted-foreground">
+                Combined: <span className="font-medium">{className}</span>
+              </p>
+            )}
           </div>
 
           {/* Weekday Selection */}

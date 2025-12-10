@@ -3825,8 +3825,8 @@ FROM auth.users WHERE LOWER(email) = LOWER('milan.yadav@mitwpu.edu.in')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO profiles (id, name, email, university_id, gender, designation, department)
-SELECT id, 'Sagar Sambhaji Apune', 'Sagar.apune@mitwpu.edu.in', '1229224760', 'male'::"gender", 'Assistant Professor', 'School of Computer Engineering & Technology'
-FROM auth.users WHERE LOWER(email) = LOWER('Sagar.apune@mitwpu.edu.in')
+SELECT id, 'Sagar Sambhaji Apune', 'sagar.apune@mitwpu.edu.in', '1229224760', 'male'::"gender", 'Assistant Professor', 'School of Computer Engineering & Technology'
+FROM auth.users WHERE LOWER(email) = LOWER('sagar.apune@mitwpu.edu.in')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO profiles (id, name, email, university_id, gender, designation, department)
