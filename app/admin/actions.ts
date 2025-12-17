@@ -181,6 +181,58 @@ export async function getUsers() {
   }
 }
 
+export async function getUsersWithCurrentUserRole() {
+  const supabase = await createClient()
+
+  try {
+    // Get current user role
+    const { data: { user } } = await supabase.auth.getUser()
+    let userRole = null
+    
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+      
+      userRole = profile?.role || null
+    }
+
+    // Get users
+    const { data: users } = await supabase
+      .from('profiles')
+      .select(`
+        id,
+        name,
+        email,
+        university_id,
+        phone,
+        gender,
+        designation,
+        department,
+        role,
+        approved,
+        approved_by,
+        approved_at,
+        created_at,
+        seating_location,
+        building_name,
+        floor_number,
+        room_number,
+        cabin,
+        cubicle,
+        workstation
+      `)
+      .order('created_at', { ascending: false })
+
+    return { users: users || [], userRole }
+  } catch (error) {
+    console.error('Error fetching users with role:', error)
+    return { users: [], userRole: null }
+  }
+}
+
 export async function approveUser(userId: string) {
   const supabase = await createClient();
   try {

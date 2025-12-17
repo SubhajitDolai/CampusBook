@@ -34,10 +34,18 @@ import {
   Search,
   Mail,
   Phone,
-  GraduationCap
+  GraduationCap,
+  Eye
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getUsers, promoteUserToAdmin, demoteUserToFaculty } from "../actions"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { getUsersWithCurrentUserRole, promoteUserToAdmin, demoteUserToFaculty } from "../actions"
 import { approveUser, unapproveUser } from "../actions"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
@@ -67,50 +75,18 @@ type User = {
   workstation?: string | null
 }
 
-// Get current user role from profiles table
-function useCurrentUserRole() {
-  const [role, setRole] = useState<'super_admin' | 'admin' | 'faculty' | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchCurrentUserRole() {
-      try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single();
-
-          setRole(profile?.role || null);
-        }
-      } catch (error) {
-        console.error('Error fetching current user role:', error);
-        setRole(null);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchCurrentUserRole();
-  }, []);
-
-  return { role, loading };
-}
-
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [isLoading, setIsLoading] = useState(true)
-  const { role: currentUserRole, loading: roleLoading } = useCurrentUserRole();
+  const [currentUserRole, setCurrentUserRole] = useState<'super_admin' | 'admin' | 'faculty' | null>(null);
   const [promotingId, setPromotingId] = useState<string | null>(null);
   const [demotingId, setDemotingId] = useState<string | null>(null);
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [unapprovingId, setUnapprovingId] = useState<string | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const handleApprove = async (userId: string) => {
     setApprovingId(userId);
@@ -139,19 +115,20 @@ export default function UsersPage() {
   }
 
   useEffect(() => {
-    async function fetchUsers() {
+    async function fetchUsersAndRole() {
       try {
         setIsLoading(true)
-        const usersData = await getUsers()
+        const { users: usersData, userRole } = await getUsersWithCurrentUserRole()
         setUsers(usersData)
         setFilteredUsers(usersData)
+        setCurrentUserRole(userRole)
       } catch (error) {
         console.error('Error fetching users:', error)
       } finally {
         setIsLoading(false)
       }
     }
-    fetchUsers()
+    fetchUsersAndRole()
   }, [])
 
   useEffect(() => {
@@ -380,13 +357,12 @@ export default function UsersPage() {
                       <TableHead>User</TableHead>
                       <TableHead>Department</TableHead>
                       <TableHead>Contact</TableHead>
-                      <TableHead>Gender</TableHead>
-                      <TableHead>Seating Location</TableHead>
                       <TableHead>Role</TableHead>
-                      {!roleLoading && (currentUserRole === 'super_admin' || currentUserRole === 'admin') && (
+                      <TableHead>View</TableHead>
+                      {(currentUserRole === 'super_admin' || currentUserRole === 'admin') && (
                         <TableHead>Action</TableHead>
                       )}
-                      {!roleLoading && (currentUserRole === 'super_admin' || currentUserRole === 'admin') && (
+                      {(currentUserRole === 'super_admin' || currentUserRole === 'admin') && (
                         <TableHead>Approval</TableHead>
                       )}
                     </TableRow>
@@ -431,37 +407,24 @@ export default function UsersPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="text-sm font-medium">{user.gender || 'Not specified'}</div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            {user.building_name && (
-                              <div className="text-xs">
-                                <span className="text-muted-foreground">Building:</span> {user.building_name}
-                              </div>
-                            )}
-                            {user.floor_number && user.room_number && (
-                              <div className="text-xs">
-                                <span className="text-muted-foreground">Room:</span> F{user.floor_number}-{user.room_number}
-                              </div>
-                            )}
-                            {(user.cabin || user.cubicle || user.workstation) && (
-                              <div className="text-xs">
-                                <span className="text-muted-foreground">Location:</span> {user.cabin || user.cubicle || user.workstation}
-                              </div>
-                            )}
-                            {!user.building_name && !user.floor_number && !user.room_number && !user.cabin && !user.cubicle && !user.workstation && (
-                              <div className="text-xs text-muted-foreground">Not specified</div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
                           <div className="flex items-center gap-2">
                             {getRoleBadge(user.role)}
                             {user.approved ? <Badge variant="default">Approved</Badge> : <Badge variant="secondary">Pending</Badge>}
                           </div>
                         </TableCell>
-                        {!roleLoading && (currentUserRole === 'super_admin' || currentUserRole === 'admin') && (
+                        <TableCell>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setIsViewDialogOpen(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                        {(currentUserRole === 'super_admin' || currentUserRole === 'admin') && (
                           <>
                             <TableCell>
                               {user.role === 'faculty' && (
@@ -490,8 +453,8 @@ export default function UsersPage() {
                             </TableCell>
 
                             <TableCell>
-                              {/* Approval actions - super_admin can approve anyone, admin can only approve faculty */}
-                              {(currentUserRole === 'super_admin' || (currentUserRole === 'admin' && user.role === 'faculty')) && (
+                              {/* Approval actions - only super_admin can approve/unapprove */}
+                              {currentUserRole === 'super_admin' && (
                                 <>
                                   {!user.approved && (
                                     <Button
@@ -515,8 +478,14 @@ export default function UsersPage() {
                                   )}
                                 </>
                               )}
-                              {currentUserRole === 'admin' && user.role !== 'faculty' && (
-                                <span className="text-xs text-muted-foreground">No permission</span>
+                              {currentUserRole === 'admin' && (
+                                <span className="text-sm">
+                                  {user.approved ? (
+                                    <Badge variant="default">Approved</Badge>
+                                  ) : (
+                                    <Badge variant="secondary">Pending</Badge>
+                                  )}
+                                </span>
                               )}
                             </TableCell>
                           </>
@@ -531,6 +500,153 @@ export default function UsersPage() {
           </Card>
         </div>
       </SidebarInset>
+
+      {/* View User Profile Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>User Profile Details</DialogTitle>
+            <DialogDescription>
+              Complete information about the user profile
+            </DialogDescription>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="grid gap-6 py-4">
+              {/* Personal Information */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Personal Information
+                </h3>
+                <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Full Name</p>
+                    <p className="font-medium">{selectedUser.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">University ID</p>
+                    <p className="font-medium">{selectedUser.university_id}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="font-medium break-all">{selectedUser.email}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-sm text-muted-foreground">Phone</p>
+                    <p className="font-medium">{selectedUser.phone || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Gender</p>
+                    <p className="font-medium">{selectedUser.gender || 'Not specified'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Designation</p>
+                    <p className="font-medium">{selectedUser.designation || 'Not specified'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Department & Role Information */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5" />
+                  Department & Role
+                </h3>
+                <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Department</p>
+                    <p className="font-medium">{selectedUser.department}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Role</p>
+                    <div className="mt-1">{getRoleBadge(selectedUser.role)}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seating Location */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Seating Location
+                </h3>
+                <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Building</p>
+                    <p className="font-medium">{selectedUser.building_name || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Floor Number</p>
+                    <p className="font-medium">{selectedUser.floor_number || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Room Number</p>
+                    <p className="font-medium">{selectedUser.room_number || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Cabin</p>
+                    <p className="font-medium">{selectedUser.cabin || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Cubicle</p>
+                    <p className="font-medium">{selectedUser.cubicle || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Workstation</p>
+                    <p className="font-medium">{selectedUser.workstation || 'Not provided'}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-sm text-muted-foreground">Seating Location</p>
+                    <p className="font-medium">{selectedUser.seating_location || 'Not provided'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Approval Status */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Account Status
+                </h3>
+                <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Approval Status</p>
+                    <div className="mt-1">
+                      {selectedUser.approved ? (
+                        <Badge variant="default">Approved</Badge>
+                      ) : (
+                        <Badge variant="secondary">Pending</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Created At</p>
+                    <p className="font-medium">
+                      {new Date(selectedUser.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  {selectedUser.approved_at && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Approved At</p>
+                      <p className="font-medium">
+                        {new Date(selectedUser.approved_at).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   )
 } 

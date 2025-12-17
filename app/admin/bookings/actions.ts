@@ -76,8 +76,8 @@ export async function approveBooking(bookingId: string) {
       .eq('id', user.id)
       .single()
 
-    if (!currentUserProfile || (currentUserProfile.role !== 'admin' && currentUserProfile.role !== 'super_admin')) {
-      return { error: 'Only admins can approve bookings' }
+    if (!currentUserProfile || currentUserProfile.role !== 'super_admin') {
+      return { error: 'Only super admins can approve bookings' }
     }
 
     // Check if booking exists and is pending
@@ -134,8 +134,8 @@ export async function rejectBooking(bookingId: string) {
       .eq('id', user.id)
       .single()
 
-    if (!currentUserProfile || (currentUserProfile.role !== 'admin' && currentUserProfile.role !== 'super_admin')) {
-      return { error: 'Only admins can reject bookings' }
+    if (!currentUserProfile || currentUserProfile.role !== 'super_admin') {
+      return { error: 'Only super admins can reject bookings' }
     }
 
     // Check if booking exists and is pending
@@ -252,8 +252,8 @@ export async function deleteBooking(bookingId: string) {
       .eq('id', user.id)
       .single()
 
-    if (!currentUserProfile || (currentUserProfile.role !== 'admin' && currentUserProfile.role !== 'super_admin')) {
-      return { error: 'Only admins can delete bookings' }
+    if (!currentUserProfile || currentUserProfile.role !== 'super_admin') {
+      return { error: 'Only super admins can delete bookings' }
     }
 
     // Delete the booking
@@ -293,6 +293,78 @@ export async function getCurrentUserRole() {
   } catch (error) {
     console.error('Error fetching user role:', error)
     return { role: null }
+  }
+}
+
+export async function getBookingsWithUserRole() {
+  try {
+    const supabase = await createClient()
+    
+    // Get current user role
+    const { data: { user } } = await supabase.auth.getUser()
+    let userRole = null
+    
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+      
+      userRole = profile?.role || null
+    }
+
+    // Get bookings
+    const { data, error } = await supabase
+      .from('bookings')
+      .select(`
+        *,
+        resources (
+          id,
+          name,
+          type,
+          capacity,
+          buildings (
+            name,
+            code
+          ),
+          floors (
+            floor_number,
+            name
+          )
+        ),
+        profiles!bookings_user_id_fkey (
+          id,
+          name,
+          email,
+          university_id,
+          department,
+          role,
+          seating_location,
+          building_name,
+          floor_number,
+          room_number,
+          cabin,
+          cubicle,
+          workstation
+        ),
+        approved_by_profile:profiles!bookings_approved_by_fkey (
+          id,
+          name,
+          email
+        )
+      `)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching bookings:', error)
+      return { bookings: [], userRole }
+    }
+
+    return { bookings: data || [], userRole }
+  } catch (error) {
+    console.error('Error fetching bookings:', error)
+    return { bookings: [], userRole: null }
   }
 }
 

@@ -63,7 +63,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { getBookings, approveBooking, rejectBooking, deleteBooking, getBookingStats, updateBooking, getCurrentUserRole } from "./actions"
+import { getBookingsWithUserRole, approveBooking, rejectBooking, deleteBooking, getBookingStats, updateBooking } from "./actions"
 
 type Booking = {
   id: string
@@ -153,26 +153,17 @@ export default function BookingsPage() {
   })
 
   useEffect(() => {
-    fetchBookings()
+    fetchBookingsAndRole()
     fetchStats()
-    fetchUserRole()
   }, [])
 
-  const fetchUserRole = async () => {
-    try {
-      const { role } = await getCurrentUserRole()
-      setIsSuperAdmin(role === 'super_admin')
-    } catch (error) {
-      console.error('Error fetching user role:', error)
-    }
-  }
-
-  const fetchBookings = async () => {
+  const fetchBookingsAndRole = async () => {
     try {
       setIsLoading(true)
-      const bookingsData = await getBookings()
+      const { bookings: bookingsData, userRole } = await getBookingsWithUserRole()
       setBookings(bookingsData)
       setFilteredBookings(bookingsData)
+      setIsSuperAdmin(userRole === 'super_admin')
     } catch (error) {
       console.error('Error fetching bookings:', error)
     } finally {
@@ -216,7 +207,7 @@ export default function BookingsPage() {
     try {
       const result = await approveBooking(bookingId)
       if (result.success) {
-        await fetchBookings()
+        await fetchBookingsAndRole()
         await fetchStats()
         toast.success('Booking approved successfully')
       } else {
@@ -235,7 +226,7 @@ export default function BookingsPage() {
     try {
       const result = await rejectBooking(bookingId)
       if (result.success) {
-        await fetchBookings()
+        await fetchBookingsAndRole()
         await fetchStats()
         toast.success('Booking rejected successfully')
       } else {
@@ -255,7 +246,7 @@ export default function BookingsPage() {
     try {
       const result = await deleteBooking(deletingBooking.id)
       if (result.success) {
-        await fetchBookings()
+        await fetchBookingsAndRole()
         await fetchStats()
         setIsDeleteDialogOpen(false)
         setDeletingBooking(null)
@@ -291,7 +282,7 @@ export default function BookingsPage() {
     try {
       const result = await updateBooking(editingBooking.id, editForm)
       if (result.success) {
-        await fetchBookings()
+        await fetchBookingsAndRole()
         await fetchStats()
         setIsEditDialogOpen(false)
         setEditingBooking(null)
@@ -706,53 +697,58 @@ export default function BookingsPage() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              {booking.status === 'pending' && (
+                              {isSuperAdmin && (
                                 <>
+                                  {booking.status === 'pending' && (
+                                    <>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => handleApproveBooking(booking.id)}
+                                        disabled={approvingId === booking.id}
+                                      >
+                                        {approvingId === booking.id ? (
+                                          <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                          <Check className="h-4 w-4" />
+                                        )}
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => handleRejectBooking(booking.id)}
+                                        disabled={rejectingId === booking.id}
+                                      >
+                                        {rejectingId === booking.id ? (
+                                          <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                          <X className="h-4 w-4" />
+                                        )}
+                                      </Button>
+                                    </>
+                                  )}
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => handleApproveBooking(booking.id)}
-                                    disabled={approvingId === booking.id}
+                                    onClick={() => handleEditBooking(booking)}
                                   >
-                                    {approvingId === booking.id ? (
-                                      <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                      <Check className="h-4 w-4" />
-                                    )}
+                                    <Edit className="h-4 w-4" />
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => handleRejectBooking(booking.id)}
-                                    disabled={rejectingId === booking.id}
+                                    onClick={() => {
+                                      setDeletingBooking(booking)
+                                      setIsDeleteDialogOpen(true)
+                                    }}
                                   >
-                                    {rejectingId === booking.id ? (
-                                      <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                      <X className="h-4 w-4" />
-                                    )}
+                                    <Trash2 className="h-4 w-4 text-red-500" />
                                   </Button>
                                 </>
                               )}
-                              {isSuperAdmin && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleEditBooking(booking)}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
+                              {!isSuperAdmin && (
+                                <span className="text-xs text-muted-foreground">View only</span>
                               )}
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setDeletingBooking(booking)
-                                  setIsDeleteDialogOpen(true)
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4 text-red-500" />
-                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>
