@@ -76,7 +76,11 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith('/set-password') &&
     !request.nextUrl.pathname.startsWith('/error') &&
     !request.nextUrl.pathname.startsWith('/banned') &&
-    !request.nextUrl.pathname.startsWith('/auth')
+    !request.nextUrl.pathname.startsWith('/auth') &&
+    // Allow SEO files without authentication
+    request.nextUrl.pathname !== '/sitemap.xml' &&
+    request.nextUrl.pathname !== '/robots.txt' &&
+    request.nextUrl.pathname !== '/manifest.json'
   ) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
