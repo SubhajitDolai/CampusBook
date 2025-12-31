@@ -247,6 +247,224 @@ export async function getBookingApprovalDetails(bookingId: string): Promise<{ ap
   }
 }
 
+export async function getBookingById(bookingId: string): Promise<{ booking?: BookingWithDetails; error?: string }> {
+  const supabase = await createClient()
+
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError || !user) {
+      return { error: 'User not authenticated' }
+    }
+
+    const { data: booking, error: bookingError } = await supabase
+      .from('bookings')
+      .select(`
+        id,
+        resource_id,
+        user_id,
+        start_date,
+        end_date,
+        start_time,
+        end_time,
+        reason,
+        status,
+        approved_by,
+        approved_at,
+        created_at,
+        weekdays,
+        faculty_name,
+        subject,
+        class_name,
+        resources (
+          id,
+          name,
+          type,
+          capacity,
+          description,
+          buildings (
+            id,
+            name,
+            code
+          ),
+          floors (
+            id,
+            floor_number,
+            name
+          )
+        ),
+        profiles:profiles!user_id (
+          id,
+          name,
+          email,
+          university_id,
+          department,
+          role
+        )
+      `)
+      .eq('id', bookingId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (bookingError) {
+      console.error('Booking error:', bookingError)
+      return { error: `Booking error: ${bookingError.message}` }
+    }
+    
+    if (!booking) {
+      return { error: 'Booking not found or unauthorized' }
+    }
+
+    // Transform the data
+    const resource = Array.isArray(booking.resources) ? booking.resources[0] : booking.resources
+    
+    if (!resource) {
+      return { error: 'Resource not found for this booking' }
+    }
+    
+    const building = Array.isArray(resource.buildings) ? resource.buildings[0] : resource.buildings
+    const floor = Array.isArray(resource.floors) ? resource.floors[0] : resource.floors
+    const profile = Array.isArray(booking.profiles) ? booking.profiles[0] : booking.profiles
+
+    const transformedBooking: BookingWithDetails = {
+      id: booking.id,
+      resource_id: booking.resource_id,
+      user_id: booking.user_id,
+      start_date: booking.start_date,
+      end_date: booking.end_date,
+      start_time: booking.start_time,
+      end_time: booking.end_time,
+      reason: booking.reason,
+      status: booking.status,
+      approved_by: booking.approved_by,
+      approved_at: booking.approved_at,
+      created_at: booking.created_at,
+      weekdays: booking.weekdays,
+      faculty_name: booking.faculty_name,
+      subject: booking.subject,
+      class_name: booking.class_name,
+      resources: {
+        id: resource.id,
+        name: resource.name,
+        type: resource.type,
+        capacity: resource.capacity,
+        description: resource.description,
+        buildings: building,
+        floors: floor
+      },
+      profiles: profile
+    }
+
+    return { booking: transformedBooking }
+  } catch (error) {
+    console.error('Error in getBookingById:', error)
+    return { error: `An error occurred: ${error instanceof Error ? error.message : 'Unknown error'}` }
+  }
+}
+
+export async function updateBooking(
+  bookingId: string,
+  updateData: {
+    startDate: string
+    endDate: string
+    startTime: string
+    endTime: string
+    reason: string
+    weekdays: number[]
+    facultyName: string
+    subject: string
+    className: string
+  }
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError || !user) {
+      return { success: false, error: 'User not authenticated' }
+    }
+
+    // Verify the booking belongs to the current user and is pending
+    const { data: booking, error: bookingError } = await supabase
+      .from('bookings')
+      .select('id, user_id, status, resource_id')
+      .eq('id', bookingId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (bookingError || !booking) {
+      return { success: false, error: 'Booking not found or unauthorized' }
+    }
+
+    if (booking.status !== 'pending') {
+      return { success: false, error: 'Only pending bookings can be edited' }
+    }
+
+    // Check for conflicts with other bookings (excluding current booking)
+    const { data: conflictingBookings, error: conflictError } = await supabase
+      .from('bookings')
+      .select('id, start_date, end_date, start_time, end_time, weekdays')
+      .eq('resource_id', booking.resource_id)
+      .in('status', ['pending', 'approved'])
+      .neq('id', bookingId)
+      .gte('end_date', updateData.startDate)
+      .lte('start_date', updateData.endDate)
+
+    if (conflictError) {
+      return { success: false, error: 'Failed to check for conflicts' }
+    }
+
+    // Check for time and weekday conflicts
+    const startTimeMinutes = parseInt(updateData.startTime.split(':')[0]) * 60 + parseInt(updateData.startTime.split(':')[1])
+    const endTimeMinutes = parseInt(updateData.endTime.split(':')[0]) * 60 + parseInt(updateData.endTime.split(':')[1])
+
+    const hasConflict = conflictingBookings?.some(conflictBooking => {
+      const bookingStartMinutes = parseInt(conflictBooking.start_time.split(':')[0]) * 60 + parseInt(conflictBooking.start_time.split(':')[1])
+      const bookingEndMinutes = parseInt(conflictBooking.end_time.split(':')[0]) * 60 + parseInt(conflictBooking.end_time.split(':')[1])
+      
+      const timeOverlap = (
+        (startTimeMinutes < bookingEndMinutes && endTimeMinutes > bookingStartMinutes)
+      )
+      
+      const weekdayOverlap = updateData.weekdays.some(day => conflictBooking.weekdays.includes(day))
+      
+      return timeOverlap && weekdayOverlap
+    })
+
+    if (hasConflict) {
+      return { success: false, error: 'This time slot conflicts with an existing booking' }
+    }
+
+    // Update the booking
+    const { error: updateError } = await supabase
+      .from('bookings')
+      .update({
+        start_date: updateData.startDate,
+        end_date: updateData.endDate,
+        start_time: updateData.startTime,
+        end_time: updateData.endTime,
+        reason: updateData.reason,
+        weekdays: updateData.weekdays,
+        faculty_name: updateData.facultyName,
+        subject: updateData.subject,
+        class_name: updateData.className
+      })
+      .eq('id', bookingId)
+      .eq('user_id', user.id)
+
+    if (updateError) {
+      console.error('Error updating booking:', updateError)
+      return { success: false, error: 'Failed to update booking' }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error in updateBooking:', error)
+    return { success: false, error: 'An error occurred while updating the booking' }
+  }
+}
+
 export async function cancelBooking(bookingId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
 

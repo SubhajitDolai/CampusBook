@@ -90,7 +90,8 @@ export async function validateBulkBookings(rows: BulkBookingRow[]) {
   const supabase = await createClient()
   const conflicts: ConflictCheck[] = []
   
-  for (const row of rows) {
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i]
     const rowConflicts: ConflictCheck['conflicts'] = []
     
     // Temporal validation - check date range
@@ -111,6 +112,51 @@ export async function validateBulkBookings(rows: BulkBookingRow[]) {
           type: 'resource_inactive',
           message: 'End time must be after start time'
         })
+      }
+    }
+    
+    // Check for conflicts with OTHER ROWS in this batch
+    for (let j = 0; j < rows.length; j++) {
+      if (i === j) continue // Skip self-comparison
+      
+      const otherRow = rows[j]
+      
+      // Only check if same resource
+      if (row.resource_id && otherRow.resource_id && row.resource_id === otherRow.resource_id) {
+        // Check date overlap
+        const dateOverlap = !(
+          new Date(row.end_date) < new Date(otherRow.start_date) ||
+          new Date(row.start_date) > new Date(otherRow.end_date)
+        )
+        
+        if (dateOverlap) {
+          // Check weekday overlap
+          const weekdayOverlap = row.weekdays.some(day => otherRow.weekdays.includes(day))
+          
+          if (weekdayOverlap) {
+            // Check time overlap
+            const rowStartMinutes = parseInt(row.start_time.split(':')[0]) * 60 + parseInt(row.start_time.split(':')[1])
+            const rowEndMinutes = parseInt(row.end_time.split(':')[0]) * 60 + parseInt(row.end_time.split(':')[1])
+            const otherStartMinutes = parseInt(otherRow.start_time.split(':')[0]) * 60 + parseInt(otherRow.start_time.split(':')[1])
+            const otherEndMinutes = parseInt(otherRow.end_time.split(':')[0]) * 60 + parseInt(otherRow.end_time.split(':')[1])
+            
+            const timeOverlap = (
+              rowStartMinutes < otherEndMinutes && rowEndMinutes > otherStartMinutes
+            )
+            
+            if (timeOverlap) {
+              const overlappingDays = row.weekdays
+                .filter(day => otherRow.weekdays.includes(day))
+                .map(day => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][day - 1])
+                .join(', ')
+              
+              rowConflicts.push({
+                type: 'overlap_approved',
+                message: `Conflicts with Row ${j + 1} (${otherRow.start_time}-${otherRow.end_time}) on ${overlappingDays}`
+              })
+            }
+          }
+        }
       }
     }
     

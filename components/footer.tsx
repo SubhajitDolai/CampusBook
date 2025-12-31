@@ -12,8 +12,8 @@ const links = [
     { title: 'How It Works', href: '#how-it-works' },
     { title: 'Stats', href: '#stats' },
     { title: 'Testimonials', href: '#testimonials' },
-    { title: 'Team', href: '#team' },
     { title: 'FAQ', href: '#faq' },
+    { title: 'Team', href: '#team' },
 ]
 
 export default function FooterSection() {

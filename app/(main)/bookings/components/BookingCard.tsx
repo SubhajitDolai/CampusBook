@@ -247,16 +247,27 @@ export function BookingCard({ booking, onCancel, showCancelButton = false }: Boo
         </div>
         
         {/* Actions */}
-        <div className="flex items-center justify-end pt-4">
-          {showCancelButton && booking.status === 'pending' && onCancel && (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => onCancel(booking.id)}
-              className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
-            >
-              Cancel Booking
-            </Button>
+        <div className="flex items-center justify-end gap-2 pt-4">
+          {showCancelButton && booking.status === 'pending' && (
+            <>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.location.href = `/bookings/${booking.id}/edit`}
+              >
+                Edit Booking
+              </Button>
+              {onCancel && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => onCancel(booking.id)}
+                  className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+                >
+                  Cancel Booking
+                </Button>
+              )}
+            </>
           )}
         </div>
       </CardContent>

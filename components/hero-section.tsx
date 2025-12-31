@@ -23,8 +23,8 @@ const menuItems = [
     { name: 'How It Works', href: '#how-it-works' },
     { name: 'Stats', href: '#stats' },
     { name: 'Testimonials', href: '#testimonials' },
-    { name: 'Team', href: '#team' },
     { name: 'FAQ', href: '#faq' },
+    { name: 'Team', href: '#team' },
 ];
 
 export default function HeroSection() {

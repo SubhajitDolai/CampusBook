@@ -78,6 +78,10 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
   const facultyInputRefDesktop = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const dropdownRefDesktop = useRef<HTMLDivElement>(null)
+  
+  // Track previous values to detect actual changes (not initial mount)
+  const prevBuildingIdRef = useRef<string | undefined>(undefined)
+  const prevFloorIdRef = useRef<string | undefined>(undefined)
 
   // Search for faculty names
   const searchFaculty = useCallback(async (query: string) => {
@@ -221,13 +225,15 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
       }
       loadFloors()
       
-      // Reset floor and resource when building changes
-      if (row.floor_id) {
+      // Only reset floor and resource if building actually changed (not on initial mount/copy)
+      if (prevBuildingIdRef.current && prevBuildingIdRef.current !== row.building_id) {
         onUpdate({ floor_id: '', resource_id: '' })
       }
+      prevBuildingIdRef.current = row.building_id
     } else {
       setFloors([])
       setResources([])
+      prevBuildingIdRef.current = undefined
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row.building_id])
@@ -245,12 +251,14 @@ export function BookingRow({ row, index, conflicts, onUpdate, onRemove, onCopy }
       }
       loadResources()
       
-      // Reset resource when floor changes
-      if (row.resource_id) {
+      // Only reset resource if floor actually changed (not on initial mount/copy)
+      if (prevFloorIdRef.current && prevFloorIdRef.current !== row.floor_id) {
         onUpdate({ resource_id: '' })
       }
+      prevFloorIdRef.current = row.floor_id
     } else {
       setResources([])
+      prevFloorIdRef.current = undefined
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row.floor_id])

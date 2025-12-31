@@ -38,9 +38,9 @@ export default function ContentSection() {
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2">
                                     <Bell className="size-4" />
-                                    <h3 className="text-blue-500 dark:text-white text-sm font-medium">Automated Reminders</h3>
+                                    <h3 className="text-blue-500 dark:text-white text-sm font-medium">Calendar View</h3>
                                 </div>
-                                <p className="text-muted-foreground text-sm">Get notified before your bookings start.</p>
+                                <p className="text-muted-foreground text-sm">Class, Classroom & Faculty Calender view.</p>
                             </div>
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2">

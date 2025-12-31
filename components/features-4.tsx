@@ -52,6 +52,48 @@ export default function Features() {
                         </div>
                         <p className="text-sm">View, edit, or cancel bookings with ease.</p>
                     </div>
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                            <Settings2 className="size-4 text-blue-500 dark:text-white " />
+                            <h3 className="text-blue-500 dark:text-white text-sm font-medium">Calendar-Based View</h3>
+                        </div>
+                        <p className="text-sm">Bookings can be viewed in a calendar format.</p>
+                    </div>
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                            <Settings2 className="size-4 text-blue-500 dark:text-white " />
+                            <h3 className="text-blue-500 dark:text-white text-sm font-medium">Faculty Directory</h3>
+                        </div>
+                        <p className="text-sm">The system maintains a directory of faculty members.</p>
+                    </div>
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                            <Settings2 className="size-4 text-blue-500 dark:text-white " />
+                            <h3 className="text-blue-500 dark:text-white text-sm font-medium">Analytics Dashboard</h3>
+                        </div>
+                        <p className="text-sm">Booking patterns, peak usage times & resource demand.</p>
+                    </div>
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                            <Settings2 className="size-4 text-blue-500 dark:text-white " />
+                            <h3 className="text-blue-500 dark:text-white text-sm font-medium">Class Timetable View</h3>
+                        </div>
+                        <p className="text-sm">Class schedules can be mapped within the system.</p>
+                    </div>
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                            <Settings2 className="size-4 text-blue-500 dark:text-white " />
+                            <h3 className="text-blue-500 dark:text-white text-sm font-medium">Classroom Timetable View</h3>
+                        </div>
+                        <p className="text-sm">Each classroom has its own timetable view.</p>
+                    </div>
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                            <Settings2 className="size-4 text-blue-500 dark:text-white " />
+                            <h3 className="text-blue-500 dark:text-white text-sm font-medium">Faculty Timetable View</h3>
+                        </div>
+                        <p className="text-sm">Faculty members can view their lectures schedule</p>
+                    </div>
                 </div>
             </div>
         </section>

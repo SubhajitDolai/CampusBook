@@ -8,7 +8,7 @@ import dynamic from 'next/dynamic';
 
 const ContentSection = dynamic(() => import('./content-7'), { ssr: false });
 const StatsSection = dynamic(() => import('./stats'), { ssr: false });
-const Testimonials = dynamic(() => import('./testimonials'), { ssr: false });
+// const Testimonials = dynamic(() => import('./testimonials'), { ssr: false });
 const CallToAction = dynamic(() => import('./call-to-action'), { ssr: false });
 const TeamSection = dynamic(() => import('./team'), { ssr: false });
 const FAQsTwo = dynamic(() => import('./faqs-3'), { ssr: false });
@@ -22,10 +22,10 @@ export default function HomeShell() {
       <Features />
       <ContentSection />
       <StatsSection />
-      <Testimonials />
+      {/* <Testimonials /> */}
       <CallToAction />
-      <TeamSection />
       <FAQsTwo />
+      <TeamSection />
       <FooterSection />
     </>
   );

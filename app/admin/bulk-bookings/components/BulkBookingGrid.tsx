@@ -64,6 +64,9 @@ export function BulkBookingGrid() {
   }, [])
 
   const validateRows = async () => {
+    // Clear previous validation results at the start
+    setConflicts([])
+    
     // Check for temporal validation errors first
     const hasTemporalErrors = rows.some(row => {
       if (row.start_date && row.end_date && new Date(row.end_date) < new Date(row.start_date)) {
@@ -130,7 +133,13 @@ export function BulkBookingGrid() {
         return false
       }
       
-      toast.success('Validation completed successfully!')
+      const hasWarnings = validationResults.some(c => c.conflicts.length > 0)
+      if (hasWarnings) {
+        toast.warning('Validation completed with warnings')
+      } else {
+        toast.success('Validation completed - no conflicts found!')
+      }
+      
       return completeRows
     } catch (error) {
       console.error('Validation error:', error)
