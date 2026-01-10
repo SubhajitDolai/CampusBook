@@ -74,13 +74,14 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
           <Label htmlFor="name">Full Name *</Label>
           <Input
             id="name"
-            name="name"
+            name={initialData?.name ? undefined : "name"}
             placeholder="Enter your full name"
             defaultValue={initialData?.name || ''}
             disabled={!!initialData?.name}
             className={initialData?.name ? 'bg-muted' : ''}
-            required
+            required={!initialData?.name}
           />
+          {initialData?.name && <input type="hidden" name="name" value={initialData.name} />}
         </div>
 
         {/* University ID */}
@@ -88,13 +89,14 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
           <Label htmlFor="university_id">University ID *</Label>
           <Input
             id="university_id"
-            name="university_id"
+            name={initialData?.university_id ? undefined : "university_id"}
             placeholder="e.g. 1132231374"
             defaultValue={initialData?.university_id || ''}
             disabled={!!initialData?.university_id}
             className={initialData?.university_id ? 'bg-muted' : ''}
-            required
+            required={!initialData?.university_id}
           />
+          {initialData?.university_id && <input type="hidden" name="university_id" value={initialData.university_id} />}
         </div>
 
         {/* Phone */}
@@ -102,20 +104,21 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
           <Label htmlFor="phone">Phone Number *</Label>
           <Input
             id="phone"
-            name="phone"
+            name={initialData?.phone ? undefined : "phone"}
             type="tel"
             placeholder="+91 9172660318"
             defaultValue={initialData?.phone || ''}
             disabled={!!initialData?.phone}
             className={initialData?.phone ? 'bg-muted' : ''}
-            required
+            required={!initialData?.phone}
           />
+          {initialData?.phone && <input type="hidden" name="phone" value={initialData.phone} />}
         </div>
 
         {/* Gender */}
         <div className="grid gap-2">
           <Label htmlFor="gender">Gender *</Label>
-          <Select name="gender" value={gender} onValueChange={setGender} disabled={!!initialData?.gender} required>
+          <Select name={initialData?.gender ? undefined : "gender"} value={gender} onValueChange={setGender} disabled={!!initialData?.gender} required={!initialData?.gender}>
             <SelectTrigger className={initialData?.gender ? 'bg-muted' : ''}>
               <SelectValue placeholder="Select gender" />
             </SelectTrigger>
@@ -125,6 +128,7 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
               <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
+          {initialData?.gender && <input type="hidden" name="gender" value={gender} />}
         </div>
 
         {/* Department */}
@@ -132,13 +136,14 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
           <Label htmlFor="department">Department *</Label>
           <Input
             id="department"
-            name="department"
+            name={initialData?.department ? undefined : "department"}
             placeholder="e.g. Computer Science & Engineering"
             defaultValue={initialData?.department || ''}
             disabled={!!initialData?.department}
             className={initialData?.department ? 'bg-muted' : ''}
-            required
+            required={!initialData?.department}
           />
+          {initialData?.department && <input type="hidden" name="department" value={initialData.department} />}
         </div>
 
         {/* Designation */}
@@ -146,13 +151,14 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
           <Label htmlFor="designation">Designation *</Label>
           <Input
             id="designation"
-            name="designation"
+            name={initialData?.designation ? undefined : "designation"}
             placeholder="e.g. Assistant Professor"
             defaultValue={initialData?.designation || ''}
             disabled={!!initialData?.designation}
             className={initialData?.designation ? 'bg-muted' : ''}
-            required
+            required={!initialData?.designation}
           />
+          {initialData?.designation && <input type="hidden" name="designation" value={initialData.designation} />}
         </div>
 
         {/* Seating Location Section */}
@@ -164,13 +170,14 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
             <Label htmlFor="building_name">Building Name *</Label>
             <Input
               id="building_name"
-              name="building_name"
+              name={initialData?.building_name ? undefined : "building_name"}
               placeholder="e.g. Main Building, Block A"
               defaultValue={initialData?.building_name || ''}
               disabled={!!initialData?.building_name}
               className={initialData?.building_name ? 'bg-muted' : ''}
-              required
+              required={!initialData?.building_name}
             />
+            {initialData?.building_name && <input type="hidden" name="building_name" value={initialData.building_name} />}
           </div>
 
           {/* Floor Number */}
@@ -178,15 +185,16 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
             <Label htmlFor="floor_number">Floor Number *</Label>
             <Input
               id="floor_number"
-              name="floor_number"
+              name={initialData?.floor_number != null ? undefined : "floor_number"}
               type="number"
               placeholder="e.g. 2"
               min="0"
               defaultValue={initialData?.floor_number?.toString() || ''}
               disabled={initialData?.floor_number != null}
               className={initialData?.floor_number != null ? 'bg-muted' : ''}
-              required
+              required={initialData?.floor_number == null}
             />
+            {initialData?.floor_number != null && <input type="hidden" name="floor_number" value={initialData.floor_number.toString()} />}
           </div>
 
           {/* Room Number */}
@@ -194,21 +202,22 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
             <Label htmlFor="room_number">Room Number *</Label>
             <Input
               id="room_number"
-              name="room_number"
+              name={initialData?.room_number != null ? undefined : "room_number"}
               type="number"
               placeholder="e.g. 201"
               min="0"
               defaultValue={initialData?.room_number?.toString() || ''}
               disabled={initialData?.room_number != null}
               className={initialData?.room_number != null ? 'bg-muted' : ''}
-              required
+              required={initialData?.room_number == null}
             />
+            {initialData?.room_number != null && <input type="hidden" name="room_number" value={initialData.room_number.toString()} />}
           </div>
 
           {/* Seating Location Type */}
           <div className="grid gap-2">
             <Label htmlFor="seating_location">Seating Location Type *</Label>
-            <Select name="seating_location" value={seatingLocation} onValueChange={setSeatingLocation} disabled={!!initialData?.seating_location} required>
+            <Select name={initialData?.seating_location ? undefined : "seating_location"} value={seatingLocation} onValueChange={setSeatingLocation} disabled={!!initialData?.seating_location} required={!initialData?.seating_location}>
               <SelectTrigger className={initialData?.seating_location ? 'bg-muted' : ''}>
                 <SelectValue placeholder="Select seating type" />
               </SelectTrigger>
@@ -220,6 +229,7 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
+            {initialData?.seating_location && <input type="hidden" name="seating_location" value={seatingLocation} />}
           </div>
 
           {/* Cabin */}
