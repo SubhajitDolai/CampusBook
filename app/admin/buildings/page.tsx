@@ -69,10 +69,12 @@ export default function BuildingsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [editingBuilding, setEditingBuilding] = useState<Building | null>(null)
+  const [deletingBuilding, setDeletingBuilding] = useState<Building | null>(null)
   const [isAddingBuilding, setIsAddingBuilding] = useState(false)
   const [isUpdatingBuilding, setIsUpdatingBuilding] = useState(false)
-  const [deletingBuildingId, setDeletingBuildingId] = useState<string | null>(null)
+  const [isDeletingBuilding, setIsDeletingBuilding] = useState(false)
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null)
   const [formErrors, setFormErrors] = useState({
     name: '',
@@ -200,10 +202,12 @@ export default function BuildingsPage() {
     }
   }
 
-  const handleDeleteBuilding = async (id: string) => {
-    setDeletingBuildingId(id)
+  const handleDeleteBuilding = async () => {
+    if (!deletingBuilding) return
+    
+    setIsDeletingBuilding(true)
     try {
-      const result = await deleteBuilding(id)
+      const result = await deleteBuilding(deletingBuilding.id)
 
       if (result.error) {
         console.error('Error deleting building:', result.error)
@@ -212,10 +216,12 @@ export default function BuildingsPage() {
 
       // Refresh the buildings list
       await fetchBuildings()
+      setIsDeleteDialogOpen(false)
+      setDeletingBuilding(null)
     } catch (error) {
       console.error('Error deleting building:', error)
     } finally {
-      setDeletingBuildingId(null)
+      setIsDeletingBuilding(false)
     }
   }
 
@@ -567,14 +573,12 @@ export default function BuildingsPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleDeleteBuilding(building.id)}
-                                disabled={deletingBuildingId === building.id}
+                                onClick={() => {
+                                  setDeletingBuilding(building)
+                                  setIsDeleteDialogOpen(true)
+                                }}
                               >
-                                {deletingBuildingId === building.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin text-red-500" />
-                                ) : (
-                                  <Trash2 className="h-4 w-4 text-red-500" />
-                                )}
+                                <Trash2 className="h-4 w-4 text-red-500" />
                               </Button>
                             </div>
                           </TableCell>
@@ -672,6 +676,33 @@ export default function BuildingsPage() {
                 </>
               ) : (
                 'Update Building'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Building</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <span className="font-semibold">{deletingBuilding?.name} ({deletingBuilding?.code})</span>? This action cannot be undone and will also delete all associated floors and resources.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeletingBuilding}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteBuilding} disabled={isDeletingBuilding}>
+              {isDeletingBuilding ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Building'
               )}
             </Button>
           </DialogFooter>

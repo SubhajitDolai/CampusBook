@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Mail, Phone, IdCard, Building2, MapPin, User, GraduationCap, Settings } from 'lucide-react'
 import { UserProfile } from '../actions'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
@@ -66,6 +66,7 @@ export function UserCard({ user }: UserCardProps) {
       <CardHeader>
         <div className="flex items-start gap-4">
           <Avatar className="h-12 w-12">
+            {user.avatar_url && <AvatarImage src={user.avatar_url} alt={user.name} />}
             <AvatarFallback className="text-lg">
               {user.name?.split(' ').map(n => n[0]).join('') || 'U'}
             </AvatarFallback>

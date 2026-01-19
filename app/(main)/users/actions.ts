@@ -13,6 +13,7 @@ export interface UserProfile {
   designation: string | null
   department: string
   role: 'faculty' | 'admin' | 'super_admin'
+  avatar_url?: string | null
   seating_location?: string | null
   building_name?: string | null
   floor_number?: number | null
@@ -61,6 +62,7 @@ export async function getAllUsersData(): Promise<UsersPageData> {
         designation,
         department,
         role,
+        avatar_url,
         seating_location,
         building_name,
         floor_number,
@@ -128,6 +130,7 @@ export async function searchUsers(
         designation,
         department,
         role,
+        avatar_url,
         seating_location,
         building_name,
         floor_number,
@@ -189,6 +192,7 @@ export async function getUserById(userId: string): Promise<UserProfile | null> {
         designation,
         department,
         role,
+        avatar_url,
         seating_location,
         building_name,
         floor_number,

@@ -5,15 +5,17 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useGlobalLoadingBar } from "@/components/providers/LoadingBarProvider"
 import { toast } from "sonner"
-import { Loader, Save, ArrowLeft, User, Phone, Venus, Building2, Briefcase, IdCard } from "lucide-react"
-import { updateProfile, type ProfileData } from '../actions'
+import { Loader, Save, ArrowLeft, User, Phone, Venus, Building2, Briefcase, IdCard, Camera, Upload } from "lucide-react"
+import { updateProfile, uploadAvatar, type ProfileData } from '../actions'
+import { createClient } from "@/utils/supabase/client"
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -40,6 +42,9 @@ interface ProfileEditFormProps {
 export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const [saving, setSaving] = useState(false)
   const [canceling, setCanceling] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatar_url || null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const { start } = useGlobalLoadingBar()
 
@@ -61,7 +66,26 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
       workstation: profile.workstation || ""
     }
   })
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
 
+    setUploading(true)
+    try {
+      const result = await uploadAvatar(file)
+      if (result.error) {
+        toast.error(result.error)
+      } else if (result.url) {
+        setAvatarUrl(result.url)
+        toast.success('Profile picture updated successfully!')
+        router.refresh()
+      }
+    } catch (error) {
+      toast.error('Failed to upload image')
+    } finally {
+      setUploading(false)
+    }
+  }
   const onSubmit = async (data: FormData) => {
     setSaving(true)
     start()
@@ -102,8 +126,32 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
       <div className="w-full max-w-3xl relative">
         <div className="h-36 w-full rounded-b-2xl bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 dark:from-blue-950 dark:via-indigo-950 dark:to-purple-950" />
         <div className="absolute left-1/2 -bottom-12 -translate-x-1/2">
-          <div className="size-24 border-4 border-background shadow-lg rounded-full bg-muted flex items-center justify-center text-2xl font-bold text-muted-foreground select-none">
-            {form.watch("name")?.split(" ").map(n => n[0]).join("") || ""}
+          <div className="relative group">
+            <Avatar className="size-24 border-4 border-background shadow-lg">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt={form.watch("name")} />}
+              <AvatarFallback className="text-2xl">
+                {form.watch("name")?.split(" ").map(n => n[0]).join("") || ""}
+              </AvatarFallback>
+            </Avatar>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer disabled:cursor-not-allowed"
+            >
+              {uploading ? (
+                <Loader className="h-6 w-6 text-white animate-spin" />
+              ) : (
+                <Camera className="h-6 w-6 text-white" />
+              )}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              className="hidden"
+            />
           </div>
         </div>
       </div>

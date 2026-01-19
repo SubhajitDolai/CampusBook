@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import {
   Building2,
   Users,
@@ -42,6 +43,7 @@ type UserProfile = {
   university_id: string
   department: string
   role: string
+  avatar_url: string | null
 }
 
 export function AppSidebar() {
@@ -62,7 +64,7 @@ export function AppSidebar() {
           // Get user profile
           const { data: profile } = await supabase
             .from('profiles')
-            .select('id, name, email, university_id, department, role')
+            .select('id, name, email, university_id, department, role, avatar_url')
             .eq('id', user.id)
             .single()
 
@@ -187,9 +189,12 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-                <User className="h-4 w-4" />
-              </div>
+              <Avatar className="h-8 w-8">
+                {userProfile?.avatar_url && <AvatarImage src={userProfile.avatar_url} alt={userProfile.name} />}
+                <AvatarFallback>
+                  {userProfile?.name?.split(" ").map(n => n[0]).join("") || <User className="h-4 w-4" />}
+                </AvatarFallback>
+              </Avatar>
               <div className="flex-1">
                 {loading ? (
                   <>

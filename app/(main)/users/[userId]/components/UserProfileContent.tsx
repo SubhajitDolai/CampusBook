@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useGlobalLoadingBar } from "@/components/providers/LoadingBarProvider"
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Mail, Phone, IdCard, Building2, Briefcase, ArrowLeft, Venus, MapPin } from "lucide-react"
@@ -42,6 +42,7 @@ export default function UserProfileContent({ profile }: UserProfileContentProps)
         <div className="h-36 w-full rounded-b-2xl bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 dark:from-blue-950 dark:via-indigo-950 dark:to-purple-950" />
         <div className="absolute left-1/2 -bottom-12 -translate-x-1/2">
           <Avatar className="size-24 border-4 border-background shadow-lg">
+            {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.name} />}
             <AvatarFallback className="text-2xl">
               {profile.name?.split(" ").map(n => n[0]).join("") || "U"}
             </AvatarFallback>

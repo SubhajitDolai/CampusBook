@@ -82,10 +82,12 @@ export default function FloorsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [editingFloor, setEditingFloor] = useState<Floor | null>(null)
+  const [deletingFloor, setDeletingFloor] = useState<Floor | null>(null)
   const [isAddingFloor, setIsAddingFloor] = useState(false)
   const [isUpdatingFloor, setIsUpdatingFloor] = useState(false)
-  const [deletingFloorId, setDeletingFloorId] = useState<string | null>(null)
+  const [isDeletingFloor, setIsDeletingFloor] = useState(false)
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null)
   const [formErrors, setFormErrors] = useState({
     building_id: '',
@@ -245,10 +247,12 @@ export default function FloorsPage() {
     }
   }
 
-  const handleDeleteFloor = async (id: string) => {
-    setDeletingFloorId(id)
+  const handleDeleteFloor = async () => {
+    if (!deletingFloor) return
+    
+    setIsDeletingFloor(true)
     try {
-      const result = await deleteFloor(id)
+      const result = await deleteFloor(deletingFloor.id)
       
       if (result.error) {
         console.error('Error deleting floor:', result.error)
@@ -257,10 +261,12 @@ export default function FloorsPage() {
 
       // Refresh the floors list
       await fetchFloors()
+      setIsDeleteDialogOpen(false)
+      setDeletingFloor(null)
     } catch (error) {
       console.error('Error deleting floor:', error)
     } finally {
-      setDeletingFloorId(null)
+      setIsDeletingFloor(false)
     }
   }
 
@@ -648,14 +654,12 @@ export default function FloorsPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleDeleteFloor(floor.id)}
-                                disabled={deletingFloorId === floor.id}
+                                onClick={() => {
+                                  setDeletingFloor(floor)
+                                  setIsDeleteDialogOpen(true)
+                                }}
                               >
-                                {deletingFloorId === floor.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin text-red-500" />
-                                ) : (
-                                  <Trash2 className="h-4 w-4 text-red-500" />
-                                )}
+                                <Trash2 className="h-4 w-4 text-red-500" />
                               </Button>
                             </div>
                           </TableCell>
@@ -763,6 +767,33 @@ export default function FloorsPage() {
                 </>
               ) : (
                 'Update Floor'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Floor</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <span className="font-semibold">Floor {deletingFloor?.floor_number}{deletingFloor?.name && ` (${deletingFloor.name})`}</span> from <span className="font-semibold">{deletingFloor?.buildings?.name}</span>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeletingFloor}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteFloor} disabled={isDeletingFloor}>
+              {isDeletingFloor ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Floor'
               )}
             </Button>
           </DialogFooter>

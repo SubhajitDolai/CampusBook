@@ -99,10 +99,12 @@ export default function ResourcesPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [editingResource, setEditingResource] = useState<Resource | null>(null)
+  const [deletingResource, setDeletingResource] = useState<Resource | null>(null)
   const [isAddingResource, setIsAddingResource] = useState(false)
   const [isUpdatingResource, setIsUpdatingResource] = useState(false)
-  const [deletingResourceId, setDeletingResourceId] = useState<string | null>(null)
+  const [isDeletingResource, setIsDeletingResource] = useState(false)
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null)
   const [formErrors, setFormErrors] = useState({
     building_id: '',
@@ -308,10 +310,12 @@ export default function ResourcesPage() {
     }
   }
 
-  const handleDeleteResource = async (id: string) => {
-    setDeletingResourceId(id)
+  const handleDeleteResource = async () => {
+    if (!deletingResource) return
+    
+    setIsDeletingResource(true)
     try {
-      const result = await deleteResource(id)
+      const result = await deleteResource(deletingResource.id)
       
       if (result.error) {
         console.error('Error deleting resource:', result.error)
@@ -320,10 +324,12 @@ export default function ResourcesPage() {
 
       // Refresh the resources list
       await fetchResources()
+      setIsDeleteDialogOpen(false)
+      setDeletingResource(null)
     } catch (error) {
       console.error('Error deleting resource:', error)
     } finally {
-      setDeletingResourceId(null)
+      setIsDeletingResource(false)
     }
   }
 
@@ -881,14 +887,12 @@ export default function ResourcesPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleDeleteResource(resource.id)}
-                                disabled={deletingResourceId === resource.id}
+                                onClick={() => {
+                                  setDeletingResource(resource)
+                                  setIsDeleteDialogOpen(true)
+                                }}
                               >
-                                {deletingResourceId === resource.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin text-red-500" />
-                                ) : (
-                                  <Trash2 className="h-4 w-4 text-red-500" />
-                                )}
+                                <Trash2 className="h-4 w-4 text-red-500" />
                               </Button>
                             </div>
                           </TableCell>
@@ -1081,6 +1085,33 @@ export default function ResourcesPage() {
                 </>
               ) : (
                 'Update Resource'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Resource</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <span className="font-semibold">{deletingResource?.name}</span>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeletingResource}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteResource} disabled={isDeletingResource}>
+              {isDeletingResource ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Resource'
               )}
             </Button>
           </DialogFooter>

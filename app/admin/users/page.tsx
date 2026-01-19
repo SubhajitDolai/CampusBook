@@ -17,7 +17,14 @@ import {
 } from "@/components/ui/sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import {
   Table,
@@ -62,6 +69,7 @@ type User = {
   designation: string | null
   department: string
   role: string
+  avatar_url?: string | null
   approved?: boolean
   approved_by?: string | null
   approved_at?: string | null
@@ -79,6 +87,8 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
   const [searchTerm, setSearchTerm] = useState("")
+  const [roleFilter, setRoleFilter] = useState<string>("all")
+  const [approvalFilter, setApprovalFilter] = useState<string>("all")
   const [isLoading, setIsLoading] = useState(true)
   const [currentUserRole, setCurrentUserRole] = useState<'super_admin' | 'admin' | 'faculty' | null>(null);
   const [promotingId, setPromotingId] = useState<string | null>(null);
@@ -132,14 +142,26 @@ export default function UsersPage() {
   }, [])
 
   useEffect(() => {
-    const filtered = users.filter(user =>
+    let filtered = users.filter(user =>
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.department?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.university_id?.toLowerCase().includes(searchTerm.toLowerCase())
     )
+    
+    // Apply role filter
+    if (roleFilter !== "all") {
+      filtered = filtered.filter(user => user.role === roleFilter)
+    }
+    
+    // Apply approval filter
+    if (approvalFilter !== "all") {
+      const isApproved = approvalFilter === "approved"
+      filtered = filtered.filter(user => user.approved === isApproved)
+    }
+    
     setFilteredUsers(filtered)
-  }, [searchTerm, users])
+  }, [searchTerm, roleFilter, approvalFilter, users])
 
   // Handler to promote a user to admin (real backend)
   const handlePromoteToAdmin = async (userId: string) => {
@@ -318,7 +340,7 @@ export default function UsersPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="mb-6">
+              <div className="mb-6 space-y-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -327,6 +349,35 @@ export default function UsersPage() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-muted-foreground">Role:</span>
+                    <Select value={roleFilter} onValueChange={setRoleFilter}>
+                      <SelectTrigger className="w-[180px] h-9">
+                        <SelectValue placeholder="All Roles" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Roles</SelectItem>
+                        <SelectItem value="faculty">Faculty</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="super_admin">Super Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-muted-foreground">Approval:</span>
+                    <Select value={approvalFilter} onValueChange={setApprovalFilter}>
+                      <SelectTrigger className="w-[180px] h-9">
+                        <SelectValue placeholder="All Users" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Users</SelectItem>
+                        <SelectItem value="approved">Approved</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
@@ -372,9 +423,12 @@ export default function UsersPage() {
                       <TableRow key={user.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                              <Users className="h-5 w-5" />
-                            </div>
+                            <Avatar className="h-10 w-10">
+                              {user.avatar_url && <AvatarImage src={user.avatar_url} alt={user.name} />}
+                              <AvatarFallback>
+                                {user.name?.split(' ').map(n => n[0]).join('') || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
                             <div>
                               <p className="font-medium">{user.name}</p>
                               <p className="text-sm text-muted-foreground">{user.university_id}</p>

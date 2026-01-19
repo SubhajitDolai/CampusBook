@@ -31,6 +31,7 @@ CREATE TABLE profiles (
   cabin VARCHAR(50),
   cubicle VARCHAR(50),
   workstation VARCHAR(50),
+  avatar_url TEXT,
   -- Approval workflow fields
   approved BOOLEAN NOT NULL DEFAULT false,
   approved_by UUID,

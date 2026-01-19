@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
@@ -16,6 +16,7 @@ export async function ProfileContent() {
         <div className="h-36 w-full rounded-b-2xl bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 dark:from-blue-950 dark:via-indigo-950 dark:to-purple-950" />
         <div className="absolute left-1/2 -bottom-12 -translate-x-1/2">
           <Avatar className="size-24 border-4 border-background shadow-lg">
+            {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.name} />}
             <AvatarFallback className="text-2xl">
               {profile.name?.split(" ").map(n => n[0]).join("")}
             </AvatarFallback>
@@ -85,85 +86,99 @@ export async function ProfileContent() {
         </CardContent>
         
         {/* Seating Location Information */}
-        {(profile.building_name || profile.floor_number || profile.room_number || profile.seating_location || profile.cabin || profile.cubicle || profile.workstation) && (
-          <CardContent className="px-8 pb-8">
-            <div className="border-t pt-8">
-              <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
-                Seating Location
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  {profile.building_name && (
-                    <div className="flex items-center gap-3">
-                      <Building2 className="text-muted-foreground size-5" />
-                      <div>
-                        <span className="text-sm text-muted-foreground">Building</span>
-                        <div className="font-medium">{profile.building_name}</div>
+        {(() => {
+          const hasSeatingInfo = !!(
+            (profile.building_name && profile.building_name.trim()) ||
+            (profile.floor_number && profile.floor_number > 0) ||
+            (profile.room_number && profile.room_number > 0) ||
+            (profile.seating_location && profile.seating_location.trim()) ||
+            (profile.cabin && profile.cabin.trim()) ||
+            (profile.cubicle && profile.cubicle.trim()) ||
+            (profile.workstation && profile.workstation.trim())
+          );
+          
+          if (!hasSeatingInfo) return null;
+          
+          return (
+            <CardContent className="px-8 pb-8">
+              <div className="border-t pt-8">
+                <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Seating Location
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    {profile.building_name && profile.building_name.trim() && (
+                      <div className="flex items-center gap-3">
+                        <Building2 className="text-muted-foreground size-5" />
+                        <div>
+                          <span className="text-sm text-muted-foreground">Building</span>
+                          <div className="font-medium">{profile.building_name}</div>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {profile.floor_number && (
-                    <div className="flex items-center gap-3">
-                      <Building2 className="text-muted-foreground size-5" />
-                      <div>
-                        <span className="text-sm text-muted-foreground">Floor</span>
-                        <div className="font-medium">{profile.floor_number}</div>
+                    )}
+                    {profile.floor_number && profile.floor_number > 0 && (
+                      <div className="flex items-center gap-3">
+                        <Building2 className="text-muted-foreground size-5" />
+                        <div>
+                          <span className="text-sm text-muted-foreground">Floor</span>
+                          <div className="font-medium">Floor {profile.floor_number}</div>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {profile.room_number && (
-                    <div className="flex items-center gap-3">
-                      <Building2 className="text-muted-foreground size-5" />
-                      <div>
-                        <span className="text-sm text-muted-foreground">Room</span>
-                        <div className="font-medium">{profile.room_number}</div>
+                    )}
+                    {profile.room_number && profile.room_number > 0 && (
+                      <div className="flex items-center gap-3">
+                        <Building2 className="text-muted-foreground size-5" />
+                        <div>
+                          <span className="text-sm text-muted-foreground">Room</span>
+                          <div className="font-medium">Room {profile.room_number}</div>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-4">
-                  {profile.seating_location && (
-                    <div className="flex items-center gap-3">
-                      <Building2 className="text-muted-foreground size-5" />
-                      <div>
-                        <span className="text-sm text-muted-foreground">Location Type</span>
-                        <div className="font-medium capitalize">{profile.seating_location}</div>
+                    )}
+                  </div>
+                  <div className="space-y-4">
+                    {profile.seating_location && profile.seating_location.trim() && (
+                      <div className="flex items-center gap-3">
+                        <Building2 className="text-muted-foreground size-5" />
+                        <div>
+                          <span className="text-sm text-muted-foreground">Location Type</span>
+                          <div className="font-medium capitalize">{profile.seating_location}</div>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {profile.cabin && (
-                    <div className="flex items-center gap-3">
-                      <Building2 className="text-muted-foreground size-5" />
-                      <div>
-                        <span className="text-sm text-muted-foreground">Cabin</span>
-                        <div className="font-medium">{profile.cabin}</div>
+                    )}
+                    {profile.cabin && profile.cabin.trim() && (
+                      <div className="flex items-center gap-3">
+                        <Building2 className="text-muted-foreground size-5" />
+                        <div>
+                          <span className="text-sm text-muted-foreground">Cabin</span>
+                          <div className="font-medium">{profile.cabin}</div>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {profile.cubicle && (
-                    <div className="flex items-center gap-3">
-                      <Building2 className="text-muted-foreground size-5" />
-                      <div>
-                        <span className="text-sm text-muted-foreground">Cubicle</span>
-                        <div className="font-medium">{profile.cubicle}</div>
+                    )}
+                    {profile.cubicle && profile.cubicle.trim() && (
+                      <div className="flex items-center gap-3">
+                        <Building2 className="text-muted-foreground size-5" />
+                        <div>
+                          <span className="text-sm text-muted-foreground">Cubicle</span>
+                          <div className="font-medium">{profile.cubicle}</div>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {profile.workstation && (
-                    <div className="flex items-center gap-3">
-                      <Building2 className="text-muted-foreground size-5" />
-                      <div>
-                        <span className="text-sm text-muted-foreground">Workstation</span>
-                        <div className="font-medium">{profile.workstation}</div>
+                    )}
+                    {profile.workstation && profile.workstation.trim() && (
+                      <div className="flex items-center gap-3">
+                        <Building2 className="text-muted-foreground size-5" />
+                        <div>
+                          <span className="text-sm text-muted-foreground">Workstation</span>
+                          <div className="font-medium">{profile.workstation}</div>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        )}
+            </CardContent>
+          );
+        })()}
       </Card>
     </div>
   )

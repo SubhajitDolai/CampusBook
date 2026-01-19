@@ -132,6 +132,7 @@ export default function BookingsPage() {
   const [stats, setStats] = useState<BookingStats>({ total: 0, pending: 0, approved: 0, rejected: 0, cancelled: 0 })
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [buildingFilter, setBuildingFilter] = useState<string>("all")
   const [isLoading, setIsLoading] = useState(true)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [deletingBooking, setDeletingBooking] = useState<Booking | null>(null)
@@ -192,15 +193,16 @@ export default function BookingsPage() {
         booking.resources?.buildings?.code?.toLowerCase().includes(searchTerm.toLowerCase())
 
       const matchesStatus = statusFilter === "all" || booking.status === statusFilter
+      const matchesBuilding = buildingFilter === "all" || booking.resources?.buildings?.name === buildingFilter
 
-      return matchesSearch && matchesStatus
+      return matchesSearch && matchesStatus && matchesBuilding
     })
     
     // Sort by created date (newest first)
     const sorted = filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     
     setFilteredBookings(sorted)
-  }, [searchTerm, statusFilter, bookings])
+  }, [searchTerm, statusFilter, buildingFilter, bookings])
 
   const handleApproveBooking = async (bookingId: string) => {
     setApprovingId(bookingId)
@@ -359,6 +361,15 @@ export default function BookingsPage() {
     return weekdays.sort().map(day => dayNames[day - 1]).join(', ')
   }
 
+  // Get unique buildings from bookings
+  const uniqueBuildings = Array.from(
+    new Set(
+      bookings
+        .map(booking => booking.resources?.buildings?.name)
+        .filter((name): name is string => Boolean(name))
+    )
+  ).sort()
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -500,42 +511,61 @@ export default function BookingsPage() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant={statusFilter === "all" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setStatusFilter("all")}
-                  >
-                    All
-                  </Button>
-                  <Button
-                    variant={statusFilter === "pending" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setStatusFilter("pending")}
-                  >
-                    Pending
-                  </Button>
-                  <Button
-                    variant={statusFilter === "approved" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setStatusFilter("approved")}
-                  >
-                    Approved
-                  </Button>
-                  <Button
-                    variant={statusFilter === "rejected" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setStatusFilter("rejected")}
-                  >
-                    Rejected
-                  </Button>
-                  <Button
-                    variant={statusFilter === "cancelled" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setStatusFilter("cancelled")}
-                  >
-                    Cancelled
-                  </Button>
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-medium text-muted-foreground mr-1">Status:</span>
+                    <Button
+                      variant={statusFilter === "all" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setStatusFilter("all")}
+                    >
+                      All
+                    </Button>
+                    <Button
+                      variant={statusFilter === "pending" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setStatusFilter("pending")}
+                    >
+                      Pending
+                    </Button>
+                    <Button
+                      variant={statusFilter === "approved" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setStatusFilter("approved")}
+                    >
+                      Approved
+                    </Button>
+                    <Button
+                      variant={statusFilter === "rejected" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setStatusFilter("rejected")}
+                    >
+                      Rejected
+                    </Button>
+                    <Button
+                      variant={statusFilter === "cancelled" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setStatusFilter("cancelled")}
+                    >
+                      Cancelled
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-medium text-muted-foreground mr-1">Building:</span>
+                    <Select value={buildingFilter} onValueChange={setBuildingFilter}>
+                      <SelectTrigger className="w-[200px] h-9">
+                        <SelectValue placeholder="All Buildings" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Buildings</SelectItem>
+                        {uniqueBuildings.map(building => (
+                          <SelectItem key={building} value={building}>
+                            {building}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 

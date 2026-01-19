@@ -17,6 +17,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { useState, useEffect } from "react"
 import { useTheme } from "next-themes"
 import { createClient } from "@/utils/supabase/client"
@@ -87,7 +88,7 @@ function ThemeToggleSidebarMenuItem() {
 
 export function AppSidebar() {
   const pathname = usePathname()
-  const [userProfile, setUserProfile] = useState<{ name: string; email: string } | null>(null)
+  const [userProfile, setUserProfile] = useState<{ name: string; email: string; avatar_url: string | null } | null>(null)
   const [loading, setLoading] = useState(true)
   const { start, finish } = useGlobalLoadingBar()
   const [loggingOut, setLoggingOut] = useState(false)
@@ -100,7 +101,7 @@ export function AppSidebar() {
         if (user) {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('name, email')
+            .select('name, email, avatar_url')
             .eq('id', user.id)
             .single()
           setUserProfile(profile)
@@ -233,9 +234,12 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-                <User className="h-4 w-4" />
-              </div>
+              <Avatar className="h-8 w-8">
+                {userProfile?.avatar_url && <AvatarImage src={userProfile.avatar_url} alt={userProfile.name} />}
+                <AvatarFallback>
+                  {userProfile?.name?.split(" ").map(n => n[0]).join("") || <User className="h-4 w-4" />}
+                </AvatarFallback>
+              </Avatar>
               <div className="flex-1">
                 {loading ? (
                   <>

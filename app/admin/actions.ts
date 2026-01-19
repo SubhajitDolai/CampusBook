@@ -212,6 +212,7 @@ export async function getUsersWithCurrentUserRole() {
         designation,
         department,
         role,
+        avatar_url,
         approved,
         approved_by,
         approved_at,
