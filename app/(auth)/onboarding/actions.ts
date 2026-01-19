@@ -2,6 +2,57 @@
 
 import { createClient } from '@/utils/supabase/server'
 
+export async function uploadAvatar(file: File): Promise<{ url?: string; error?: string }> {
+  const supabase = await createClient()
+
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError || !user) {
+      return { error: 'Not authenticated' }
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      return { error: 'File must be an image' }
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      return { error: 'Image size must be less than 5MB' }
+    }
+
+    // Create unique filename
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${user.id}-${Date.now()}.${fileExt}`
+    const filePath = `avatars/${fileName}`
+
+    // Upload to Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from('profiles')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true,
+        contentType: file.type
+      })
+
+    if (uploadError) {
+      console.error('Storage upload error:', uploadError)
+      return { error: `Upload failed: ${uploadError.message}` }
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('profiles')
+      .getPublicUrl(filePath)
+
+    return { url: publicUrl }
+  } catch (error) {
+    console.error('Error in uploadAvatar:', error)
+    return { error: 'Failed to upload avatar' }
+  }
+}
+
 export async function completeOnboarding(formData: FormData) {
   const supabase = await createClient()
 
@@ -28,6 +79,7 @@ export async function completeOnboarding(formData: FormData) {
   const cabin = formData.get('cabin') as string
   const cubicle = formData.get('cubicle') as string
   const workstation = formData.get('workstation') as string
+  const avatar_url = formData.get('avatar_url') as string | null
 
   // Validate required fields
   if (!name || !university_id || !phone || !gender || !department || !designation) {
@@ -62,6 +114,7 @@ export async function completeOnboarding(formData: FormData) {
     gender,
     department,
     designation,
+    avatar_url: avatar_url || null,
     seating_location: seating_location || null,
     building_name: building_name || null,
     floor_number: floor_number ? parseInt(floor_number) : null,

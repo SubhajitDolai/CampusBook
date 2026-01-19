@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader } from "lucide-react"
-import { completeOnboarding } from '../actions'
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { Loader, Camera, User } from "lucide-react"
+import { completeOnboarding, uploadAvatar } from '../actions'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useGlobalLoadingBar } from "@/components/providers/LoadingBarProvider"
@@ -36,8 +37,27 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
   const [isLoading, setIsLoading] = useState(false)
   const [gender, setGender] = useState(initialData?.gender || '')
   const [seatingLocation, setSeatingLocation] = useState(initialData?.seating_location || '')
+  const [uploading, setUploading] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const { start, finish } = useGlobalLoadingBar()
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    const result = await uploadAvatar(file)
+    
+    if (result.error) {
+      toast.error(result.error)
+    } else if (result.url) {
+      setAvatarUrl(result.url)
+      toast.success('Profile image uploaded!')
+    }
+    setUploading(false)
+  }
 
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -45,6 +65,9 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
     start()
 
     const formData = new FormData(e.currentTarget)
+    if (avatarUrl) {
+      formData.append('avatar_url', avatarUrl)
+    }
     const res = await completeOnboarding(formData)
 
     if (res.error) {
@@ -66,6 +89,39 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
         <p className="text-sm text-muted-foreground">
           Please provide your university information
         </p>
+      </div>
+
+      {/* Avatar Upload */}
+      <div className="flex flex-col items-center gap-2">
+        <Label className="text-sm font-medium">Profile Picture (Optional)</Label>
+        <div className="relative group">
+          <Avatar className="size-24 border-4 border-background shadow-lg">
+            {avatarUrl && <AvatarImage src={avatarUrl} alt="Profile" />}
+            <AvatarFallback className="text-2xl">
+              {initialData?.name ? initialData.name.split(" ").map(n => n[0]).join("") : <User className="h-10 w-10" />}
+            </AvatarFallback>
+          </Avatar>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer disabled:cursor-not-allowed"
+          >
+            {uploading ? (
+              <Loader className="h-6 w-6 text-white animate-spin" />
+            ) : (
+              <Camera className="h-6 w-6 text-white" />
+            )}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarUpload}
+            className="hidden"
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">Click to upload image</p>
       </div>
 
       <div className="grid gap-6">
