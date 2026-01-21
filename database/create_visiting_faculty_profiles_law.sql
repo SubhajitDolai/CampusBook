@@ -69,7 +69,23 @@ SELECT id, 'Amruta Malusare', 'amruta.malusare.vf@mitwpu.edu.in', 'VF013', 'Visi
 FROM auth.users WHERE LOWER(email) = LOWER('amruta.malusare.vf@mitwpu.edu.in')
 ON CONFLICT (id) DO NOTHING;
 
--- Verify the profiles were created
-SELECT 'Total visiting faculty profiles created:' as status, COUNT(*) as count 
+-- Add three more visiting faculty entries
+INSERT INTO profiles (id, name, email, university_id, designation, department)
+SELECT id, 'Mihir Inamdar', 'mihir.inamdar@mitwpu.edu.in', 'VF014', 'Visiting Faculty', 'School of Law'
+FROM auth.users WHERE LOWER(email) = LOWER('mihir.inamdar@mitwpu.edu.in')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO profiles (id, name, email, university_id, designation, department)
+SELECT id, 'Apurva Tiwari', '1362250349@mitwpu.edu.in', 'VF015', 'Visiting Faculty', 'School of Law'
+FROM auth.users WHERE LOWER(email) = LOWER('1362250349@mitwpu.edu.in')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO profiles (id, name, email, university_id, designation, department)
+SELECT id, 'Achira Chakraborty', '1362250377@mitwpu.edu.in', 'VF016', 'Visiting Faculty', 'School of Law'
+FROM auth.users WHERE LOWER(email) = LOWER('1362250377@mitwpu.edu.in')
+ON CONFLICT (id) DO NOTHING;
+
+-- Verify the profiles were created (includes the three numeric emails)
+SELECT 'Total visiting faculty profiles created (including these 3):' as status, COUNT(*) as count 
 FROM profiles 
-WHERE email LIKE '%.vf@mitwpu.edu.in';
+WHERE email LIKE '%.vf@mitwpu.edu.in' OR LOWER(email) IN ('mihir.inamdar@mitwpu.edu.in','1362250349@mitwpu.edu.in','1362250377@mitwpu.edu.in');

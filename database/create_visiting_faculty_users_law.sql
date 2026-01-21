@@ -24,7 +24,10 @@ DECLARE
         'satya.singh.vf@mitwpu.edu.in',
         'akshay.pawale.vf@mitwpu.edu.in',
         'seema.deshpande.vf@mitwpu.edu.in',
-        'amruta.malusare.vf@mitwpu.edu.in'
+        'amruta.malusare.vf@mitwpu.edu.in',
+        'mihir.inamdar@mitwpu.edu.in',
+        '1362250349@mitwpu.edu.in',
+        '1362250377@mitwpu.edu.in'
     ];
     user_email TEXT;
     new_user_id UUID;
@@ -122,4 +125,6 @@ BEGIN
 END $$;
 
 -- Verify the users were created
-SELECT COUNT(*) as total_visiting_faculty_users FROM auth.users WHERE email LIKE '%.vf@mitwpu.edu.in';
+SELECT COUNT(*) as total_visiting_faculty_users
+FROM auth.users
+WHERE email LIKE '%.vf@mitwpu.edu.in' OR LOWER(email) IN ('mihir.inamdar@mitwpu.edu.in','1362250349@mitwpu.edu.in','1362250377@mitwpu.edu.in');
