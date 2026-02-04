@@ -4,6 +4,7 @@ import { Card, CardTitle, CardDescription, CardContent } from "@/components/ui/c
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { Mail, Phone, IdCard, Venus, Building2, Briefcase } from "lucide-react"
 import { EditProfileButton } from './EditProfileButton'
+import { ShareProfileButton } from './ShareProfileButton'
 import { getProfile } from '../actions'
 
 export async function ProfileContent() {
@@ -43,7 +44,10 @@ export async function ProfileContent() {
               {profile.designation} &mdash; {profile.department}
             </CardDescription>
           </div>
-          <EditProfileButton />
+          <div className="flex gap-2">
+            <ShareProfileButton universityId={profile.university_id} profileName={profile.name} />
+            <EditProfileButton />
+          </div>
         </div>
 
         {/* Info Grid */}

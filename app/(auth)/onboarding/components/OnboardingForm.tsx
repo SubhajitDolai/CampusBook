@@ -39,6 +39,9 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
   const [seatingLocation, setSeatingLocation] = useState(initialData?.seating_location || '')
   const [uploading, setUploading] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [cabin, setCabin] = useState(initialData?.cabin || '')
+  const [cubicle, setCubicle] = useState(initialData?.cubicle || '')
+  const [workstation, setWorkstation] = useState(initialData?.workstation || '')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const { start, finish } = useGlobalLoadingBar()
@@ -61,13 +64,24 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
 
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    
+    // Validate avatar upload
+    if (!avatarUrl) {
+      toast.error('Please upload a profile picture')
+      return
+    }
+    
+    // Validate at least one of cabin, cubicle, or workstation is filled
+    if (!cabin.trim() && !cubicle.trim() && !workstation.trim()) {
+      toast.error('Please fill in at least one: Cabin, Cubicle, or Workstation')
+      return
+    }
+    
     setIsLoading(true)
     start()
 
     const formData = new FormData(e.currentTarget)
-    if (avatarUrl) {
-      formData.append('avatar_url', avatarUrl)
-    }
+    formData.append('avatar_url', avatarUrl)
     const res = await completeOnboarding(formData)
 
     if (res.error) {
@@ -80,7 +94,7 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
     toast.success('Profile completed successfully')
     router.push('/')
     setIsLoading(false)
-  }, [router, start, finish])
+  }, [router, start, finish, avatarUrl, cabin, cubicle, workstation])
 
   return (
     <form onSubmit={handleSubmit} className={cn("flex flex-col gap-6", className)} {...props}>
@@ -93,7 +107,7 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
 
       {/* Avatar Upload */}
       <div className="flex flex-col items-center gap-2">
-        <Label className="text-sm font-medium">Profile Picture (Optional)</Label>
+        <Label className="text-sm font-medium">Profile Picture *</Label>
         <div className="relative group">
           <Avatar className="size-24 border-4 border-background shadow-lg">
             {avatarUrl && <AvatarImage src={avatarUrl} alt="Profile" />}
@@ -122,6 +136,9 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
           />
         </div>
         <p className="text-xs text-muted-foreground">Click to upload image</p>
+        {!avatarUrl && (
+          <p className="text-xs text-destructive">Profile picture is required</p>
+        )}
       </div>
 
       <div className="grid gap-6">
@@ -174,7 +191,7 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
         {/* Gender */}
         <div className="grid gap-2">
           <Label htmlFor="gender">Gender *</Label>
-          <Select name={initialData?.gender ? undefined : "gender"} value={gender} onValueChange={setGender} disabled={!!initialData?.gender} required={!initialData?.gender}>
+          <Select name={initialData?.gender ? undefined : "gender"} value={gender} onValueChange={setGender} disabled={!!initialData?.gender}>
             <SelectTrigger className={initialData?.gender ? 'bg-muted' : ''}>
               <SelectValue placeholder="Select gender" />
             </SelectTrigger>
@@ -184,6 +201,17 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
               <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
+          {!initialData?.gender && (
+            <input
+              type="text"
+              name="gender_validation"
+              value={gender}
+              onChange={() => {}}
+              required
+              className="sr-only"
+              tabIndex={-1}
+            />
+          )}
           {initialData?.gender && <input type="hidden" name="gender" value={gender} />}
         </div>
 
@@ -273,7 +301,7 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
           {/* Seating Location Type */}
           <div className="grid gap-2">
             <Label htmlFor="seating_location">Seating Location Type *</Label>
-            <Select name={initialData?.seating_location ? undefined : "seating_location"} value={seatingLocation} onValueChange={setSeatingLocation} disabled={!!initialData?.seating_location} required={!initialData?.seating_location}>
+            <Select name={initialData?.seating_location ? undefined : "seating_location"} value={seatingLocation} onValueChange={setSeatingLocation} disabled={!!initialData?.seating_location}>
               <SelectTrigger className={initialData?.seating_location ? 'bg-muted' : ''}>
                 <SelectValue placeholder="Select seating type" />
               </SelectTrigger>
@@ -285,17 +313,29 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
+            {!initialData?.seating_location && (
+              <input
+                type="text"
+                name="seating_location_validation"
+                value={seatingLocation}
+                onChange={() => {}}
+                required
+                className="sr-only"
+                tabIndex={-1}
+              />
+            )}
             {initialData?.seating_location && <input type="hidden" name="seating_location" value={seatingLocation} />}
           </div>
 
           {/* Cabin */}
           <div className="grid gap-2">
-            <Label htmlFor="cabin">Cabin</Label>
+            <Label htmlFor="cabin">Cabin {!initialData?.cabin && '*'}</Label>
             <Input
               id="cabin"
               name="cabin"
               placeholder="e.g. Cabin 3"
-              defaultValue={initialData?.cabin || ''}
+              value={cabin}
+              onChange={(e) => setCabin(e.target.value)}
               disabled={!!initialData?.cabin}
               className={initialData?.cabin ? 'bg-muted' : ''}
             />
@@ -303,12 +343,13 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
 
           {/* Cubicle */}
           <div className="grid gap-2">
-            <Label htmlFor="cubicle">Cubicle</Label>
+            <Label htmlFor="cubicle">Cubicle {!initialData?.cubicle && '*'}</Label>
             <Input
               id="cubicle"
               name="cubicle"
               placeholder="e.g. Cubicle A5"
-              defaultValue={initialData?.cubicle || ''}
+              value={cubicle}
+              onChange={(e) => setCubicle(e.target.value)}
               disabled={!!initialData?.cubicle}
               className={initialData?.cubicle ? 'bg-muted' : ''}
             />
@@ -316,15 +357,19 @@ export function OnboardingForm({ className, initialData, ...props }: OnboardingF
 
           {/* Workstation */}
           <div className="grid gap-2">
-            <Label htmlFor="workstation">Workstation</Label>
+            <Label htmlFor="workstation">Workstation {!initialData?.workstation && '*'}</Label>
             <Input
               id="workstation"
               name="workstation"
               placeholder="e.g. Workstation 12"
-              defaultValue={initialData?.workstation || ''}
+              value={workstation}
+              onChange={(e) => setWorkstation(e.target.value)}
               disabled={!!initialData?.workstation}
               className={initialData?.workstation ? 'bg-muted' : ''}
             />
+            {!cabin && !cubicle && !workstation && (
+              <p className="text-xs text-muted-foreground">* At least one of Cabin, Cubicle, or Workstation is required</p>
+            )}
           </div>
         </div>
 
